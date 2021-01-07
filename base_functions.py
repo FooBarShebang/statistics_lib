@@ -87,8 +87,6 @@ if not (ROOT_FOLDER in sys.path):
 
 from introspection_lib.base_exceptions import UT_TypeError, UT_ValueError
 
-from phyqus_lib.base_classes import MeasuredValue
-
 #types
 
 TGenericSequence = Sequence[Any]
