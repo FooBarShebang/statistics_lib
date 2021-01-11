@@ -60,8 +60,8 @@ the following functions correspondence is implemented:
 """
 
 __version__= '1.0.0.0'
-__date__ = '07-01-2021'
-__status__ = 'Development'
+__date__ = '11-01-2021'
+__status__ = 'Production'
 
 #imports
 
@@ -781,7 +781,7 @@ def GetCovariance(DataX: TGenericSequence,
     fSum = math.fsum(lstDataY)
     fMeanY = fSum / iN
     fSum = math.fsum((Item - fMeanX)*(lstDataY[iId] - fMeanY)
-                                            for iId, Item in enumerate(lstData))
+                                        for iId, Item in enumerate(lstDataX))
     fResult = fSum / iN
     return fResult
 
@@ -852,7 +852,7 @@ def GetMoment2(DataX: TGenericSequence,
         fMeanX = 0.0
         fMeanY = 0.0
     fSum = math.fsum((((Item - fMeanX)**NX)*((lstDataY[iId] - fMeanY)**NY))
-                                            for iId, Item in enumerate(lstData))
+                                        for iId, Item in enumerate(lstDataX))
     fResult = fSum / iN
     return fResult
 
@@ -895,7 +895,7 @@ def GetPearsonR(DataX: TGenericSequence,
     fSum = math.fsum(lstDataY)
     fMeanY = fSum / iN
     CoVar = math.fsum((Item - fMeanX)*(lstDataY[iId] - fMeanY)
-                                            for iId, Item in enumerate(lstData))
+                                        for iId, Item in enumerate(lstDataX))
     VarX = math.fsum((Item - fMeanX)**2 for Item in lstDataX)
     VarY = math.fsum((Item - fMeanY)**2 for Item in lstDataY)
     fResult = CoVar / math.sqrt(VarX * VarY)
