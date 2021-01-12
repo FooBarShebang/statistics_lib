@@ -113,8 +113,9 @@ class Test_GetMean(unittest.TestCase):
     """
     Test cases for the function statistics_lib.base_functions.GetMean()
     
-    Implements tests: ???. Covers the requirements
-    ???.
+    Implements tests: TEST-T-100, TEST-T-103, TEST-T-104.
+    Covers the requirements REQ-FUN-100, REQ-FUN-101, REQ-AWM-100 and
+    REQ-AWM-101.
     """
     
     @classmethod
@@ -156,6 +157,8 @@ class Test_GetMean(unittest.TestCase):
     def test_CheckOutput(self):
         """
         Checks that the tested function computes the proper value.
+
+        TEST-T-100 / REQ-FUN-100, REQ-FUN-101
         """
         for strKey in ['X', 'Y']:
             dCheckValue = CHECKS[strKey][self.CheckKey]
@@ -175,6 +178,8 @@ class Test_GetMean(unittest.TestCase):
         """
         Checks that the tested function raises ValueError (or its sub-class)
         if the passed sequence is empty.
+
+        TEST-T-104 / REQ-AWM-101
         """
         with self.assertRaises(ValueError, msg = 'an empty list'):
             self.TestFunction(list())
@@ -186,6 +191,8 @@ class Test_GetMean(unittest.TestCase):
         Checks that the tested function raises TypeError (or its sub-class)
         if the passed argument is not a sequence of real numbers or measurements
         data with the uncertainties.
+
+        TEST-T-103 / REQ-AWM-100
         """
         for gItem in self.BadInput:
             with self.assertRaises(TypeError, msg = str(gItem)):
@@ -195,8 +202,9 @@ class Test_GetMeanSquares(Test_GetMean):
     """
     Test cases for the function statistics_lib.base_functions.GetMeanSquares()
     
-    Implements tests: ???. Covers the requirements
-    ???.
+    Implements tests: TEST-T-100, TEST-T-103, TEST-T-104.
+    Covers the requirements REQ-FUN-100, REQ-FUN-101, REQ-AWM-100 and
+    REQ-AWM-101.
     """
 
     @classmethod
@@ -212,8 +220,9 @@ class Test_GetVariance(Test_GetMean):
     """
     Test cases for the function statistics_lib.base_functions.GetVariance()
     
-    Implements tests: ???. Covers the requirements
-    ???.
+    Implements tests: TEST-T-100, TEST-T-103, TEST-T-104.
+    Covers the requirements REQ-FUN-100, REQ-FUN-101, REQ-AWM-100 and
+    REQ-AWM-101.
     """
 
     @classmethod
@@ -230,8 +239,9 @@ class Test_GetVarianceBessel(Test_GetMean):
     Test cases for the function
     statistics_lib.base_functions.GetVarianceBessel()
     
-    Implements tests: ???. Covers the requirements
-    ???.
+    Implements tests: TEST-T-100, TEST-T-103, TEST-T-104.
+    Covers the requirements REQ-FUN-100, REQ-FUN-101, REQ-AWM-100 and
+    REQ-AWM-101.
     """
 
     @classmethod
@@ -247,6 +257,8 @@ class Test_GetVarianceBessel(Test_GetMean):
         """
         Checks that the tested function raises ValueError (or its sub-class)
         if the passed sequence is shorter than 2 elements.
+
+        TEST-T-104 / REQ-AWM-101
         """
         super().test_ValueError()
         with self.assertRaises(ValueError, msg = 'one element list'):
@@ -254,14 +266,14 @@ class Test_GetVarianceBessel(Test_GetMean):
         with self.assertRaises(ValueError, msg = 'one element tuple'):
             self.TestFunction((1, ))
 
-
 class Test_GetStandardDeviation(Test_GetMean):
     """
     Test cases for the function
     statistics_lib.base_functions.GetStandardDeviation()
     
-    Implements tests: ???. Covers the requirements
-    ???.
+    Implements tests: TEST-T-100, TEST-T-103, TEST-T-104.
+    Covers the requirements REQ-FUN-100, REQ-FUN-101, REQ-AWM-100 and
+    REQ-AWM-101.
     """
 
     @classmethod
@@ -278,8 +290,9 @@ class Test_GetStandardDeviationBessel(Test_GetVarianceBessel):
     Test cases for the function
     statistics_lib.base_functions.GetStandardDeviationBessel()
     
-    Implements tests: ???. Covers the requirements
-    ???.
+    Implements tests: TEST-T-100, TEST-T-103, TEST-T-104.
+    Covers the requirements REQ-FUN-100, REQ-FUN-101, REQ-AWM-100 and
+    REQ-AWM-101.
     """
 
     @classmethod
@@ -296,8 +309,9 @@ class Test_GetStandardError(Test_GetMean):
     Test cases for the function
     statistics_lib.base_functions.GetStandardError()
     
-    Implements tests: ???. Covers the requirements
-    ???.
+    Implements tests: TEST-T-100, TEST-T-103, TEST-T-104.
+    Covers the requirements REQ-FUN-100, REQ-FUN-101, REQ-AWM-100 and
+    REQ-AWM-101.
     """
 
     @classmethod
@@ -314,8 +328,9 @@ class Test_GetFullStandardError(Test_GetMean):
     Test cases for the function
     statistics_lib.base_functions.GetFullStandardError()
     
-    Implements tests: ???. Covers the requirements
-    ???.
+    Implements tests: TEST-T-101, TEST-T-103, TEST-T-104.
+    Covers the requirements REQ-FUN-100, REQ-FUN-101, REQ-AWM-100 and
+    REQ-AWM-101.
     """
 
     @classmethod
@@ -329,6 +344,8 @@ class Test_GetFullStandardError(Test_GetMean):
     def test_CheckOutput(self):
         """
         Checks that the tested function computes the proper value.
+
+        TEST-T-101 / REQ-FUN-100, REQ-FUN-101
         """
         for strKey in ['X', 'Y']:
             dMin = CHECKS[strKey]['SE']
@@ -365,8 +382,9 @@ class Test_GetSkewness(Test_GetMean):
     Test cases for the function
     statistics_lib.base_functions.GetSkewness()
     
-    Implements tests: ???. Covers the requirements
-    ???.
+    Implements tests: TEST-T-100, TEST-T-103, TEST-T-104.
+    Covers the requirements REQ-FUN-100, REQ-FUN-101, REQ-AWM-100 and
+    REQ-AWM-101.
     """
 
     @classmethod
@@ -383,8 +401,9 @@ class Test_GetSkewnessBessel(Test_GetVarianceBessel):
     Test cases for the function
     statistics_lib.base_functions.GetSkewnessBessel()
     
-    Implements tests: ???. Covers the requirements
-    ???.
+    Implements tests: TEST-T-100, TEST-T-103, TEST-T-104.
+    Covers the requirements REQ-FUN-100, REQ-FUN-101, REQ-AWM-100 and
+    REQ-AWM-101.
     """
 
     @classmethod
@@ -400,6 +419,8 @@ class Test_GetSkewnessBessel(Test_GetVarianceBessel):
         """
         Checks that the tested function raises ValueError (or its sub-class)
         if the passed sequence is shorter than 3 elements.
+
+        TEST-T-104 / REQ-AWM-101
         """
         super().test_ValueError()
         with self.assertRaises(ValueError, msg = 'two element list'):
@@ -412,8 +433,9 @@ class Test_GetKurtosis(Test_GetMean):
     Test cases for the function
     statistics_lib.base_functions.GetKurtosis()
     
-    Implements tests: ???. Covers the requirements
-    ???.
+    Implements tests: TEST-T-100, TEST-T-103, TEST-T-104.
+    Covers the requirements REQ-FUN-100, REQ-FUN-101, REQ-AWM-100 and
+    REQ-AWM-101.
     """
 
     @classmethod
@@ -430,8 +452,9 @@ class Test_GetKurtosisBessel(Test_GetSkewnessBessel):
     Test cases for the function
     statistics_lib.base_functions.GetKurtosisBessel()
     
-    Implements tests: ???. Covers the requirements
-    ???.
+    Implements tests: TEST-T-100, TEST-T-103, TEST-T-104.
+    Covers the requirements REQ-FUN-100, REQ-FUN-101, REQ-AWM-100 and
+    REQ-AWM-101.
     """
 
     @classmethod
@@ -447,6 +470,8 @@ class Test_GetKurtosisBessel(Test_GetSkewnessBessel):
         """
         Checks that the tested function raises ValueError (or its sub-class)
         if the passed sequence is shorter than 4 elements.
+
+        TEST-T-104 / REQ-AWM-101
         """
         super().test_ValueError()
         with self.assertRaises(ValueError, msg = 'three element list'):
@@ -459,8 +484,9 @@ class Test_GetMoment(Test_GetMean):
     Test cases for the function
     statistics_lib.base_functions.GetMoment()
     
-    Implements tests: ???. Covers the requirements
-    ???.
+    Implements tests: TEST-T-100, TEST-T-103, TEST-T-104.
+    Covers the requirements REQ-FUN-100, REQ-FUN-101, REQ-AWM-100 and
+    REQ-AWM-101.
     """
 
     @classmethod
@@ -476,6 +502,8 @@ class Test_GetMoment(Test_GetMean):
         Checks that the tested function raises ValueError (or its sub-class)
         if the passed sequence is empty or the passed power in an integer but
         not positive.
+
+        TEST-T-104 / REQ-AWM-101
         """
         with self.assertRaises(ValueError, msg = 'an empty list'):
             self.TestFunction(list(), 1)
@@ -491,6 +519,8 @@ class Test_GetMoment(Test_GetMean):
         Checks that the tested function raises TypeError (or its sub-class)
         if the passed argument is not a sequence of real numbers or measurements
         data with the uncertainties, or the power in not an integer.
+
+        TEST-T-103 / REQ-AWM-100
         """
         for gItem in self.BadInput:
             with self.assertRaises(TypeError, msg = str(gItem)):
@@ -503,6 +533,8 @@ class Test_GetMoment(Test_GetMean):
     def test_CheckOutput(self):
         """
         Checks that the tested function computes the proper value.
+
+        TEST-T-102 / REQ-FUN-100, REQ-FUN-101
         """
         for strKey in ['X', 'Y']:
             for strType, glstValues in self.Data[strKey].items():
@@ -547,8 +579,9 @@ class Test_GetCovariance(Test_GetMean):
     Test cases for the function
     statistics_lib.base_functions.GetCovariance()
     
-    Implements tests: ???. Covers the requirements
-    ???.
+    Implements tests: TEST-T-102, TEST-T-103, TEST-T-104.
+    Covers the requirements REQ-FUN-100, REQ-FUN-101, REQ-AWM-100 and
+    REQ-AWM-101.
     """
 
     @classmethod
@@ -565,6 +598,8 @@ class Test_GetCovariance(Test_GetMean):
         Checks that the tested function raises TypeError (or its sub-class)
         if any of the passed arguments is not a sequence of real numbers or
         measurements data with the uncertainties.
+
+        TEST-T-103 / REQ-AWM-100
         """
         for gItem in self.BadInput:
             if isinstance(gItem, (list, tuple)):
@@ -583,6 +618,8 @@ class Test_GetCovariance(Test_GetMean):
         Checks that the tested function raises ValueError (or its sub-class)
         if any of the passed sequence is empty or the lengths of the sequences
         are not not equal.
+
+        TEST-T-104 / REQ-AWM-101
         """
         with self.assertRaises(ValueError, msg = 'an empty list - first'):
             self.TestFunction(list(), [1])
@@ -598,6 +635,8 @@ class Test_GetCovariance(Test_GetMean):
     def test_CheckOutput(self):
         """
         Checks that the tested function computes the proper value.
+
+        TEST-T-102 / REQ-FUN-100, REQ-FUN-101
         """
         dCheckValue = CHECKS['XY'][self.CheckKey]
         for strType in self.Data['X'].keys():
@@ -617,8 +656,9 @@ class Test_GetPearsonR(Test_GetCovariance):
     Test cases for the function
     statistics_lib.base_functions.GetPearsonR()
     
-    Implements tests: ???. Covers the requirements
-    ???.
+    Implements tests: TEST-T-102, TEST-T-103, TEST-T-104.
+    Covers the requirements REQ-FUN-100, REQ-FUN-101, REQ-AWM-100 and
+    REQ-AWM-101.
     """
 
     @classmethod
@@ -635,8 +675,9 @@ class Test_GetMoment2(Test_GetMean):
     Test cases for the function
     statistics_lib.base_functions.GetMoment2()
     
-    Implements tests: ???. Covers the requirements
-    ???.
+    Implements tests: TEST-T-102, TEST-T-103, TEST-T-104.
+    Covers the requirements REQ-FUN-100, REQ-FUN-101, REQ-AWM-100 and
+    REQ-AWM-101.
     """
 
     @classmethod
@@ -653,6 +694,8 @@ class Test_GetMoment2(Test_GetMean):
         if any of the passed sequence is empty or any of the passed power in an
         integer but not positive or the lengths of the sequences are not not
         equal.
+
+        TEST-T-104 / REQ-AWM-101
         """
         with self.assertRaises(ValueError, msg = 'an empty list - first'):
             self.TestFunction(list(), [1], 1, 1)
@@ -683,6 +726,8 @@ class Test_GetMoment2(Test_GetMean):
         if any of the passed argument is not a sequence of real numbers or
         measurements data with the uncertainties, or any of the powers in not an
         integer.
+
+        TEST-T-103 / REQ-AWM-100
         """
         for gItem in self.BadInput:
             if isinstance(gItem, (list, tuple)):
@@ -708,6 +753,8 @@ class Test_GetMoment2(Test_GetMean):
     def test_CheckOutput(self):
         """
         Checks that the tested function computes the proper value.
+
+        TEST-T-102 / REQ-FUN-100, REQ-FUN-101
         """
         for iPowerX in range(1, 4):
             for iPowerY in range(1, 4):

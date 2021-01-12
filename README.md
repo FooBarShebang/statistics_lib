@@ -16,3 +16,9 @@ Check the system requirements and dependencies:
 $cd "your projects folder"/statistics_lib
 $python3 ./check_dependencies.py
 ```
+
+## Documentation
+
+* [Requirements](./Documents/Requirements/index.md)
+* [Test reports](./Documents/Tests/index.md)
+* [User and API references](./Documents/References/index.md)

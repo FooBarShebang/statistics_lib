@@ -47,7 +47,7 @@ Functions:
 Considering the standard spreadsheet applications (MS Excel, LibreOffice Calc)
 the following functions correspondence is implemented:
 
-    * MEAN() -> GetMean()
+    * AVERAGE() -> GetMean()
     * STDEV.P() -> GetStandardDeviation()
     * STDEV.S() -> GetStandardDeviationBessel()
     * VAR.P() -> GetVariance()
@@ -102,7 +102,7 @@ def _ExtractMeans(Data: TGenericSequence) -> List[TReal]:
     checks. Extracts the values supposed to represent the 'mean' values of the
     measurements data point with the associated measurement uncertainties.
 
-    Sequence:
+    Signature:
         seq(type A) -> list(int OR float)
     
     Args:
@@ -145,7 +145,7 @@ def _ExtractMeans2(DataX: TGenericSequence,
     checks. Extracts the values supposed to represent the 'mean' values of the
     measurements data point with the associated measurement uncertainties.
 
-    Sequence:
+    Signature:
         seq(type A) -> list(int OR float)
     
     Args:
@@ -224,7 +224,7 @@ def _ExtractErrors(Data: TGenericSequence) -> List[TReal]:
     checks. Extracts the values supposed to represent the 'error' values of the
     measurements data point with the associated measurement uncertainties.
 
-    Sequence:
+    Signature:
         seq(type A) -> list(int OR float)
     
     Args:
@@ -271,7 +271,7 @@ def GetMean(Data: TGenericSequence) -> float:
     i.e. the 2-tuples of the 'mean' value of a measurement and the associated
     measurement uncertainty.
 
-    Sequence:
+    Signature:
         seq(type A) -> float
     
     Args:
@@ -302,7 +302,7 @@ def GetMeanSquares(Data: TGenericSequence) -> float:
     'real life measurements' class, i.e. the 2-tuples of the 'mean' value of a
     measurement and the associated measurement uncertainty.
 
-    Sequence:
+    Signature:
         seq(type A) -> float
     
     Args:
@@ -334,7 +334,7 @@ def GetVariance(Data: TGenericSequence) -> float:
     measurements' class, i.e. the 2-tuples of the 'mean' value of a measurement
     and the associated measurement uncertainty.
 
-    Sequence:
+    Signature:
         seq(type A) -> float
     
     Args:
@@ -368,7 +368,7 @@ def GetVarianceBessel(Data: TGenericSequence) -> float:
     measurements' class, i.e. the 2-tuples of the 'mean' value of a measurement
     and the associated measurement uncertainty.
 
-    Sequence:
+    Signature:
         seq(type A) -> float
     
     Args:
@@ -382,7 +382,7 @@ def GetVarianceBessel(Data: TGenericSequence) -> float:
         UT_TypeError: the passed argument is not a sequence, OR any of its
             elements is not a real number (int or float, 'is a' check) or an
             instance of 'real life measurement' class ('has a' check)
-        UT_ValueError: the passed sequence is shoerter than 2 elements
+        UT_ValueError: the passed sequence is shorter than 2 elements
     
     Version 1.0.0.0
     """
@@ -404,7 +404,7 @@ def GetStandardDeviation(Data: TGenericSequence) -> float:
     measurements' class, i.e. the 2-tuples of the 'mean' value of a measurement
     and the associated measurement uncertainty.
 
-    Sequence:
+    Signature:
         seq(type A) -> float
     
     Args:
@@ -438,7 +438,7 @@ def GetStandardDeviationBessel(Data: TGenericSequence) -> float:
     measurements' class, i.e. the 2-tuples of the 'mean' value of a measurement
     and the associated measurement uncertainty.
 
-    Sequence:
+    Signature:
         seq(type A) -> float
     
     Args:
@@ -475,7 +475,7 @@ def GetStandardError(Data: TGenericSequence) -> float:
     the 'real life measurements' class, i.e. the 2-tuples of the 'mean' value of
     a measurement and the associated measurement uncertainty.
 
-    Sequence:
+    Signature:
         seq(type A) -> float
     
     Args:
@@ -510,7 +510,7 @@ def GetFullStandardError(Data: TGenericSequence) -> float:
     the 'real life measurements' class, i.e. the 2-tuples of the 'mean' value of
     a measurement and the associated measurement uncertainty.
 
-    Sequence:
+    Signature:
         seq(type A) -> float
     
     Args:
@@ -547,7 +547,7 @@ def GetSkewness(Data: TGenericSequence) -> float:
     measurements' class, i.e. the 2-tuples of the 'mean' value of a measurement
     and the associated measurement uncertainty.
 
-    Sequence:
+    Signature:
         seq(type A) -> float
     
     Args:
@@ -582,7 +582,7 @@ def GetSkewnessBessel(Data: TGenericSequence) -> float:
     measurements' class, i.e. the 2-tuples of the 'mean' value of a measurement
     and the associated measurement uncertainty.
 
-    Sequence:
+    Signature:
         seq(type A) -> float
     
     Args:
@@ -620,7 +620,7 @@ def GetKurtosis(Data: TGenericSequence) -> float:
     measurements' class, i.e. the 2-tuples of the 'mean' value of a measurement
     and the associated measurement uncertainty.
 
-    Sequence:
+    Signature:
         seq(type A) -> float
     
     Args:
@@ -656,7 +656,7 @@ def GetKurtosisBessel(Data: TGenericSequence) -> float:
     measurements' class, i.e. the 2-tuples of the 'mean' value of a measurement
     and the associated measurement uncertainty.
 
-    Sequence:
+    Signature:
         seq(type A) -> float
     
     Args:
@@ -696,9 +696,9 @@ def GetMoment(Data: TGenericSequence, N: int, *,
     measurements' class, i.e. the 2-tuples of the 'mean' value of a measurement
     and the associated measurement uncertainty. By default, the central moment
     is calculated, pass keyword argument IsCentral = False explicitely to
-    calculated a non-central moment.
+    calculate a non-central moment.
 
-    Sequence:
+    Signature:
         seq(type A), int > 0 /, bool/ -> float
     
     Args:
@@ -751,8 +751,8 @@ def GetCovariance(DataX: TGenericSequence,
     measurements' class, i.e. the 2-tuples of the 'mean' value of a measurement
     and the associated measurement uncertainty.
 
-    Sequence:
-        seq(type A), seq(type A), int > 0, int > 0 /, bool/ -> float
+    Signature:
+        seq(type A), seq(type A) -> float
     
     Args:
         DataX: seq(type A); the input data sequence, expected a mixture of real
@@ -795,9 +795,9 @@ def GetMoment2(DataX: TGenericSequence,
     measurements' class, i.e. the 2-tuples of the 'mean' value of a measurement
     and the associated measurement uncertainty. By default, the central moment
     is calculated, pass keyword argument IsCentral = False explicitely to
-    calculated a non-central moment.
+    calculate a non-central moment.
 
-    Sequence:
+    Signature:
         seq(type A), seq(type A), int > 0, int > 0 /, bool/ -> float
     
     Args:
@@ -819,7 +819,7 @@ def GetMoment2(DataX: TGenericSequence,
         UT_TypeError: any of the passed data sets is not a sequence, OR any of
             their elements is not a real number (int or float, 'is a' check) or
             an instance of 'real life measurement' class ('has a' check), OR any
-            of the passed powers are not integers
+            of the passed powers in not integer
         UT_ValueError: any of the passed sequence is empty, OR their lengths are
             not equal, OR any of the passed powers is not positive
     
@@ -865,8 +865,8 @@ def GetPearsonR(DataX: TGenericSequence,
     instances of the 'real life measurements' class, i.e. the 2-tuples of the
     'mean' value of a measurement and the associated measurement uncertainty.
 
-    Sequence:
-        seq(type A), seq(type A), int > 0, int > 0 /, bool/ -> float
+    Signature:
+        seq(type A), seq(type A) -> float
     
     Args:
         DataX: seq(type A); the input data sequence, expected a mixture of real
@@ -890,13 +890,17 @@ def GetPearsonR(DataX: TGenericSequence,
     """
     lstDataX, lstDataY = _ExtractMeans2(DataX, DataY)
     iN = len(lstDataX)
-    fSum = math.fsum(lstDataX)
-    fMeanX = fSum / iN
-    fSum = math.fsum(lstDataY)
-    fMeanY = fSum / iN
-    CoVar = math.fsum((Item - fMeanX)*(lstDataY[iId] - fMeanY)
+    #special case - one element length of each sub-set, avoid zero division
+    if iN > 1:
+        fSum = math.fsum(lstDataX)
+        fMeanX = fSum / iN
+        fSum = math.fsum(lstDataY)
+        fMeanY = fSum / iN
+        CoVar = math.fsum((Item - fMeanX)*(lstDataY[iId] - fMeanY)
                                         for iId, Item in enumerate(lstDataX))
-    VarX = math.fsum((Item - fMeanX)**2 for Item in lstDataX)
-    VarY = math.fsum((Item - fMeanY)**2 for Item in lstDataY)
-    fResult = CoVar / math.sqrt(VarX * VarY)
+        VarX = math.fsum((Item - fMeanX)**2 for Item in lstDataX)
+        VarY = math.fsum((Item - fMeanY)**2 for Item in lstDataY)
+        fResult = CoVar / math.sqrt(VarX * VarY)
+    else:
+        fResult = 1.0
     return fResult
