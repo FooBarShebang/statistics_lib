@@ -60,7 +60,7 @@ $$SE(X) = \frac{\sigma(X)}{\sqrt{N}} = \frac{\sqrt{\sum\limits_{i=1}^{N}{(x_i - 
 
 However, for the measurements with the associated individual uncertainties these uncertainties must be taken into account - the so called 'full standard error'
 
-$$SE_F(X) = \frac{\sqrt{\sum\limits_{i=1}^{N}{(x_i - <X>)^2 + \left(\sum\limits_{i=1}^{N}{z_i}\right)^2}}}{N}$$
+$$SE_F(X) = \frac{\sqrt{\sum\limits_{i=1}^{N}{(x_i - <X>)^2 + \left(\sum\limits_{i=1}^{N}{z_i^2}\right)}}}{N}$$
 
 Note that, generally, $SE_F(X) \geq SE(X)$, and $SE_F(X) = SE(X)$ only if the data set consists of only real numbers, or all associated individual uncertainties are zero. This functionality is added for the implementation of the standard error propagation model, specifically - averaging of multiple measurements.
 

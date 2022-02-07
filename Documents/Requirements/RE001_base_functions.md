@@ -38,21 +38,22 @@ The verification method for a requirement is given by a single letter according 
   * Standard error of the mean of a data set (as population - i.e. without Bessel correction)
   * Skewness with the Bessel correction (sample skewness) and without the correction (population skewness)
   * Excess kurtosis with the Bessel correction (sample kurtosis) and without the correction (population kurtosis)
-  * Generic Nth moment of a data set distributiion (as population - i.e. without Bessel correction) - both central and non-central variants
-  * 'Full' standard error of the mean of a data set as population and including the individual data ppints 'measurement uncertainties'
+  * Generic Nth moment of a data set distributiion (as population - i.e. without Bessel correction) - both central and non-central variants, as well as central and non-central normalized variants
+  * Mean squared uncertanty of the measured data points
+  * 'Full' standard error of the mean of a data set as population and including the individual data points 'measurement uncertainties'
 * 2D statics
   * Covariance of a 2D data set (as population - i.e. without Bessel correction)
   * Pearson's coefficient of correlation *r* of a 2D data set (as population - i.e. without Bessel correction)
-  * Generic Nth-Mth moment of a 2D data set distributiion (as population - i.e. without Bessel correction) - both central and non-central variants
+  * Generic Nth-Mth moment of a 2D data set distributiion (as population - i.e. without Bessel correction) - both central and non-central variants, as well as central and non-central normalized variants
 
-**Verification Method:** T
+**Verification Method:** A
 ___
 
 **Requirement ID:** REQ-FUN-101
 
 **Title:** Input and ouput data format
 
-**Description:** The 1D statistics functions should accept the input data set as any flat sequence (e.g. list or tuple) of real numbers (int or float) or instances of a data type class imlementing a 'real life measurement' with the associated uncertainty of the measurement, which is API compatible with the **phyqus_lib.base_classes.MeasuredValue** class, i.e. the 'mean' value of the measurement being accessible via field / property *Value* and the associated uncertainty - via field / property *SE*. Such sequence does not have to be homogeneous, and it may be an arbitrary mixture of such instances, integer and floating point numbers. A 2D statistical data set should be passed as two such sequences of the same length.
+**Description:** The 1D statistics functions should accept the input data set as any flat sequence (e.g. list or tuple) of real numbers (int or float) or instances of a data type class imlementing a 'real life measurement' with the associated uncertainty of the measurement, which is API compatible with the **phyqus_lib.base_classes.MeasuredValue** class, i.e. the 'mean' value of the measurement being accessible via field / property *Value* and the associated uncertainty - via field / property *SE*. Such sequence does not have to be homogeneous, and it may be an arbitrary mixture of such instances, integer and floating point numbers. A 2D statistical data set should be passed as two such sequences of the same length. The return values of the functions must be a real number - integer of floating point.
 
 **Verification Method:** T
 
