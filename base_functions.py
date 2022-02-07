@@ -45,12 +45,29 @@ from introspection_lib.base_exceptions import UT_TypeError, UT_ValueError
 #types
 
 TGenericSequence = Sequence[Any]
+
 TReal = Union[int, float]
+
+TRealList = List[TReal]
 
 #functions
 
 #+ helper functions - not for usage outside the module
 
+def _CheckInput(Data: Any) -> None:
+    """
+    """
+    pass
+
+def _ExtractMeans(Data: TGenericSequence) -> TRealList:
+    """
+    """
+    pass
+
+def _ExtractErrors(Data: TGenericSequence) -> TRealList:
+    """
+    """
+    pass
 
 #+ 'public' functions to be available for everyone
 
