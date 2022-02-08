@@ -124,7 +124,12 @@ class Test_Basis(unittest.TestCase):
             TestResult = self.TestFunction(BaseInput)
             self.assertIsInstance(TestResult, (int, float))
             TestCheck = self.CheckFunction(BaseInput)
-            self.assertAlmostEqual(TestResult, TestCheck, places= DEF_PRECISION)
+            self.assertAlmostEqual(TestResult, TestCheck, 
+                                                places = FLOAT_CHECK_PRECISION)
+            TestResult = self.TestFunction(tuple(BaseInput))
+            self.assertIsInstance(TestResult, (int, float))
+            self.assertAlmostEqual(TestResult, TestCheck, 
+                                                places = FLOAT_CHECK_PRECISION)
         for TestInput, BaseInput in ((self.IntErr, self.AllInt),
                                         (self.FloatErr, self.AllFloat),
                                         (self.MixedErr, self.Mixed),
@@ -132,7 +137,12 @@ class Test_Basis(unittest.TestCase):
             TestResult = self.TestFunction(TestInput)
             self.assertIsInstance(TestResult, (int, float))
             TestCheck = self.CheckFunction(BaseInput)
-            self.assertAlmostEqual(TestResult, TestCheck, places= DEF_PRECISION)
+            self.assertAlmostEqual(TestResult, TestCheck,
+                                                places = FLOAT_CHECK_PRECISION)
+            TestResult = self.TestFunction(tuple(TestInput))
+            self.assertIsInstance(TestResult, (int, float))
+            self.assertAlmostEqual(TestResult, TestCheck,
+                                                places = FLOAT_CHECK_PRECISION)
 
 class Test_GetMean(Test_Basis):
     """
@@ -141,14 +151,71 @@ class Test_GetMean(Test_Basis):
     Implements tests: TEST-T-100, TEST-T-101, TEST-T-102
     Covers the requirements REQ-FUN-101, REQ-AWM-100 and REQ-AWM-101.
     """
-    pass
+    
+    @classmethod
+    def setUpClass(cls) -> None:
+        """
+        Preparation for the test cases, done only once.
+        """
+        super().setUpClass()
+        cls.TestFunction = staticmethod(test_module.GetMean)
+    
+    def test_EdgeCase(self) -> None:
+        """
+        Checks the edge case of a sequence of a single value.
+
+        Implements tests: TEST-T-100.
+        Covers the requirements REQ-FUN-101.
+        """
+        for Item in [2, 3.4, MeasuredValue(3.2, 0.1)]:
+            TestResult = self.TestFunction([Item])
+            self.assertIsInstance(TestResult, (int, float))
+            if isinstance(Item, (int, float)):
+                self.assertAlmostEqual(TestResult, Item,
+                                                places = FLOAT_CHECK_PRECISION)
+            else:
+                self.assertAlmostEqual(TestResult, Item.Value,
+                                                places = FLOAT_CHECK_PRECISION)
+
+class Test_GetVarianceP(Test_Basis):
+    """
+    Unit-tests of the function GetMean().
+
+    Implements tests: TEST-T-100, TEST-T-101, TEST-T-102
+    Covers the requirements REQ-FUN-101, REQ-AWM-100 and REQ-AWM-101.
+    """
+    
+    @classmethod
+    def setUpClass(cls) -> None:
+        """
+        Preparation for the test cases, done only once.
+        """
+        super().setUpClass()
+        cls.TestFunction = staticmethod(test_module.GetVarianceP)
+        cls.CheckFunction = staticmethod(statistics.pvariance)
+
+    def test_EdgeCase(self) -> None:
+        """
+        Checks the edge case of a sequence of a single value.
+
+        Implements tests: TEST-T-100.
+        Covers the requirements REQ-FUN-101.
+        """
+        for Item in [2, 3.4, MeasuredValue(3.2, 0.1)]:
+            TestResult = self.TestFunction([Item])
+            self.assertIsInstance(TestResult, (int, float))
+            self.assertAlmostEqual(TestResult, 0,
+                                                places = FLOAT_CHECK_PRECISION)
+
 
 #+ test suites
 
 TestSuite1 = unittest.TestLoader().loadTestsFromTestCase(Test_GetMean)
 
+TestSuite2 = unittest.TestLoader().loadTestsFromTestCase(Test_GetVarianceP)
+
 TestSuite = unittest.TestSuite()
-TestSuite.addTests([TestSuite1, ])
+TestSuite.addTests([TestSuite1, TestSuite2])
 
 if __name__ == "__main__":
     sys.stdout.write(
