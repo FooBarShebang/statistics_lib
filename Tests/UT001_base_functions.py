@@ -8,7 +8,7 @@ report TE001_base_functions.md
 
 
 __version__= '1.0.0.0'
-__date__ = '07-02-2022'
+__date__ = '08-02-2022'
 __status__ = 'Testing'
 
 #imports
@@ -20,6 +20,7 @@ import os
 import unittest
 import random
 import statistics
+import math
 
 #+ custom modules
 
@@ -38,8 +39,31 @@ from phyqus_lib.base_classes import MeasuredValue
 
 #globals
 
-
 FLOAT_CHECK_PRECISION = 8 #digits after comma
+
+#helper functions
+
+def CheckSE(Data):
+    """
+    Calculates SE using statistics.pstdev() function.
+    """
+    return statistics.pstdev(Data) / math.sqrt(len(Data))
+
+def CheckMoment2(Data):
+    """
+    Calculates the second non-central moment.
+    """
+    return sum(pow(Item, 2) for Item in Data) / len(Data)
+
+def CheckFullSE(Means, Errors):
+    """
+    Calculates the total uncertainty of the mean.
+    """
+    Variance = statistics.pvariance(Means)
+    MSSE = CheckMoment2(Errors)
+    Length = len(Means)
+    Result = math.sqrt((Variance + MSSE) /  Length)
+    return Result
 
 #classes
 
@@ -179,7 +203,7 @@ class Test_GetMean(Test_Basis):
 
 class Test_GetVarianceP(Test_Basis):
     """
-    Unit-tests of the function GetMean().
+    Unit-tests of the function GetVarianceP().
 
     Implements tests: TEST-T-100, TEST-T-101, TEST-T-102
     Covers the requirements REQ-FUN-101, REQ-AWM-100 and REQ-AWM-101.
@@ -207,6 +231,211 @@ class Test_GetVarianceP(Test_Basis):
             self.assertAlmostEqual(TestResult, 0,
                                                 places = FLOAT_CHECK_PRECISION)
 
+class Test_GetStdevP(Test_GetVarianceP):
+    """
+    Unit-tests of the function GetStevP().
+
+    Implements tests: TEST-T-100, TEST-T-101, TEST-T-102
+    Covers the requirements REQ-FUN-101, REQ-AWM-100 and REQ-AWM-101.
+    """
+    
+    @classmethod
+    def setUpClass(cls) -> None:
+        """
+        Preparation for the test cases, done only once.
+        """
+        super().setUpClass()
+        cls.TestFunction = staticmethod(test_module.GetStdevP)
+        cls.CheckFunction = staticmethod(statistics.pstdev)
+
+class Test_GetVarianceS(Test_Basis):
+    """
+    Unit-tests of the function GetVarianceS().
+
+    Implements tests: TEST-T-100, TEST-T-101, TEST-T-102
+    Covers the requirements REQ-FUN-101, REQ-AWM-100 and REQ-AWM-101.
+    """
+    
+    @classmethod
+    def setUpClass(cls) -> None:
+        """
+        Preparation for the test cases, done only once.
+        """
+        super().setUpClass()
+        cls.TestFunction = staticmethod(test_module.GetVarianceS)
+        cls.CheckFunction = staticmethod(statistics.variance)
+
+    def test_EdgeCase(self) -> None:
+        """
+        Checks the edge case of a sequence of a single value - sub-class of
+        ValueError should be raised.
+
+        Implements tests: TEST-T-100.
+        Covers the requirements REQ-FUN-101.
+        """
+        for Item in [2, 3.4, MeasuredValue(3.2, 0.1)]:
+            with self.assertRaises(ValueError):
+                self.TestFunction([Item])
+
+class Test_GetStdevS(Test_GetVarianceS):
+    """
+    Unit-tests of the function GetMean().
+
+    Implements tests: TEST-T-100, TEST-T-101, TEST-T-102
+    Covers the requirements REQ-FUN-101, REQ-AWM-100 and REQ-AWM-101.
+    """
+    
+    @classmethod
+    def setUpClass(cls) -> None:
+        """
+        Preparation for the test cases, done only once.
+        """
+        super().setUpClass()
+        cls.TestFunction = staticmethod(test_module.GetStdevS)
+        cls.CheckFunction = staticmethod(statistics.stdev)
+
+class Test_GetSE(Test_GetVarianceP):
+    """
+    Unit-tests of the function GetSE().
+
+    Implements tests: TEST-T-100, TEST-T-101, TEST-T-102
+    Covers the requirements REQ-FUN-101, REQ-AWM-100 and REQ-AWM-101.
+    """
+    
+    @classmethod
+    def setUpClass(cls) -> None:
+        """
+        Preparation for the test cases, done only once.
+        """
+        super().setUpClass()
+        cls.TestFunction = staticmethod(test_module.GetSE)
+        cls.CheckFunction = staticmethod(CheckSE)
+
+class Test_GetMeanSqrSE(Test_Basis):
+    """
+    Unit-tests of the function GetMeanSqrSE().
+
+    Implements tests: TEST-T-100, TEST-T-101, TEST-T-102
+    Covers the requirements REQ-FUN-101, REQ-AWM-100 and REQ-AWM-101.
+    """
+    
+    @classmethod
+    def setUpClass(cls) -> None:
+        """
+        Preparation for the test cases, done only once.
+        """
+        super().setUpClass()
+        cls.TestFunction = staticmethod(test_module.GetMeanSqrSE)
+        cls.CheckFunction = staticmethod(CheckMoment2)
+    
+    def test_OkOperation(self) -> None:
+        """
+        Checks the normal operation mode of the function being tested
+
+        Implements test TEST-T-100.
+        Covers the requirement REQ-FUN-101.
+        """
+        for BaseInput in [self.AllInt, self.AllFloat, self.Mixed]:
+            TestResult = self.TestFunction(BaseInput)
+            self.assertIsInstance(TestResult, (int, float))
+            self.assertAlmostEqual(TestResult, 0, 
+                                                places = FLOAT_CHECK_PRECISION)
+            TestResult = self.TestFunction(tuple(BaseInput))
+            self.assertIsInstance(TestResult, (int, float))
+            self.assertAlmostEqual(TestResult, 0, 
+                                                places = FLOAT_CHECK_PRECISION)
+        for TestInput in (self.IntErr, self.FloatErr, self.MixedErr):
+            TestResult = self.TestFunction(TestInput)
+            self.assertIsInstance(TestResult, (int, float))
+            BaseInput = [Item.SE for Item in TestInput]
+            TestCheck = self.CheckFunction(BaseInput)
+            self.assertAlmostEqual(TestResult, TestCheck,
+                                                places = FLOAT_CHECK_PRECISION)
+            TestResult = self.TestFunction(tuple(TestInput))
+            self.assertIsInstance(TestResult, (int, float))
+            self.assertAlmostEqual(TestResult, TestCheck,
+                                                places = FLOAT_CHECK_PRECISION)
+        TestInput = self.TotalMixed
+        BaseInput = list()
+        for Item in TestInput:
+            if hasattr(Item, 'SE'):
+                BaseInput.append(Item.SE)
+            else:
+                BaseInput.append(0)
+        TestCheck = self.CheckFunction(BaseInput)
+        TestResult = self.TestFunction(TestInput)
+        self.assertIsInstance(TestResult, (int, float))
+        self.assertAlmostEqual(TestResult, TestCheck,
+                                                places = FLOAT_CHECK_PRECISION)
+        TestResult = self.TestFunction(tuple(TestInput))
+        self.assertIsInstance(TestResult, (int, float))
+        self.assertAlmostEqual(TestResult, TestCheck,
+                                                places = FLOAT_CHECK_PRECISION)
+
+class Test_GetFullSE(Test_Basis):
+    """
+    Unit-tests of the function GetFullSE().
+
+    Implements tests: TEST-T-100, TEST-T-101, TEST-T-102
+    Covers the requirements REQ-FUN-101, REQ-AWM-100 and REQ-AWM-101.
+    """
+    
+    @classmethod
+    def setUpClass(cls) -> None:
+        """
+        Preparation for the test cases, done only once.
+        """
+        super().setUpClass()
+        cls.TestFunction = staticmethod(test_module.GetFullSE)
+        cls.CheckFunction = staticmethod(CheckFullSE)
+    
+    def test_OkOperation(self) -> None:
+        """
+        Checks the normal operation mode of the function being tested
+
+        Implements test TEST-T-100.
+        Covers the requirement REQ-FUN-101.
+        """
+        for TestInput in [self.AllInt, self.AllFloat, self.Mixed]:
+            TestResult = self.TestFunction(TestInput)
+            self.assertIsInstance(TestResult, (int, float))
+            BaseInput = [0 for _ in TestInput]
+            TestCheck = self.CheckFunction(TestInput, BaseInput)
+            self.assertAlmostEqual(TestResult, TestCheck, 
+                                                places = FLOAT_CHECK_PRECISION)
+            TestResult = self.TestFunction(tuple(TestInput))
+            self.assertIsInstance(TestResult, (int, float))
+            self.assertAlmostEqual(TestResult, TestCheck, 
+                                                places = FLOAT_CHECK_PRECISION)
+        for TestInput, Means in ((self.IntErr, self.AllInt),
+                                    (self.FloatErr, self.AllFloat),
+                                     (self.MixedErr, self.Mixed)):
+            TestResult = self.TestFunction(TestInput)
+            self.assertIsInstance(TestResult, (int, float))
+            BaseInput = [Item.SE for Item in TestInput]
+            TestCheck = self.CheckFunction(Means, BaseInput)
+            self.assertAlmostEqual(TestResult, TestCheck,
+                                                places = FLOAT_CHECK_PRECISION)
+            TestResult = self.TestFunction(tuple(TestInput))
+            self.assertIsInstance(TestResult, (int, float))
+            self.assertAlmostEqual(TestResult, TestCheck,
+                                                places = FLOAT_CHECK_PRECISION)
+        TestInput = self.TotalMixed
+        BaseInput = list()
+        for Item in TestInput:
+            if hasattr(Item, 'SE'):
+                BaseInput.append(Item.SE)
+            else:
+                BaseInput.append(0)
+        TestCheck = self.CheckFunction(self.Mixed, BaseInput)
+        TestResult = self.TestFunction(TestInput)
+        self.assertIsInstance(TestResult, (int, float))
+        self.assertAlmostEqual(TestResult, TestCheck,
+                                                places = FLOAT_CHECK_PRECISION)
+        TestResult = self.TestFunction(tuple(TestInput))
+        self.assertIsInstance(TestResult, (int, float))
+        self.assertAlmostEqual(TestResult, TestCheck,
+                                                places = FLOAT_CHECK_PRECISION)
 
 #+ test suites
 
@@ -214,8 +443,21 @@ TestSuite1 = unittest.TestLoader().loadTestsFromTestCase(Test_GetMean)
 
 TestSuite2 = unittest.TestLoader().loadTestsFromTestCase(Test_GetVarianceP)
 
+TestSuite3 = unittest.TestLoader().loadTestsFromTestCase(Test_GetStdevP)
+
+TestSuite4 = unittest.TestLoader().loadTestsFromTestCase(Test_GetVarianceS)
+
+TestSuite5 = unittest.TestLoader().loadTestsFromTestCase(Test_GetStdevS)
+
+TestSuite6 = unittest.TestLoader().loadTestsFromTestCase(Test_GetSE)
+
+TestSuite7 = unittest.TestLoader().loadTestsFromTestCase(Test_GetMeanSqrSE)
+
+TestSuite8 = unittest.TestLoader().loadTestsFromTestCase(Test_GetFullSE)
+
 TestSuite = unittest.TestSuite()
-TestSuite.addTests([TestSuite1, TestSuite2])
+TestSuite.addTests([TestSuite1, TestSuite2, TestSuite3, TestSuite4, TestSuite5,
+                    TestSuite6, TestSuite7, TestSuite8])
 
 if __name__ == "__main__":
     sys.stdout.write(

@@ -11,11 +11,34 @@ not employ the Bessel correction. There are 'special versions' of the same
 functions with the corrections, which have 'Bessel' suffix in their names.
 
 Functions:
-    
+    GetMean(Data, *, SkipFrames = 1, DoCheck = True)
+        list(int OR float OR phyqus_lib.base_classes.MeasureValue)/, *, int > 0,
+            bool/ -> int OR float
+    GetVarianceP(Data, *, SkipFrames = 1, DoCheck = True)
+        list(int OR float OR phyqus_lib.base_classes.MeasureValue)/, *, int > 0,
+            bool/ -> int OR float
+    GetStdevP(Data, *, SkipFrames = 1, DoCheck = True)
+        list(int OR float OR phyqus_lib.base_classes.MeasureValue)/, *, int > 0,
+            bool/ -> int OR float
+    GetVarianceS(Data, *, SkipFrames = 1, DoCheck = True)
+        list(int OR float OR phyqus_lib.base_classes.MeasureValue)/, *, int > 0,
+            bool/ -> int OR float
+    GetStdevS(Data, *, SkipFrames = 1, DoCheck = True)
+        list(int OR float OR phyqus_lib.base_classes.MeasureValue)/, *, int > 0,
+            bool/ -> int OR float
+    GetSE(Data, *, SkipFrames = 1, DoCheck = True)
+        list(int OR float OR phyqus_lib.base_classes.MeasureValue)/, *, int > 0,
+            bool/ -> int OR float
+    GetMeanSqrSE(Data, *, SkipFrames = 1, DoCheck = True)
+        list(int OR float OR phyqus_lib.base_classes.MeasureValue)/, *, int > 0,
+            bool/ -> int OR float
+    GetFullSE(Data, *, SkipFrames = 1, DoCheck = True)
+        list(int OR float OR phyqus_lib.base_classes.MeasureValue)/, *, int > 0,
+            bool/ -> int OR float
 """
 
 __version__= '1.0.0.0'
-__date__ = '07-02-2022'
+__date__ = '08-02-2022'
 __status__ = 'Development'
 
 #imports
@@ -286,13 +309,244 @@ def GetVarianceP(Data: TGenericSequence, *, SkipFrames: int = 1,
     Result = Sum / Length
     return Result
 
+def GetStdevP(Data: TGenericSequence, *, SkipFrames: int = 1,
+                                            DoCheck: bool = True) -> TReal:
+    """
+    Calculates the population standard deviation of a mixed sequence of real
+    numbers and the measurements with uncertainty.
+
+    Signature:
+        list(int OR float OR phyqus_lib.base_classes.MeasureValue)/, *, int > 0,
+            bool/ -> int OR float
+    
+    Args:
+        Data: list(int OR float OR phyqus_lib.base_classes.MeasureValue); a
+            sequence of real numbers or 'measurements with uncertainty'
+        SkipFrames: (keyword) int > 0; how many frames to hide in the
+            exception traceback, defaults to 1
+        DoCheck: (keyword) bool; flag if to perform the input data sanity
+            check and convert the mixed sequence into a list of only real
+            numbers
+    
+    Returns:
+        int OR float: the calculated standard deviation value
+    
+    Raises:
+        UT_TypeError: mandatory argument is not a sequence or real numbers or
+            measurements with uncertainty, OR any keyword argument is of
+            improper type
+        UT_ValueError: passed mandatory sequence is empty, OR any keyword
+            argument is of the proper type but unacceptable value
+
+    Version 1.0.0.0
+    """
+    _CheckPositiveInteger(SkipFrames)
+    if DoCheck:
+        _Data = _ExtractMeans(Data, SkipFrames = SkipFrames + 1)
+    else:
+        _Data = Data
+    Variance = GetVarianceP(_Data, SkipFrames = SkipFrames + 1,  DoCheck= False)
+    Result = math.sqrt(Variance)
+    return Result
+
+def GetVarianceS(Data: TGenericSequence, *, SkipFrames: int = 1,
+                                            DoCheck: bool = True) -> TReal:
+    """
+    Calculates the sample variance of a mixed sequence of real numbers and
+    the measurements with uncertainty.
+
+    Signature:
+        list(int OR float OR phyqus_lib.base_classes.MeasureValue)/, *, int > 0,
+            bool/ -> int OR float
+    
+    Args:
+        Data: list(int OR float OR phyqus_lib.base_classes.MeasureValue); a
+            sequence of real numbers or 'measurements with uncertainty'
+        SkipFrames: (keyword) int > 0; how many frames to hide in the
+            exception traceback, defaults to 1
+        DoCheck: (keyword) bool; flag if to perform the input data sanity
+            check and convert the mixed sequence into a list of only real
+            numbers
+    
+    Returns:
+        int OR float: the calculated variance value
+    
+    Raises:
+        UT_TypeError: mandatory argument is not a sequence or real numbers or
+            measurements with uncertainty, OR any keyword argument is of
+            improper type
+        UT_ValueError: passed mandatory sequence is less than 2 elements long,
+            OR any keyword argument is of the proper type but unacceptable value
+
+    Version 1.0.0.0
+    """
+    _CheckPositiveInteger(SkipFrames)
+    if DoCheck:
+        _Data = _ExtractMeans(Data, SkipFrames = SkipFrames + 1)
+    else:
+        _Data = Data
+    Length = len(_Data)
+    if Length < 2:
+        raise UT_ValueError(Length, '> 1 - sequence length',
+                                                        SkipFrames = SkipFrames)
+    Mean = GetMean(_Data, SkipFrames = SkipFrames + 1, DoCheck = False)
+    Sum = sum(pow(Item - Mean, 2) for Item in _Data)
+    Result = Sum / (Length - 1)
+    return Result
+
+def GetStdevS(Data: TGenericSequence, *, SkipFrames: int = 1,
+                                            DoCheck: bool = True) -> TReal:
+    """
+    Calculates the sample standard deviation of a mixed sequence of real
+    numbers and the measurements with uncertainty.
+
+    Signature:
+        list(int OR float OR phyqus_lib.base_classes.MeasureValue)/, *, int > 0,
+            bool/ -> int OR float
+    
+    Args:
+        Data: list(int OR float OR phyqus_lib.base_classes.MeasureValue); a
+            sequence of real numbers or 'measurements with uncertainty'
+        SkipFrames: (keyword) int > 0; how many frames to hide in the
+            exception traceback, defaults to 1
+        DoCheck: (keyword) bool; flag if to perform the input data sanity
+            check and convert the mixed sequence into a list of only real
+            numbers
+    
+    Returns:
+        int OR float: the calculated standard deviation value
+    
+    Raises:
+        UT_TypeError: mandatory argument is not a sequence or real numbers or
+            measurements with uncertainty, OR any keyword argument is of
+            improper type
+        UT_ValueError: passed mandatory sequence is less than 2 elements long,
+            OR any keyword argument is of the proper type but unacceptable value
+
+    Version 1.0.0.0
+    """
+    _CheckPositiveInteger(SkipFrames)
+    if DoCheck:
+        _Data = _ExtractMeans(Data, SkipFrames = SkipFrames + 1)
+    else:
+        _Data = Data
+    Variance = GetVarianceS(_Data, SkipFrames = SkipFrames + 1,  DoCheck= False)
+    Result = math.sqrt(Variance)
+    return Result
+
+def GetSE(Data: TGenericSequence, *, SkipFrames: int = 1,
+                                            DoCheck: bool = True) -> TReal:
+    """
+    Calculates the standard error of the mean of a mixed sequence of real
+    numbers and the measurements with uncertainty.
+
+    Signature:
+        list(int OR float OR phyqus_lib.base_classes.MeasureValue)/, *, int > 0,
+            bool/ -> int OR float
+    
+    Args:
+        Data: list(int OR float OR phyqus_lib.base_classes.MeasureValue); a
+            sequence of real numbers or 'measurements with uncertainty'
+        SkipFrames: (keyword) int > 0; how many frames to hide in the
+            exception traceback, defaults to 1
+        DoCheck: (keyword) bool; flag if to perform the input data sanity
+            check and convert the mixed sequence into a list of only real
+            numbers
+    
+    Returns:
+        int OR float: the calculated standard error of the mean value
+    
+    Raises:
+        UT_TypeError: mandatory argument is not a sequence or real numbers or
+            measurements with uncertainty, OR any keyword argument is of
+            improper type
+        UT_ValueError: passed mandatory sequence is empty, OR any keyword
+            argument is of the proper type but unacceptable value
+
+    Version 1.0.0.0
+    """
+    _CheckPositiveInteger(SkipFrames)
+    if DoCheck:
+        _Data = _ExtractMeans(Data, SkipFrames = SkipFrames + 1)
+    else:
+        _Data = Data
+    Variance = GetVarianceP(_Data, SkipFrames = SkipFrames + 1,  DoCheck= False)
+    Result = math.sqrt(Variance / len(_Data))
+    return Result
+
+def GetMeanSqrSE(Data: TGenericSequence, *, SkipFrames: int = 1,
+                                            DoCheck: bool = True) -> TReal:
+    """
+    Calculates the mean squared uncertainty of a mixed sequence of real
+    numbers and the measurements with uncertainty.
+
+    Signature:
+        list(int OR float OR phyqus_lib.base_classes.MeasureValue)/, *, int > 0,
+            bool/ -> int OR float
+    
+    Args:
+        Data: list(int OR float OR phyqus_lib.base_classes.MeasureValue); a
+            sequence of real numbers or 'measurements with uncertainty'
+        SkipFrames: (keyword) int > 0; how many frames to hide in the
+            exception traceback, defaults to 1
+        DoCheck: (keyword) bool; flag if to perform the input data sanity
+            check and convert the mixed sequence into a list of only real
+            numbers
+    
+    Returns:
+        int OR float: the calculated mean squared uncertainty value
+    
+    Raises:
+        UT_TypeError: mandatory argument is not a sequence or real numbers or
+            measurements with uncertainty, OR any keyword argument is of
+            improper type
+        UT_ValueError: passed mandatory sequence is empty, OR any keyword
+            argument is of the proper type but unacceptable value
+
+    Version 1.0.0.0
+    """
+    _CheckPositiveInteger(SkipFrames)
+    _Data = _ExtractErrors(Data, SkipFrames = SkipFrames + 1, DoCheck = DoCheck)
+    Length = len(_Data)
+    Sum = sum(pow(Item, 2) for Item in _Data)
+    Result = Sum / Length
+    return Result
+
+def GetFullSE(Data: TGenericSequence, *, SkipFrames: int = 1,
+                                            DoCheck: bool = True) -> TReal:
+    """
+    Calculates the full uncertainty of the mean of a mixed sequence of real
+    numbers and the measurements with uncertainty.
+
+    Signature:
+        list(int OR float OR phyqus_lib.base_classes.MeasureValue)/, *, int > 0,
+            bool/ -> int OR float
+    
+    Args:
+        Data: list(int OR float OR phyqus_lib.base_classes.MeasureValue); a
+            sequence of real numbers or 'measurements with uncertainty'
+        SkipFrames: (keyword) int > 0; how many frames to hide in the
+            exception traceback, defaults to 1
+        DoCheck: (keyword) bool; flag if to perform the input data sanity
+            check and convert the mixed sequence into a list of only real
+            numbers
+    
+    Returns:
+        int OR float: the calculated full uncertainty of the mean value
+    
+    Raises:
+        UT_TypeError: mandatory argument is not a sequence or real numbers or
+            measurements with uncertainty, OR any keyword argument is of
+            improper type
+        UT_ValueError: passed mandatory sequence is empty, OR any keyword
+            argument is of the proper type but unacceptable value
+
+    Version 1.0.0.0
+    """
+    _CheckPositiveInteger(SkipFrames)
+    Variance = GetVarianceP(Data, SkipFrames = SkipFrames + 1, DoCheck= DoCheck)
+    MSSE = GetMeanSqrSE(Data, SkipFrames = SkipFrames + 1, DoCheck = False)
+    Result = math.sqrt((Variance + MSSE) / len(Data))
+    return Result
+
 #++ 2D statistics
-
-#test area
-
-if __name__ == '__main__':
-    try:
-        print(GetMean([1, 2, 3.0, MeasuredValue(4, 0.3)]))
-    except Exception as err:
-        print(err.__class__.__name__, ':', err)
-        print(err.Traceback.Info)
