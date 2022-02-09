@@ -7,8 +7,11 @@ associated uncertainty as well as basic arithmetics with this new data type.
 The input data is supposed to be long sequences, which can be assumed to
 represent the full population. Therefore, the Bessel corrections does not have
 a lot of sense or importance. Hence, the 'base' versions of the functions do
-not employ the Bessel correction. There are 'special versions' of the same
-functions with the corrections, which have 'Bessel' suffix in their names.
+not employ the Bessel correction, and they have 'P' suffix in their neames.
+There are 'special versions' of the same functions with the corrections, which
+have 'S' suffix in their names. The generic moments, standard error, covariance
+and correlation functions assume that the passed data represent the entire
+population.
 
 Functions:
     GetMean(Data, *, SkipFrames = 1, DoCheck = True)
@@ -35,10 +38,35 @@ Functions:
     GetFullSE(Data, *, SkipFrames = 1, DoCheck = True)
         list(int OR float OR phyqus_lib.base_classes.MeasureValue)/, *, int > 0,
             bool/ -> int OR float
+    GetMoment(Data, Power, *, SkipFrames = 1, DoCheck = True)
+        list(int OR float OR phyqus_lib.base_classes.MeasureValue)/, int > 0,
+            *, int > 0, bool/ -> int OR float
+    GetSkewnessP(Data, *, SkipFrames = 1, DoCheck = True)
+        list(int OR float OR phyqus_lib.base_classes.MeasureValue)/, *, int > 0,
+            bool/ -> int OR float
+    GetSkewnessS(Data, *, SkipFrames = 1, DoCheck = True)
+        list(int OR float OR phyqus_lib.base_classes.MeasureValue)/, *, int > 0,
+            bool/ -> int OR float
+    GetKurtosisP(Data, *, SkipFrames = 1, DoCheck = True)
+        list(int OR float OR phyqus_lib.base_classes.MeasureValue)/, *, int > 0,
+            bool/ -> int OR float
+    GetKurtosisS(Data, *, SkipFrames = 1, DoCheck = True)
+        list(int OR float OR phyqus_lib.base_classes.MeasureValue)/, *, int > 0,
+            bool/ -> int OR float
+    GetCovariance(DataX, DataY, *, SkipFrames = 1, DoCheck = True)
+        list(int OR float OR phyqus_lib.base_classes.MeasureValue)/,
+            list(int OR float OR phyqus_lib.base_classes.MeasureValue)/,
+                *, int > 0, bool/ -> int OR float
+    GetMoment2(DataX, DataY, PowerX, PowerY, *, IsCentral = False,
+                        IsNormalized = False, SkipFrames = 1, DoCheck = True)
+    GetPearsonR(DataX, DataY, *, SkipFrames = 1, DoCheck = True)
+        list(int OR float OR phyqus_lib.base_classes.MeasureValue)/,
+            list(int OR float OR phyqus_lib.base_classes.MeasureValue)/,
+                *, int > 0, bool/ -> int OR float
 """
 
 __version__= '1.0.0.0'
-__date__ = '08-02-2022'
+__date__ = '09-02-2022'
 __status__ = 'Development'
 
 #imports
@@ -549,4 +577,418 @@ def GetFullSE(Data: TGenericSequence, *, SkipFrames: int = 1,
     Result = math.sqrt((Variance + MSSE) / len(Data))
     return Result
 
+def GetMoment(Data: TGenericSequence, Power: int, *, IsCentral: bool = False,
+                IsNormalized: bool = False, SkipFrames: int = 1,
+                    DoCheck: bool = True) -> TReal:
+    """
+    Calculates the generic N-th moment of a mixed sequence of real numbers and
+    the measurements with uncertainty, which can be central or non-central,
+    normailized or not normalized, depending on the values of the keyword
+    arguments.
+
+    Signature:
+        list(int OR float OR phyqus_lib.base_classes.MeasureValue), int > 0/,
+            *, bool, bool, int > 0, bool/ -> int OR float
+    
+    Args:
+        Data: list(int OR float OR phyqus_lib.base_classes.MeasureValue); a
+            sequence of real numbers or 'measurements with uncertainty'
+        Power: int > 0; the moment power
+        IsCentral: (keyword) bool; is the central moment is to be calculated,
+            defaults to False
+        IsNormalized: (keyword) bool; is the normalized moment is to be
+            calculated, defaults to False
+        SkipFrames: (keyword) int > 0; how many frames to hide in the
+            exception traceback, defaults to 1
+        DoCheck: (keyword) bool; flag if to perform the input data sanity
+            check and convert the mixed sequence into a list of only real
+            numbers
+    
+    Returns:
+        int OR float: the calculated full uncertainty of the mean value
+    
+    Raises:
+        UT_TypeError: the mandatory data argument is not a sequence or real
+            numbers or measurements with uncertainty, OR the moment power is not
+            an integer number, OR any keyword argument is of improper type
+        UT_ValueError: passed mandatory sequence is empty, OR the moment power
+            is zero or negative integer, OR any keyword argument is of the
+            proper type but unacceptable value
+
+    Version 1.0.0.0
+    """
+    _CheckPositiveInteger(Power)
+    _CheckPositiveInteger(SkipFrames)
+    if DoCheck:
+        _Data = _ExtractMeans(Data, SkipFrames = SkipFrames + 1)
+    else:
+        _Data = Data
+    if IsCentral:
+        Mean = GetMean(_Data, SkipFrames = SkipFrames + 1, DoCheck = False)
+    else:
+        Mean = 0
+    if IsNormalized:
+        Sigma = GetStdevP(_Data, SkipFrames = SkipFrames + 1, DoCheck = False)
+    else:
+        Sigma = 1
+    Length = len(_Data)
+    if Sigma > 0:
+        Sum = sum(pow((Item - Mean) / Sigma, Power) for Item in _Data)
+        Result = Sum / Length
+    else: #all elements are the same!!!!
+        if IsNormalized and (not IsCentral):
+            raise UT_ValueError(Sigma, '!= 0 - variance of the data',
+                                                        SkipFrames = SkipFrames)
+        else:
+            Result = 0
+    return Result
+
+def GetSkewnessP(Data: TGenericSequence, *, SkipFrames: int = 1,
+                                            DoCheck: bool = True) -> TReal:
+    """
+    Calculates the population skewness of a mixed sequence of real numbers and
+    the measurements with uncertainty.
+
+    Signature:
+        list(int OR float OR phyqus_lib.base_classes.MeasureValue)/, *, int > 0,
+            bool/ -> int OR float
+    
+    Args:
+        Data: list(int OR float OR phyqus_lib.base_classes.MeasureValue); a
+            sequence of real numbers or 'measurements with uncertainty'
+        SkipFrames: (keyword) int > 0; how many frames to hide in the
+            exception traceback, defaults to 1
+        DoCheck: (keyword) bool; flag if to perform the input data sanity
+            check and convert the mixed sequence into a list of only real
+            numbers
+    
+    Returns:
+        int OR float: the calculated skewness value
+    
+    Raises:
+        UT_TypeError: mandatory argument is not a sequence or real numbers or
+            measurements with uncertainty, OR any keyword argument is of
+            improper type
+        UT_ValueError: passed mandatory sequence is empty, OR any keyword
+            argument is of the proper type but unacceptable value
+
+    Version 1.0.0.0
+    """
+    _CheckPositiveInteger(SkipFrames)
+    Result = GetMoment(Data, 3, IsCentral = True, IsNormalized = True,
+                                SkipFrames = SkipFrames + 1, DoCheck= DoCheck)
+    return Result
+
+def GetSkewnessS(Data: TGenericSequence, *, SkipFrames: int = 1,
+                                            DoCheck: bool = True) -> TReal:
+    """
+    Calculates the sample skewness of a mixed sequence of real numbers and the
+    measurements with uncertainty.
+
+    Signature:
+        list(int OR float OR phyqus_lib.base_classes.MeasureValue)/, *, int > 0,
+            bool/ -> int OR float
+    
+    Args:
+        Data: list(int OR float OR phyqus_lib.base_classes.MeasureValue); a
+            sequence of real numbers or 'measurements with uncertainty'
+        SkipFrames: (keyword) int > 0; how many frames to hide in the
+            exception traceback, defaults to 1
+        DoCheck: (keyword) bool; flag if to perform the input data sanity
+            check and convert the mixed sequence into a list of only real
+            numbers
+    
+    Returns:
+        int OR float: the calculated skewness value
+    
+    Raises:
+        UT_TypeError: mandatory argument is not a sequence or real numbers or
+            measurements with uncertainty, OR any keyword argument is of
+            improper type
+        UT_ValueError: passed mandatory sequence is less than 3 elements long,
+            OR any keyword argument is of the proper type but unacceptable value
+
+    Version 1.0.0.0
+    """
+    _CheckPositiveInteger(SkipFrames)
+    if DoCheck:
+        _Data = _ExtractMeans(Data, SkipFrames = SkipFrames + 1)
+    else:
+        _Data = Data
+    Length = len(_Data)
+    if Length < 3:
+        raise UT_ValueError(Length, '> 2 - sequence length',
+                                                        SkipFrames = SkipFrames)
+    Skew = GetSkewnessP(_Data, SkipFrames = SkipFrames + 1, DoCheck= False)
+    Result = math.sqrt(Length * (Length - 1)) * Skew / (Length - 2)
+    return Result
+
+def GetKurtosisP(Data: TGenericSequence, *, SkipFrames: int = 1,
+                                            DoCheck: bool = True) -> TReal:
+    """
+    Calculates the population excess kurtosis of a mixed sequence of real
+    numbers and the measurements with uncertainty.
+
+    Signature:
+        list(int OR float OR phyqus_lib.base_classes.MeasureValue)/, *, int > 0,
+            bool/ -> int OR float
+    
+    Args:
+        Data: list(int OR float OR phyqus_lib.base_classes.MeasureValue); a
+            sequence of real numbers or 'measurements with uncertainty'
+        SkipFrames: (keyword) int > 0; how many frames to hide in the
+            exception traceback, defaults to 1
+        DoCheck: (keyword) bool; flag if to perform the input data sanity
+            check and convert the mixed sequence into a list of only real
+            numbers
+    
+    Returns:
+        int OR float: the calculated excess kurtosis value
+    
+    Raises:
+        UT_TypeError: mandatory argument is not a sequence or real numbers or
+            measurements with uncertainty, OR any keyword argument is of
+            improper type
+        UT_ValueError: passed mandatory sequence is empty, OR any keyword
+            argument is of the proper type but unacceptable value
+
+    Version 1.0.0.0
+    """
+    _CheckPositiveInteger(SkipFrames)
+    Result = GetMoment(Data, 4, IsCentral = True, IsNormalized = True,
+                            SkipFrames = SkipFrames + 1, DoCheck= DoCheck) - 3
+    return Result
+
+def GetKurtosisS(Data: TGenericSequence, *, SkipFrames: int = 1,
+                                            DoCheck: bool = True) -> TReal:
+    """
+    Calculates the sample excess kurtosis of a mixed sequence of real numbers
+    and the measurements with uncertainty.
+
+    Signature:
+        list(int OR float OR phyqus_lib.base_classes.MeasureValue)/, *, int > 0,
+            bool/ -> int OR float
+    
+    Args:
+        Data: list(int OR float OR phyqus_lib.base_classes.MeasureValue); a
+            sequence of real numbers or 'measurements with uncertainty'
+        SkipFrames: (keyword) int > 0; how many frames to hide in the
+            exception traceback, defaults to 1
+        DoCheck: (keyword) bool; flag if to perform the input data sanity
+            check and convert the mixed sequence into a list of only real
+            numbers
+    
+    Returns:
+        int OR float: the calculated skewness value
+    
+    Raises:
+        UT_TypeError: mandatory argument is not a sequence or real numbers or
+            measurements with uncertainty, OR any keyword argument is of
+            improper type
+        UT_ValueError: passed mandatory sequence is less than 4 elements long,
+            OR any keyword argument is of the proper type but unacceptable value
+
+    Version 1.0.0.0
+    """
+    _CheckPositiveInteger(SkipFrames)
+    if DoCheck:
+        _Data = _ExtractMeans(Data, SkipFrames = SkipFrames + 1)
+    else:
+        _Data = Data
+    Length = len(_Data)
+    if Length < 4:
+        raise UT_ValueError(Length, '> 3 - sequence length',
+                                                        SkipFrames = SkipFrames)
+    Kurt = GetKurtosisP(_Data, SkipFrames = SkipFrames + 1, DoCheck= False)
+    Temp = (Length - 1) * ((Length + 1) * Kurt  + 6)
+    Result = Temp / ((Length - 2) * (Length - 3))
+    return Result
+
 #++ 2D statistics
+
+def GetCovariance(DataX: TGenericSequence, DataY: TGenericSequence, *,
+                            SkipFrames: int = 1, DoCheck: bool = True) -> TReal:
+    """
+    Calculates the covariance of the paired  mixed sequences of real numbers and
+    the measurements with uncertainty.
+
+    Signature:
+        list(int OR float OR phyqus_lib.base_classes.MeasureValue)/,
+            list(int OR float OR phyqus_lib.base_classes.MeasureValue)/,
+                *, int > 0, bool/ -> int OR float
+    
+    Args:
+        DataX: list(int OR float OR phyqus_lib.base_classes.MeasureValue); a
+            sequence of real numbers or 'measurements with uncertainty' as X
+        DataY: list(int OR float OR phyqus_lib.base_classes.MeasureValue); a
+            sequence of real numbers or 'measurements with uncertainty' as Y
+        SkipFrames: (keyword) int > 0; how many frames to hide in the
+            exception traceback, defaults to 1
+        DoCheck: (keyword) bool; flag if to perform the input data sanity
+            check and convert the mixed sequence into a list of only real
+            numbers
+    
+    Returns:
+        int OR float: the calculated full uncertainty of the mean value
+    
+    Raises:
+        UT_TypeError: any of mandatory data arguments is not a sequence or real
+            numbers or measurements with uncertainty, OR any keyword argument is
+            of improper type
+        UT_ValueError: any of the passed mandatory sequence is empty, OR any
+            keyword argument is of the proper type but unacceptable value, OR
+            the X and Y sequences are of different length
+
+    Version 1.0.0.0
+    """
+    _CheckPositiveInteger(SkipFrames)
+    if DoCheck:
+        _DataX = _ExtractMeans(DataX, SkipFrames = SkipFrames + 1)
+        _DataY = _ExtractMeans(DataY, SkipFrames = SkipFrames + 1)
+    else:
+        _DataX = DataX
+        _DataY = DataY
+    if len(_DataX) != len(_DataY):
+        raise UT_ValueError(
+                len(_DataX), '== {} - X and Y data length'.format(len(_DataY)))
+    MeanX = GetMean(_DataX, SkipFrames = SkipFrames + 1, DoCheck = False)
+    MeanY = GetMean(_DataY, SkipFrames = SkipFrames + 1, DoCheck = False)
+    Length = len(_DataX)
+    Sum = sum((Item - MeanX) * (_DataY[Index] - MeanY)
+                                        for Index, Item in enumerate(_DataX))
+    Result = Sum / Length
+    return Result
+
+def GetMoment2(DataX: TGenericSequence, DataY: TGenericSequence, PowerX: int,
+                    PowerY: int, *, IsCentral: bool = False,
+                        IsNormalized: bool = False, SkipFrames: int = 1,
+                            DoCheck: bool = True) -> TReal:
+    """
+    Calculates the generic N-th / M-th moment of the paired mixed sequences of
+    real numbers and the measurements with uncertainty, which can be central or
+    non-central, normailized or not normalized, depending on the values of the
+    keyword arguments.
+
+    Signature:
+        list(int OR float OR phyqus_lib.base_classes.MeasureValue),
+            list(int OR float OR phyqus_lib.base_classes.MeasureValue),
+                int > 0, int > 0/, *, bool, bool, int > 0, bool/ -> int OR float
+    
+    Args:
+        DataX: list(int OR float OR phyqus_lib.base_classes.MeasureValue); a
+            sequence of real numbers or 'measurements with uncertainty' as X
+        DataY: list(int OR float OR phyqus_lib.base_classes.MeasureValue); a
+            sequence of real numbers or 'measurements with uncertainty' as Y
+        PowerX: int > 0; the moment power of X
+        PowerY: int > 0; the moment power of Y
+        IsCentral: (keyword) bool; is the central moment is to be calculated,
+            defaults to False
+        IsNormalized: (keyword) bool; is the normalized moment is to be
+            calculated, defaults to False
+        SkipFrames: (keyword) int > 0; how many frames to hide in the
+            exception traceback, defaults to 1
+        DoCheck: (keyword) bool; flag if to perform the input data sanity
+            check and convert the mixed sequence into a list of only real
+            numbers
+    
+    Returns:
+        int OR float: the calculated full uncertainty of the mean value
+    
+    Raises:
+        UT_TypeError: any of mandatory data arguments is not a sequence or real
+            numbers or measurements with uncertainty, OR any moment power is
+            not an integer number, OR any keyword argument is of improper type
+        UT_ValueError: any of the passed mandatory sequence is empty, OR any
+            moment power is zero or negative integer, OR any keyword argument is
+            of the proper type but unacceptable value, OR the X and Y sequences
+            are of different length
+
+    Version 1.0.0.0
+    """
+    _CheckPositiveInteger(PowerX)
+    _CheckPositiveInteger(PowerY)
+    _CheckPositiveInteger(SkipFrames)
+    if DoCheck:
+        _DataX = _ExtractMeans(DataX, SkipFrames = SkipFrames + 1)
+        _DataY = _ExtractMeans(DataY, SkipFrames = SkipFrames + 1)
+    else:
+        _DataX = DataX
+        _DataY = DataY
+    if len(_DataX) != len(_DataY):
+        raise UT_ValueError(
+                len(_DataX), '== {} - X and Y data length'.format(len(_DataY)))
+    if IsCentral:
+        MeanX = GetMean(_DataX, SkipFrames = SkipFrames + 1, DoCheck = False)
+        MeanY = GetMean(_DataY, SkipFrames = SkipFrames + 1, DoCheck = False)
+    else:
+        MeanX = 0
+        MeanY = 0
+    if IsNormalized:
+        SigmaX = GetStdevP(_DataX, SkipFrames = SkipFrames + 1, DoCheck = False)
+        SigmaY = GetStdevP(_DataY, SkipFrames = SkipFrames + 1, DoCheck = False)
+    else:
+        SigmaX = 1
+        SigmaY = 1
+    Length = len(_DataX)
+    Sum = sum((pow((Item - MeanX) / SigmaX, PowerX) *
+                pow((_DataY[Index] - MeanY) / SigmaY, PowerY))
+                                        for Index, Item in enumerate(_DataX))
+    if SigmaX and SigmaY:
+        Result = Sum / Length
+    else: #at least, in one sequence all items are the same!!!
+        Result = 0
+    return Result
+
+def GetPearsonR(DataX: TGenericSequence, DataY: TGenericSequence, *,
+                            SkipFrames: int = 1, DoCheck: bool = True) -> TReal:
+    """
+    Calculates the Pearson`s correlation coefficient r of the paired  mixed
+    sequences of real numbers and the measurements with uncertainty.
+
+    Signature:
+        list(int OR float OR phyqus_lib.base_classes.MeasureValue)/,
+            list(int OR float OR phyqus_lib.base_classes.MeasureValue)/,
+                *, int > 0, bool/ -> int OR float
+    
+    Args:
+        DataX: list(int OR float OR phyqus_lib.base_classes.MeasureValue); a
+            sequence of real numbers or 'measurements with uncertainty' as X
+        DataY: list(int OR float OR phyqus_lib.base_classes.MeasureValue); a
+            sequence of real numbers or 'measurements with uncertainty' as Y
+        SkipFrames: (keyword) int > 0; how many frames to hide in the
+            exception traceback, defaults to 1
+        DoCheck: (keyword) bool; flag if to perform the input data sanity
+            check and convert the mixed sequence into a list of only real
+            numbers
+    
+    Returns:
+        int OR float: the calculated full uncertainty of the mean value
+    
+    Raises:
+        UT_TypeError: any of mandatory data arguments is not a sequence or real
+            numbers or measurements with uncertainty, OR any keyword argument is
+            of improper type
+        UT_ValueError: any of the passed mandatory sequence is empty, OR any
+            keyword argument is of the proper type but unacceptable value, OR
+            the X and Y sequences are of different length
+
+    Version 1.0.0.0
+    """
+    _CheckPositiveInteger(SkipFrames)
+    if DoCheck:
+        _DataX = _ExtractMeans(DataX, SkipFrames = SkipFrames + 1)
+        _DataY = _ExtractMeans(DataY, SkipFrames = SkipFrames + 1)
+    else:
+        _DataX = DataX
+        _DataY = DataY
+    Covariance = GetCovariance(_DataX, _DataY, SkipFrames = SkipFrames + 1,
+                                                                DoCheck = False)
+    SigmaX = GetStdevP(_DataX, SkipFrames = SkipFrames + 1, DoCheck = False)
+    SigmaY = GetStdevP(_DataY, SkipFrames = SkipFrames + 1, DoCheck = False)
+    if SigmaX and SigmaY:
+        Result = Covariance / (SigmaX * SigmaY)
+    elif SigmaX or SigmaY: #one sequence is constant
+        Result = 0
+    else: #both sequences are constants
+        Result = 1
+    return Result

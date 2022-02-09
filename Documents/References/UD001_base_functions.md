@@ -64,7 +64,11 @@ $$SE_F(X) = \frac{\sqrt{\sum\limits_{i=1}^{N}{(x_i - <X>)^2 + \left(\sum\limits_
 
 Note that, generally, $SE_F(X) \geq SE(X)$, and $SE_F(X) = SE(X)$ only if the data set consists of only real numbers, or all associated individual uncertainties are zero. This functionality is added for the implementation of the standard error propagation model, specifically - averaging of multiple measurements.
 
-It is also possible to define the normalized central moment as
+It is also possible to define the normalized non-central moment as
+
+$$E\left[\left(\frac{X}{\sigma(X)}\right)^K\right] = \frac{\sum\limits_{i=1}^{N}{x_i^K}}{N \times {\sigma(X)}^K}$$
+
+and normalized central moment as
 
 $$E\left[\left(\frac{X-<X>}{\sigma(X)}\right)^K\right] = \frac{\sum\limits_{i=1}^{N}{(x_i - <X>)^K}}{N \times {\sigma(X)}^K}$$
 
@@ -78,13 +82,15 @@ Note, that the *excess kurtosis* is, in fact, calculated.
 
 In general, especially in the cases of small samples (N ~ 10) then mean and standard deviation calculated from a sample are not, generally speaking, the same as the *true* mean and standard deviation of the distribution of the entire population, from which the sample is taken: $<X> \neq \mu$ and $\sigma(X) \neq \sigma_X$. The formulas above are *biased* estimators of the *true* moments based on $<X>$ and $\sigma(X)$ instead of $\mu$ and $\sigma_X$. The Bessel correction provides *unbiased* (but not *per se* accurate) estimators, known as *sample* variance, standard deviation, skewness and (excess) kurtosis.
 
-$$Var_S(X)  = \frac{\sum\limits_{i=1}^{N-1}{(x_i - <X>)^2}}{N} \approx E[(X-\mu)^2]$$
+$$Var_S(X)  = \frac{\sum\limits_{i=1}^{N-1}{(x_i - <X>)^2}}{N -1} = \frac{N}{N-1} \times Var(S)\approx E[(X-\mu)^2]$$
 
-$$\sigma_S(X) = \sqrt{Var_S(X)} \approx \sigma_X$$
+$$\sigma_S(X) = \sqrt{Var_S(X)} = \sqrt{\frac{N}{N-1}} \times \sigma_X \approx \sigma_X$$
 
-$$Skew_S(X) = \frac{\sum\limits_{i=1}^{N}{(x_i - <X>)^3}}{{\sigma(X)}^3} \times \sqrt{\frac{N \times (N-1)}{N-2}} \approx E\left[\left(\frac{X-\mu}{\sigma_X}\right)^3\right]$$
+$$Skew_S(X) = \frac{\sum\limits_{i=1}^{N}{(x_i - <X>)^3}}{{N \times \sigma(X)}^3} \times \frac{\sqrt{N \times (N-1)}}{N-2} = Skew(X) \times \frac{\sqrt{N \times (N-1)}}{N-2} \approx E\left[\left(\frac{X-\mu}{\sigma_X}\right)^3\right]$$
 
-$$KurtEx_S(X) = \frac{\sum\limits_{i=1}^{N}{(x_i - <X>)^3}}{{\sigma(X)}^4} \times \frac{(N-1) \times (N+1)}{N \times (N-2) \times (N-3)} - 3 \times \frac{\left(N-1\right)^2}{(N-2) \times (N-3)} \approx E\left[\left(\frac{X-\mu}{\sigma_X}\right)^4\right] - 3$$
+$$KurtEx_S(X) = \frac{\sum\limits_{i=1}^{N}{(x_i - <X>)^4}}{{N \times\sigma(X)}^4} \times \frac{(N-1) \times (N+1)}{(N-2) \times (N-3)} - 3 \times \frac{\left(N-1\right)^2}{(N-2) \times (N-3)} \approx E\left[\left(\frac{X-\mu}{\sigma_X}\right)^4\right] - 3$$
+
+$$KurtEx_S(X) = \frac{(N-1) \times ((N+1) \times KurtEx(X) + 6)}{(N-2) \times (N-3)}$$
 
 Finally, the module implements calculation of the basic 2D statistic properties ignoring the individual uncertainties and Bessel correction, e.g. covariance
 
@@ -98,32 +104,40 @@ Central generic cross-moment
 
 $$E[(X-<X>)^K \times (Y-<Y>)^M] = \frac{\sum\limits_{i=1}^{N}{(x_i - <X>)^K \times (y_i - <Y>)^M}}{N}$$
 
+Non-central normalized generic cross-moment
+
+$$E[\left(\frac{X}{\sigma_x}\right)^K \times \left(\frac{Y}{\sigma_y}\right)^M] = \frac{\sum\limits_{i=1}^{N}{x_i^K \times y_i^M}}{N \times \sigma_x^K \times \sigma_y^M}$$
+
+Central normalized generic cross-moment
+
+$$E[\left(\frac{X - \langle X \rangle}{\sigma_x}\right)^K \times \left(\frac{Y - \langle Y \rangle}{\sigma_y}\right)^M] = \frac{\sum\limits_{i=1}^{N}{(x_i - \langle X \rangle)^K \times (y_i - \langle Y \rangle)^M}}{N \times \sigma_x^K \times \sigma_y^M}$$
+
 And the Pearson's coefficient of correlation
 
-$$r = \frac{Cov(X,Y)}{\sqrt{Var(X) \times Var(Y)}}$$
+$$r = \frac{Cov(X,Y)}{\sqrt{Var(X) \times Var(Y)}} = E[\left(\frac{X - \langle X \rangle}{\sigma_x}\right) \times \left(\frac{Y - \langle Y \rangle}{\sigma_y}\right)]$$
 
 ## Design and Implementation
 
 The required functionality is implemented as a number of functions. The table below provides the correspondence between the implemented function names, their functionality and the corresponding spreadsheet function (MS Excel or LibreOffice Calc):
 
-| **Function name**          | **Functionality**                                          | **Spreadsheet** |
-| -------------------------- | ---------------------------------------------------------- | --------------- |
-| GetMean                    | E[X]                                                       | AVERAGE         |
-| GetMeanSquares             | E[X^2]                                                     | N/A             |
-| GetVariance                | E[(X-\<X\>)^2]                                             | VAR.P           |
-| GetVarianceBessel          | N*E[(X-\<X\>)^2]/(N-1)                                     | VAR.S           |
-| GetStandardDeviation       | SQRT(E[(X-\<X\>)^2])                                       | STDEV.P         |
-| GetStandardDeviationBessel | SQRT(N*E[(X-\<X\>)^2]/(N-1))                               | STDEV.S         |
-| GetStandardError           | SQRT(E[(X-\<X\>)^2]/N)                                     | N/A             |
-| GetFullStandardError       | see text above                                             | N/A             |
-| GetSkewness                | E[(X-\<X\>)^3] / E[(X-\<X\>)^2]^3/2                        | SKEWP           |
-| GetSkewnessBessel          | see text above                                             | SKEWS           |
-| GetKurtosis                | (E[(X-\<X\>)^4] / E[(X-\<X\>)^2]^2) - 3                    | N/A             |
-| GetSkewnessBessel          | see text above                                             | KURT            |
-| GetMoment                  | E[X^N] and E[(X-\<X\>)^N]                                  | N/A             |
-| GetCovariance              | E[(X-\<X\>)*(Y-\<Y\>)]                                     | COVARIANCE.P    |
-| GetMoment2                 | E[(X^N)\*(Y^M)] and E[((X-\<X\>)^N)\*((Y-\<Y\>)^M)]        | N/A             |
-| GetPearsonR                | E[(X-\<X\>)*(Y-\<Y\>)]/SQRT(E[(X-\<X\>)^2]*E[(Y-\<Y\>)^2]) | PEARSON         |
+| **Function name** | **Functionality**                                          | **Spreadsheet** |
+| ----------------- | ---------------------------------------------------------- | --------------- |
+| GetMean           | E[X]                                                       | AVERAGE         |
+| GetMeanSqrSE      | see text above                                             | N/A             |
+| GetVarianceP      | E[(X-\<X\>)^2]                                             | VAR.P           |
+| GetVarianceS      | N*E[(X-\<X\>)^2]/(N-1)                                     | VAR.S           |
+| GetStdevP         | SQRT(E[(X-\<X\>)^2])                                       | STDEV.P         |
+| GetStdevS         | SQRT(N*E[(X-\<X\>)^2]/(N-1))                               | STDEV.S         |
+| GetSE             | SQRT(E[(X-\<X\>)^2]/N)                                     | N/A             |
+| GetFullSE         | see text above                                             | N/A             |
+| GetSkewnessP      | E[(X-\<X\>)^3] / E[(X-\<X\>)^2]^3/2                        | SKEWP           |
+| GetSkewnessS      | see text above                                             | SKEWS           |
+| GetKurtosisP      | (E[(X-\<X\>)^4] / E[(X-\<X\>)^2]^2) - 3                    | KURT            |
+| GetKurtosisS      | see text above                                             | N/A             |
+| GetMoment         | see text above                                             | N/A             |
+| GetCovariance     | E[(X-\<X\>)*(Y-\<Y\>)]                                     | COVARIANCE.P    |
+| GetMoment2        | see text                                                   | N/A             |
+| GetPearsonR       | E[(X-\<X\>)*(Y-\<Y\>)]/SQRT(E[(X-\<X\>)^2]*E[(Y-\<Y\>)^2]) | PEARSON         |
 
 All these functions are designed to accept a generic sequence (or two sequences) containing only real number (integer or floating point) and / or instances of a class implementing measurements with uncertainty, which is expected to be API compatible with the **phyqus_lib.base_classes.MeasuredValue** class, i.e. to have fields / properties *Value* and *SE*. A different type of the input data set results in a **TypeError** typed exception. An empty data sequence, or unequal length X- and Y-data sequences result in **ValueError** typed exception.
 

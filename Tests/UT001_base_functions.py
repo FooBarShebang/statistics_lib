@@ -8,7 +8,7 @@ report TE001_base_functions.md
 
 
 __version__= '1.0.0.0'
-__date__ = '08-02-2022'
+__date__ = '09-02-2022'
 __status__ = 'Testing'
 
 #imports
@@ -41,6 +41,8 @@ from phyqus_lib.base_classes import MeasuredValue
 
 FLOAT_CHECK_PRECISION = 8 #digits after comma
 
+DELTA_PRECISION = 0.000001 # 1E-6
+
 #helper functions
 
 def CheckSE(Data):
@@ -63,6 +65,81 @@ def CheckFullSE(Means, Errors):
     MSSE = CheckMoment2(Errors)
     Length = len(Means)
     Result = math.sqrt((Variance + MSSE) /  Length)
+    return Result
+
+def CheckSkewP(Data):
+    """
+    Calculates the population skewness
+    """
+    Mean = statistics.mean(Data)
+    Sigma = statistics.pstdev(Data)
+    Length = len(Data)
+    Sum = sum(pow((Item - Mean) / Sigma, 3) for Item in Data)
+    Result = Sum / Length
+    return Result
+
+def CheckSkewS(Data):
+    """
+    Calculates the population skewness
+    """
+    Mean = statistics.mean(Data)
+    Sigma = statistics.pstdev(Data)
+    Length = len(Data)
+    Sum = sum(pow((Item - Mean) / Sigma, 3) for Item in Data)
+    Result = math.sqrt((Length - 1) / Length) * Sum / (Length - 2)
+    return Result
+
+def CheckKurtP(Data):
+    """
+    Calculates the population excess kurtosis
+    """
+    Mean = statistics.mean(Data)
+    Sigma = statistics.pstdev(Data)
+    Length = len(Data)
+    Sum = sum(pow((Item - Mean) / Sigma, 4) for Item in Data)
+    Result = Sum / Length - 3
+    return Result
+
+def CheckKurtS(Data):
+    """
+    Calculates the sample excess kurtosis
+    """
+    Mean = statistics.mean(Data)
+    Sigma = statistics.pstdev(Data)
+    Length = len(Data)
+    Sum = sum(pow((Item - Mean) / Sigma, 4) for Item in Data)
+    Kurt = Sum / Length
+    Corr1 = (Length * Length - 1) / ((Length - 2) * (Length - 3))
+    Corr2 = ((Length - 1) * (Length - 1)) / ((Length - 2) * (Length - 3))
+    Result = Corr1 * Kurt - 3 * Corr2
+    return Result
+
+def CheckCovariance(DataX, DataY):
+    """
+    Calculates the covariance of two sequences
+    """
+    if sys.version_info[0] >= 3 and sys.version_info[1] >= 10:
+        Result = statistics.correlation(DataX, DataY)
+    else:
+        MeanX = statistics.mean(DataX)
+        MeanY = statistics.mean(DataY)
+        Length = len(DataX)
+        Sum = sum((Item - MeanX) * (DataY[Index] - MeanY)
+                                            for Index, Item in enumerate(DataX))
+        Result = Sum / Length
+    return Result
+
+def CheckCorrelation(DataX, DataY):
+    """
+    Calculates the Pearson correlation of two sequences
+    """
+    if sys.version_info[0] >= 3 and sys.version_info[1] >= 10:
+        Result = statistics.correlation(DataX, DataY)
+    else:
+        Cov = CheckCovariance(DataX, DataY)
+        SigmaX = statistics.pstdev(DataX)
+        SigmaY = statistics.pstdev(DataY)
+        Result = Cov / (SigmaX * SigmaY)
     return Result
 
 #classes
@@ -437,6 +514,446 @@ class Test_GetFullSE(Test_Basis):
         self.assertAlmostEqual(TestResult, TestCheck,
                                                 places = FLOAT_CHECK_PRECISION)
 
+class Test_GetSkewnessP(Test_GetVarianceP):
+    """
+    Unit-tests of the function GetSkewnessP().
+
+    Implements tests: TEST-T-100, TEST-T-101, TEST-T-102
+    Covers the requirements REQ-FUN-101, REQ-AWM-100 and REQ-AWM-101.
+    """
+    
+    @classmethod
+    def setUpClass(cls) -> None:
+        """
+        Preparation for the test cases, done only once.
+        """
+        super().setUpClass()
+        cls.TestFunction = staticmethod(test_module.GetSkewnessP)
+        cls.CheckFunction = staticmethod(CheckSkewP)
+
+class Test_GetSkewnessS(Test_Basis):
+    """
+    Unit-tests of the function GetSkewnessS().
+
+    Implements tests: TEST-T-100, TEST-T-101, TEST-T-102
+    Covers the requirements REQ-FUN-101, REQ-AWM-100 and REQ-AWM-101.
+    """
+    
+    @classmethod
+    def setUpClass(cls) -> None:
+        """
+        Preparation for the test cases, done only once.
+        """
+        super().setUpClass()
+        cls.TestFunction = staticmethod(test_module.GetSkewnessS)
+        cls.CheckFunction = staticmethod(CheckSkewS)
+    
+    def test_EdgeCase(self) -> None:
+        """
+        Checks the edge case of a sequence of one or two values - sub-class of
+        ValueError should be raised.
+
+        Implements tests: TEST-T-100.
+        Covers the requirements REQ-FUN-101.
+        """
+        for Item in [2, 3.4, MeasuredValue(3.2, 0.1)]:
+            with self.assertRaises(ValueError):
+                self.TestFunction([Item])
+            with self.assertRaises(ValueError):
+                self.TestFunction([Item, Item])
+
+class Test_GetKurtosisP(Test_Basis):
+    """
+    Unit-tests of the function GetKurtosisP().
+
+    Implements tests: TEST-T-100, TEST-T-101, TEST-T-102
+    Covers the requirements REQ-FUN-101, REQ-AWM-100 and REQ-AWM-101.
+    """
+    
+    @classmethod
+    def setUpClass(cls) -> None:
+        """
+        Preparation for the test cases, done only once.
+        """
+        super().setUpClass()
+        cls.TestFunction = staticmethod(test_module.GetKurtosisP)
+        cls.CheckFunction = staticmethod(CheckKurtP)
+    
+    def test_EdgeCase(self) -> None:
+        """
+        Checks the edge case of a sequence of a single value.
+
+        Implements tests: TEST-T-100.
+        Covers the requirements REQ-FUN-101.
+        """
+        for Item in [2, 3.4, MeasuredValue(3.2, 0.1)]:
+            TestResult = self.TestFunction([Item])
+            self.assertIsInstance(TestResult, (int, float))
+            self.assertAlmostEqual(TestResult, -3,
+                                                places = FLOAT_CHECK_PRECISION)
+
+class Test_GetKurtosisS(Test_Basis):
+    """
+    Unit-tests of the function GetKurtosisS().
+
+    Implements tests: TEST-T-100, TEST-T-101, TEST-T-102
+    Covers the requirements REQ-FUN-101, REQ-AWM-100 and REQ-AWM-101.
+    """
+    
+    @classmethod
+    def setUpClass(cls) -> None:
+        """
+        Preparation for the test cases, done only once.
+        """
+        super().setUpClass()
+        cls.TestFunction = staticmethod(test_module.GetKurtosisS)
+        cls.CheckFunction = staticmethod(CheckKurtS)
+    
+    def test_EdgeCase(self) -> None:
+        """
+        Checks the edge case of a sequence of one, two or three values -
+        sub-class of ValueError should be raised.
+
+        Implements tests: TEST-T-100.
+        Covers the requirements REQ-FUN-101.
+        """
+        for Item in [2, 3.4, MeasuredValue(3.2, 0.1)]:
+            with self.assertRaises(ValueError):
+                self.TestFunction([Item])
+            with self.assertRaises(ValueError):
+                self.TestFunction([Item, Item])
+            with self.assertRaises(ValueError):
+                self.TestFunction([Item, Item, Item])
+
+class Test_GetMoment(Test_Basis):
+    """
+    Unit-tests of the function GetMoment().
+
+    Implements tests: TEST-T-100, TEST-T-101, TEST-T-102
+    Covers the requirements REQ-FUN-101, REQ-AWM-100 and REQ-AWM-101.
+    """
+    
+    @classmethod
+    def setUpClass(cls) -> None:
+        """
+        Preparation for the test cases, done only once.
+        """
+        super().setUpClass()
+        cls.TestFunction = staticmethod(test_module.GetMoment)
+    
+    def test_TypeError(self) -> None:
+        """
+        Checks that sub-class of TypeError is raised with improper input data
+        type.
+
+        Implements test TEST-T-101.
+        Covers the requirement REQ-AWM-100.
+        """
+        for Temp in self.BadCases:
+            with self.assertRaises(TypeError):
+                self.TestFunction(Temp, random.randint(1, 6))
+            with self.assertRaises(TypeError):
+                self.TestFunction(Temp, random.randint(1, 6), IsCentral = True)
+            with self.assertRaises(TypeError):
+                self.TestFunction(Temp, random.randint(1, 6), IsCentral = False)
+            with self.assertRaises(TypeError):
+                self.TestFunction(Temp, random.randint(1, 6),
+                                                            IsNormalized = True)
+            with self.assertRaises(TypeError):
+                self.TestFunction(Temp, random.randint(1, 6), IsCentral = True,
+                                                            IsNormalized = True)
+            with self.assertRaises(TypeError):
+                self.TestFunction(Temp, random.randint(1, 6), IsCentral = False,
+                                                            IsNormalized = True)
+            with self.assertRaises(TypeError):
+                self.TestFunction(Temp, random.randint(1, 6),
+                                                        IsNormalized = False)
+            with self.assertRaises(TypeError):
+                self.TestFunction(Temp, random.randint(1, 6), IsCentral = True,
+                                                        IsNormalized = False)
+            with self.assertRaises(TypeError):
+                self.TestFunction(Temp, random.randint(1, 6), IsCentral = False,
+                                                        IsNormalized = False)
+        for Power in [1.0, '1', [1], (1, 2), MeasuredValue(1), {1:1}]:
+            with self.assertRaises(TypeError):
+                self.TestFunction(self.AllInt, Power)
+            with self.assertRaises(TypeError):
+                self.TestFunction(self.AllInt, Power, IsCentral = True)
+            with self.assertRaises(TypeError):
+                self.TestFunction(self.AllInt, Power, IsCentral = False)
+            with self.assertRaises(TypeError):
+                self.TestFunction(self.AllInt, Power, IsNormalized = True)
+            with self.assertRaises(TypeError):
+                self.TestFunction(self.AllInt, Power, IsCentral = True,
+                                                            IsNormalized = True)
+            with self.assertRaises(TypeError):
+                self.TestFunction(self.AllInt, Power, IsCentral = False,
+                                                            IsNormalized = True)
+            with self.assertRaises(TypeError):
+                self.TestFunction(self.AllInt, Power, IsNormalized = False)
+            with self.assertRaises(TypeError):
+                self.TestFunction(self.AllInt, Power, IsCentral = True,
+                                                        IsNormalized = False)
+            with self.assertRaises(TypeError):
+                self.TestFunction(self.AllInt, Power, IsCentral = False,
+                                                        IsNormalized = False)
+
+    def test_ValueError(self) -> None:
+        """
+        Checks that sub-class of ValueError is raised with proper input data
+        type but wrong value.
+
+        Implements test TEST-T-102.
+        Covers the requirement REQ-AWM-101.
+        """
+        with self.assertRaises(ValueError):
+            self.TestFunction([], random.randint(1, 6)) #empty sequence
+        for Power in range(-6, 1):
+            with self.assertRaises(ValueError):
+                self.TestFunction(self.AllInt, Power)
+            with self.assertRaises(ValueError):
+                self.TestFunction([1, 1, 1], Power, IsCentral = False,
+                                                            IsNormalized = True)
+    
+    def test_OkOperation(self) -> None:
+        """
+        Checks the normal operation mode of the function being tested
+
+        Implements test TEST-T-100.
+        Covers the requirement REQ-FUN-101.
+        """
+        for Power in range(1, 6):
+            for TestInput, BaseInput in ((self.AllInt, self.AllInt),
+                                        (self.AllFloat, self.AllFloat),
+                                        (self.Mixed, self.Mixed),
+                                        (self.IntErr, self.AllInt),
+                                        (self.FloatErr, self.AllFloat),
+                                        (self.MixedErr, self.Mixed),
+                                        (self.TotalMixed, self.Mixed)):
+                Length = len(BaseInput)
+                Sigma = statistics.pstdev(BaseInput)
+                Mean = statistics.mean(BaseInput)
+                #non-central not normalized
+                TestResult = self.TestFunction(TestInput, Power)
+                self.assertIsInstance(TestResult, (int, float))
+                TestCheck = sum(pow(Item, Power) for Item in BaseInput) / Length
+                self.assertAlmostEqual(TestResult, TestCheck, 
+                                                        delta = DELTA_PRECISION)
+                TestResult = self.TestFunction(tuple(TestInput), Power)
+                self.assertIsInstance(TestResult, (int, float))
+                self.assertAlmostEqual(TestResult, TestCheck, 
+                                                        delta = DELTA_PRECISION)
+                #non-central normalized
+                TestResult = self.TestFunction(TestInput, Power,
+                                                            IsNormalized = True)
+                self.assertIsInstance(TestResult, (int, float))
+                TestCheck = sum(pow(Item / Sigma, Power)
+                                                for Item in BaseInput) / Length
+                self.assertAlmostEqual(TestResult, TestCheck, 
+                                                places = FLOAT_CHECK_PRECISION)
+                TestResult = self.TestFunction(tuple(TestInput), Power,
+                                                            IsNormalized = True)
+                self.assertIsInstance(TestResult, (int, float))
+                self.assertAlmostEqual(TestResult, TestCheck, 
+                                                places = FLOAT_CHECK_PRECISION)
+                #central not normalized
+                TestResult = self.TestFunction(TestInput, Power,
+                                                            IsCentral = True)
+                self.assertIsInstance(TestResult, (int, float))
+                TestCheck = sum(pow(Item - Mean, Power)
+                                                for Item in BaseInput) / Length
+                self.assertAlmostEqual(TestResult, TestCheck, 
+                                                        delta = DELTA_PRECISION)
+                TestResult = self.TestFunction(tuple(TestInput), Power,
+                                                            IsCentral = True)
+                self.assertIsInstance(TestResult, (int, float))
+                self.assertAlmostEqual(TestResult, TestCheck, 
+                                                        delta = DELTA_PRECISION)
+                #central normalized
+                TestResult = self.TestFunction(TestInput, Power,
+                                        IsCentral = True, IsNormalized = True)
+                self.assertIsInstance(TestResult, (int, float))
+                TestCheck = sum(pow((Item - Mean) / Sigma, Power)
+                                                for Item in BaseInput) / Length
+                self.assertAlmostEqual(TestResult, TestCheck, 
+                                                places = FLOAT_CHECK_PRECISION)
+                TestResult = self.TestFunction(tuple(TestInput), Power,
+                                        IsCentral = True, IsNormalized = True)
+                self.assertIsInstance(TestResult, (int, float))
+                self.assertAlmostEqual(TestResult, TestCheck, 
+                                                places = FLOAT_CHECK_PRECISION)
+    
+    def test_EdgeCase(self) -> None:
+        """
+        Checks the edge case of a sequence of a single value.
+
+        Implements tests: TEST-T-100.
+        Covers the requirements REQ-FUN-101.
+        """
+        for Power in range(1, 6):
+            for Item in [2, 3.4, MeasuredValue(3.2, 0.1)]:
+                #non-central not normalized
+                TestResult = self.TestFunction([Item], Power)
+                self.assertIsInstance(TestResult, (int, float))
+                self.assertAlmostEqual(TestResult, pow(Item, Power),
+                                                places = FLOAT_CHECK_PRECISION)
+                #central not normalized
+                TestResult = self.TestFunction([Item], Power, IsCentral = True)
+                self.assertIsInstance(TestResult, (int, float))
+                self.assertAlmostEqual(TestResult, 0,
+                                                places = FLOAT_CHECK_PRECISION)
+                #central normalized
+                TestResult = self.TestFunction([Item], Power, IsCentral = True,
+                                                            IsNormalized = True)
+                self.assertIsInstance(TestResult, (int, float))
+                self.assertAlmostEqual(TestResult, 0,
+                                                places = FLOAT_CHECK_PRECISION)
+
+class Test_GetCovariance(Test_Basis):
+    """
+    Unit-tests of the function GetCovariance().
+
+    Implements tests: TEST-T-100, TEST-T-101, TEST-T-102
+    Covers the requirements REQ-FUN-101, REQ-AWM-100 and REQ-AWM-101.
+    """
+    
+    @classmethod
+    def setUpClass(cls) -> None:
+        """
+        Preparation for the test cases, done only once.
+        """
+        super().setUpClass()
+        cls.TestFunction = staticmethod(test_module.GetCovariance)
+        cls.CheckFunction = staticmethod(CheckCovariance)
+    
+    def test_TypeError(self) -> None:
+        """
+        Checks that sub-class of TypeError is raised with improper input data
+        type.
+
+        Implements test TEST-T-101.
+        Covers the requirement REQ-AWM-100.
+        """
+        for Temp in self.BadCases:
+            with self.assertRaises(TypeError):
+                self.TestFunction(Temp, [1, 1])
+            with self.assertRaises(TypeError):
+                self.TestFunction([1, 1], Temp)
+            with self.assertRaises(TypeError):
+                self.TestFunction(Temp, Temp)
+    
+    def test_ValueError(self) -> None:
+        """
+        Checks that sub-class of ValueError is raised with proper input data
+        type but wrong value.
+
+        Implements test TEST-T-102.
+        Covers the requirement REQ-AWM-101.
+        """
+        with self.assertRaises(ValueError):
+            self.TestFunction([], [1, 1])
+        with self.assertRaises(ValueError):
+            self.TestFunction([1, 1], [])
+        with self.assertRaises(ValueError):
+            self.TestFunction([], [])
+        for _ in range(10):
+            Array1 = [random.randint(1, 5) for _ in range(random.randint(1, 5))]
+            Array2 = list(Array1)
+            Array2.extend([random.randint(1, 5)
+                                        for _ in range(random.randint(1, 5))])
+            with self.assertRaises(ValueError):
+                self.TestFunction(Array1, Array2)
+            with self.assertRaises(ValueError):
+                self.TestFunction(Array2, Array1)
+    
+    def test_OkOperation(self) -> None:
+        """
+        Checks the normal operation mode of the function being tested
+
+        Implements test TEST-T-100.
+        Covers the requirement REQ-FUN-101.
+        """
+        for TestInputX, BaseInputX in ((self.AllInt, self.AllInt),
+                                        (self.AllFloat, self.AllFloat),
+                                        (self.Mixed, self.Mixed),
+                                        (self.IntErr, self.AllInt),
+                                        (self.FloatErr, self.AllFloat),
+                                        (self.MixedErr, self.Mixed),
+                                        (self.TotalMixed, self.Mixed)):
+            for TestInputY, BaseInputY in ((self.AllInt, self.AllInt),
+                                        (self.AllFloat, self.AllFloat),
+                                        (self.Mixed, self.Mixed),
+                                        (self.IntErr, self.AllInt),
+                                        (self.FloatErr, self.AllFloat),
+                                        (self.MixedErr, self.Mixed),
+                                        (self.TotalMixed, self.Mixed)):
+                MinLength = min(len(BaseInputX), len(BaseInputY))
+                CheckResult = self.CheckFunction(BaseInputX[:MinLength],
+                                                        BaseInputY[:MinLength])
+                TestResult = self.TestFunction(TestInputX[:MinLength],
+                                                        TestInputY[:MinLength])
+                self.assertIsInstance(TestResult, (int, float))
+                self.assertAlmostEqual(TestResult, CheckResult,
+                                                places= FLOAT_CHECK_PRECISION)
+                TestResult = self.TestFunction(tuple(TestInputX[:MinLength]),
+                                                tuple(TestInputY[:MinLength]))
+                self.assertIsInstance(TestResult, (int, float))
+                self.assertAlmostEqual(TestResult, CheckResult,
+                                                places= FLOAT_CHECK_PRECISION)
+    
+    def test_EdgeCase(self) -> None:
+        """
+        Checks the edge case of a sequences of a single value and 1 or both
+        sequences being constant.
+
+        Implements tests: TEST-T-100.
+        Covers the requirements REQ-FUN-101.
+        """
+        for _ in range(10):
+            Value = random.random()
+            self.assertEqual(self.TestFunction([Value], [Value]), 0)
+            Length = random.randint(2, 100)
+            Value1 = [1 for _ in range(Length)]
+            Value2 = [random.random() for _ in range(Length)]
+            self.assertEqual(self.TestFunction(Value1, Value2), 0)
+            self.assertEqual(self.TestFunction(Value2, Value1), 0)
+            self.assertEqual(self.TestFunction(Value1, Value1), 0)
+
+class Test_GetPearsonR(Test_GetCovariance):
+    """
+    Unit-tests of the function GetPearsonR().
+
+    Implements tests: TEST-T-100, TEST-T-101, TEST-T-102
+    Covers the requirements REQ-FUN-101, REQ-AWM-100 and REQ-AWM-101.
+    """
+    
+    @classmethod
+    def setUpClass(cls) -> None:
+        """
+        Preparation for the test cases, done only once.
+        """
+        super().setUpClass()
+        cls.TestFunction = staticmethod(test_module.GetPearsonR)
+        cls.CheckFunction = staticmethod(CheckCorrelation)
+    
+    def test_EdgeCase(self) -> None:
+        """
+        Checks the edge case of a sequences of a single value and 1 or both
+        sequences being constant.
+
+        Implements tests: TEST-T-100.
+        Covers the requirements REQ-FUN-101.
+        """
+        for _ in range(10):
+            Value = random.random()
+            self.assertEqual(self.TestFunction([Value], [Value]), 1)
+            Length = random.randint(2, 100)
+            Value1 = [1 for _ in range(Length)]
+            Value2 = [random.random() for _ in range(Length)]
+            self.assertEqual(self.TestFunction(Value1, Value2), 0)
+            self.assertEqual(self.TestFunction(Value2, Value1), 0)
+            self.assertEqual(self.TestFunction(Value1, Value1), 1)
+
 #+ test suites
 
 TestSuite1 = unittest.TestLoader().loadTestsFromTestCase(Test_GetMean)
@@ -455,9 +972,25 @@ TestSuite7 = unittest.TestLoader().loadTestsFromTestCase(Test_GetMeanSqrSE)
 
 TestSuite8 = unittest.TestLoader().loadTestsFromTestCase(Test_GetFullSE)
 
+TestSuite9 = unittest.TestLoader().loadTestsFromTestCase(Test_GetSkewnessP)
+
+TestSuite10 = unittest.TestLoader().loadTestsFromTestCase(Test_GetSkewnessS)
+
+TestSuite11 = unittest.TestLoader().loadTestsFromTestCase(Test_GetKurtosisP)
+
+TestSuite12 = unittest.TestLoader().loadTestsFromTestCase(Test_GetKurtosisS)
+
+TestSuite13 = unittest.TestLoader().loadTestsFromTestCase(Test_GetMoment)
+
+TestSuite14 = unittest.TestLoader().loadTestsFromTestCase(Test_GetCovariance)
+
+TestSuite15 = unittest.TestLoader().loadTestsFromTestCase(Test_GetPearsonR)
+
 TestSuite = unittest.TestSuite()
 TestSuite.addTests([TestSuite1, TestSuite2, TestSuite3, TestSuite4, TestSuite5,
-                    TestSuite6, TestSuite7, TestSuite8])
+                    TestSuite6, TestSuite7, TestSuite8, TestSuite9, TestSuite10,
+                    TestSuite11, TestSuite12, TestSuite13, TestSuite14,
+                    TestSuite15])
 
 if __name__ == "__main__":
     sys.stdout.write(
