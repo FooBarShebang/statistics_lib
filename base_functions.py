@@ -66,8 +66,8 @@ Functions:
 """
 
 __version__= '1.0.0.0'
-__date__ = '09-02-2022'
-__status__ = 'Development'
+__date__ = '10-02-2022'
+__status__ = 'Production'
 
 #imports
 
@@ -632,13 +632,18 @@ def GetMoment(Data: TGenericSequence, Power: int, *, IsCentral: bool = False,
     else:
         Sigma = 1
     Length = len(_Data)
-    if Sigma > 0:
+    Eps = sys.float_info.epsilon
+    First = _Data[0]
+    bCond = any(map(lambda x: abs(x - First) > Eps, _Data))
+    if bCond:
         Sum = sum(pow((Item - Mean) / Sigma, Power) for Item in _Data)
         Result = Sum / Length
     else: #all elements are the same!!!!
         if IsNormalized and (not IsCentral):
             raise UT_ValueError(Sigma, '!= 0 - variance of the data',
                                                         SkipFrames = SkipFrames)
+        elif (not IsNormalized) and (not IsCentral):
+            Result = sum(pow(Item, Power) for Item in _Data) / Length
         else:
             Result = 0
     return Result
@@ -917,6 +922,7 @@ def GetMoment2(DataX: TGenericSequence, DataY: TGenericSequence, PowerX: int,
     if len(_DataX) != len(_DataY):
         raise UT_ValueError(
                 len(_DataX), '== {} - X and Y data length'.format(len(_DataY)))
+    Length = len(_DataX)
     if IsCentral:
         MeanX = GetMean(_DataX, SkipFrames = SkipFrames + 1, DoCheck = False)
         MeanY = GetMean(_DataY, SkipFrames = SkipFrames + 1, DoCheck = False)
@@ -929,14 +935,25 @@ def GetMoment2(DataX: TGenericSequence, DataY: TGenericSequence, PowerX: int,
     else:
         SigmaX = 1
         SigmaY = 1
-    Length = len(_DataX)
-    Sum = sum((pow((Item - MeanX) / SigmaX, PowerX) *
+    Eps = sys.float_info.epsilon
+    First = _DataX[0]
+    bCond1 = any(map(lambda x: abs(x - First) > Eps, _DataX))
+    First = _DataY[0]
+    bCond2 = any(map(lambda x: abs(x - First) > Eps, _DataY))
+    if bCond1 and bCond2:
+        Sum = sum((pow((Item - MeanX) / SigmaX, PowerX) *
                 pow((_DataY[Index] - MeanY) / SigmaY, PowerY))
                                         for Index, Item in enumerate(_DataX))
-    if SigmaX and SigmaY:
         Result = Sum / Length
     else: #at least, in one sequence all items are the same!!!
-        Result = 0
+        if IsNormalized and (not IsCentral):
+            raise UT_ValueError((SigmaX, SigmaY), '!= 0 - variance of the data',
+                                                        SkipFrames = SkipFrames)
+        elif (not IsNormalized) and (not IsCentral):
+            Result = sum(pow(Item, PowerX) * pow(_DataY[Index], PowerY)
+                                for Index, Item in enumerate(_DataX)) / Length
+        else: # any central moment
+            Result = 0
     return Result
 
 def GetPearsonR(DataX: TGenericSequence, DataY: TGenericSequence, *,
@@ -985,9 +1002,9 @@ def GetPearsonR(DataX: TGenericSequence, DataY: TGenericSequence, *,
                                                                 DoCheck = False)
     SigmaX = GetStdevP(_DataX, SkipFrames = SkipFrames + 1, DoCheck = False)
     SigmaY = GetStdevP(_DataY, SkipFrames = SkipFrames + 1, DoCheck = False)
-    if SigmaX and SigmaY:
+    if SigmaX > 0 and SigmaY > 0:
         Result = Covariance / (SigmaX * SigmaY)
-    elif SigmaX or SigmaY: #one sequence is constant
+    elif (SigmaX > 0)  or (SigmaY > 0): #one sequence is constant
         Result = 0
     else: #both sequences are constants
         Result = 1

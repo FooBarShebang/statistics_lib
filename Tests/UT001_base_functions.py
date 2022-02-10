@@ -8,7 +8,7 @@ report TE001_base_functions.md
 
 
 __version__= '1.0.0.0'
-__date__ = '09-02-2022'
+__date__ = '10-02-2022'
 __status__ = 'Testing'
 
 #imports
@@ -41,7 +41,7 @@ from phyqus_lib.base_classes import MeasuredValue
 
 FLOAT_CHECK_PRECISION = 8 #digits after comma
 
-DELTA_PRECISION = 0.000001 # 1E-6
+DELTA_PRECISION = 0.0001 # 1E-4
 
 #helper functions
 
@@ -708,9 +708,20 @@ class Test_GetMoment(Test_Basis):
         """
         with self.assertRaises(ValueError):
             self.TestFunction([], random.randint(1, 6)) #empty sequence
-        for Power in range(-6, 1):
+        for FlagA in [True, False]:
+            for FlagB in [True, False]:
+                with self.assertRaises(ValueError):
+                    self.TestFunction([], random.randint(1, 6),
+                                        IsCentral = FlagA, IsNormalized = FlagB)
+        for Power in range(-6, 1): #negative powers
             with self.assertRaises(ValueError):
                 self.TestFunction(self.AllInt, Power)
+            for FlagA in [True, False]:
+                for FlagB in [True, False]:
+                    with self.assertRaises(ValueError):
+                        self.TestFunction(self.AllInt, Power,
+                                        IsCentral = FlagA, IsNormalized = FlagB)
+        for Power in range(1, 6): #non-central normalized constant sequence
             with self.assertRaises(ValueError):
                 self.TestFunction([1, 1, 1], Power, IsCentral = False,
                                                             IsNormalized = True)
@@ -785,7 +796,8 @@ class Test_GetMoment(Test_Basis):
     
     def test_EdgeCase(self) -> None:
         """
-        Checks the edge case of a sequence of a single value.
+        Checks the edge case of a sequence of a single value and constant values
+        sequences.
 
         Implements tests: TEST-T-100.
         Covers the requirements REQ-FUN-101.
@@ -797,8 +809,18 @@ class Test_GetMoment(Test_Basis):
                 self.assertIsInstance(TestResult, (int, float))
                 self.assertAlmostEqual(TestResult, pow(Item, Power),
                                                 places = FLOAT_CHECK_PRECISION)
+                TestResult = self.TestFunction([Item], Power, IsCentral = False,
+                                                        IsNormalized = False)
+                self.assertIsInstance(TestResult, (int, float))
+                self.assertAlmostEqual(TestResult, pow(Item, Power),
+                                                places = FLOAT_CHECK_PRECISION)
                 #central not normalized
                 TestResult = self.TestFunction([Item], Power, IsCentral = True)
+                self.assertIsInstance(TestResult, (int, float))
+                self.assertAlmostEqual(TestResult, 0,
+                                                places = FLOAT_CHECK_PRECISION)
+                TestResult = self.TestFunction([Item], Power, IsCentral = True,
+                                                        IsNormalized = False)
                 self.assertIsInstance(TestResult, (int, float))
                 self.assertAlmostEqual(TestResult, 0,
                                                 places = FLOAT_CHECK_PRECISION)
@@ -807,6 +829,38 @@ class Test_GetMoment(Test_Basis):
                                                             IsNormalized = True)
                 self.assertIsInstance(TestResult, (int, float))
                 self.assertAlmostEqual(TestResult, 0,
+                                                places = FLOAT_CHECK_PRECISION)
+        for _ in range(10):
+            Const = random.random() + random.randint(-3, 4)
+            Length = random.randint(2, 10)
+            Array1 = [Const for _ in range(Length)]
+            Power = random.randint(1, 6)
+            TestCheck = pow(Const, Power)
+            #non-central not normalized
+            TestResult = self.TestFunction(Array1, Power)
+            self.assertIsInstance(TestResult, (int, float))
+            self.assertAlmostEqual(TestResult, TestCheck,
+                                                places = FLOAT_CHECK_PRECISION)
+            TestResult = self.TestFunction(Array1, Power, IsCentral = False,
+                                                        IsNormalized = False)
+            self.assertIsInstance(TestResult, (int, float))
+            self.assertAlmostEqual(TestResult, TestCheck,
+                                                places = FLOAT_CHECK_PRECISION)
+            #central not normalized
+            TestResult = self.TestFunction(Array1, Power, IsCentral = True)
+            self.assertIsInstance(TestResult, (int, float))
+            self.assertAlmostEqual(TestResult, 0,
+                                                places = FLOAT_CHECK_PRECISION)
+            TestResult = self.TestFunction(Array1, Power, IsCentral = True,
+                                                        IsNormalized = False)
+            self.assertIsInstance(TestResult, (int, float))
+            self.assertAlmostEqual(TestResult, 0,
+                                                places = FLOAT_CHECK_PRECISION)
+            #central normalized
+            TestResult = self.TestFunction(Array1, Power, IsCentral = True,
+                                                            IsNormalized = True)
+            self.assertIsInstance(TestResult, (int, float))
+            self.assertAlmostEqual(TestResult, 0,
                                                 places = FLOAT_CHECK_PRECISION)
 
 class Test_GetCovariance(Test_Basis):
@@ -954,6 +1008,396 @@ class Test_GetPearsonR(Test_GetCovariance):
             self.assertEqual(self.TestFunction(Value2, Value1), 0)
             self.assertEqual(self.TestFunction(Value1, Value1), 1)
 
+class Test_GetMoment2(Test_Basis):
+    """
+    Unit-tests of the function GetMoment2().
+
+    Implements tests: TEST-T-100, TEST-T-101, TEST-T-102
+    Covers the requirements REQ-FUN-101, REQ-AWM-100 and REQ-AWM-101.
+    """
+    
+    @classmethod
+    def setUpClass(cls) -> None:
+        """
+        Preparation for the test cases, done only once.
+        """
+        super().setUpClass()
+        cls.TestFunction = staticmethod(test_module.GetMoment2)
+    
+    def test_TypeError(self) -> None:
+        """
+        Checks that sub-class of TypeError is raised with improper input data
+        type.
+
+        Implements test TEST-T-101.
+        Covers the requirement REQ-AWM-100.
+        """
+        for PowerX in range(1, 4):
+            for PowerY in range(1, 4):
+                for Temp in self.BadCases:
+                    with self.assertRaises(TypeError):
+                        self.TestFunction(Temp, [1, 1, 1], PowerX, PowerY)
+                    with self.assertRaises(TypeError):
+                        self.TestFunction([1, 1, 1], Temp, PowerX, PowerY)
+                    with self.assertRaises(TypeError):
+                        self.TestFunction(Temp, Temp, PowerX, PowerY)
+                    for FlagA in [True, False]:
+                        for FlagB in [True, False]:
+                            with self.assertRaises(TypeError):
+                                self.TestFunction(Temp, [1, 1, 1], PowerX,
+                                                    PowerY, IsCentral = FlagA,
+                                                        IsNormalized = FlagB)
+                            with self.assertRaises(TypeError):
+                                self.TestFunction([1, 1, 1], Temp, PowerX,
+                                                    PowerY, IsCentral = FlagA,
+                                                        IsNormalized = FlagB)
+                            with self.assertRaises(TypeError):
+                                self.TestFunction(Temp, Temp, PowerX,
+                                                    PowerY, IsCentral = FlagA,
+                                                        IsNormalized = FlagB)
+        for PowerX in [1.0, '1', [1], (1, 2), MeasuredValue(1), {1:1}]:
+            for PowerY in range(1, 4):
+                with self.assertRaises(TypeError):
+                    self.TestFunction(self.AllInt, self.AllInt, PowerX, PowerY)
+                with self.assertRaises(TypeError):
+                    self.TestFunction(self.AllInt, self.AllInt, PowerY, PowerX)
+                with self.assertRaises(TypeError):
+                    self.TestFunction(self.AllInt, self.AllInt, PowerX, PowerX)
+                for FlagA in [True, False]:
+                    for FlagB in [True, False]:
+                        with self.assertRaises(TypeError):
+                            self.TestFunction(self.AllInt, self.AllInt, PowerX,
+                                                    PowerY, IsCentral = FlagA,
+                                                        IsNormalized = FlagB)
+                        with self.assertRaises(TypeError):
+                            self.TestFunction(self.AllInt, self.AllInt, PowerY,
+                                                    PowerX, IsCentral = FlagA,
+                                                        IsNormalized = FlagB)
+                        with self.assertRaises(TypeError):
+                            self.TestFunction(self.AllInt, self.AllInt, PowerX,
+                                                    PowerX, IsCentral = FlagA,
+                                                        IsNormalized = FlagB)
+    
+    def test_ValueError(self) -> None:
+        """
+        Checks that sub-class of ValueError is raised with proper input data
+        type but wrong value.
+
+        Implements test TEST-T-102.
+        Covers the requirement REQ-AWM-101.
+        """
+        for PowerX in range(1, 4):
+            for PowerY in range(1, 4):
+                #empty sequences
+                with self.assertRaises(ValueError):
+                    self.TestFunction(self.AllInt, [], PowerX, PowerY)
+                with self.assertRaises(ValueError):
+                    self.TestFunction([], self.AllInt, PowerX, PowerY)
+                with self.assertRaises(ValueError):
+                    self.TestFunction([], self.AllInt, PowerX, PowerY)
+                for FlagA in [True, False]:
+                    for FlagB in [True, False]:
+                        with self.assertRaises(ValueError):
+                            self.TestFunction(self.AllInt, [], PowerX, PowerY,
+                                        IsCentral = FlagA, IsNormalized = FlagB)
+                        with self.assertRaises(ValueError):
+                            self.TestFunction([], self.AllInt, PowerX, PowerY,
+                                        IsCentral = FlagA, IsNormalized = FlagB)
+                        with self.assertRaises(ValueError):
+                            self.TestFunction([], self.AllInt, PowerX, PowerY,
+                                        IsCentral = FlagA, IsNormalized = FlagB)
+                for _ in range(5): #unequal sequences
+                    Array1 = [random.randint(1, 5)
+                                        for _ in range(random.randint(1, 5))]
+                    Array2 = list(Array1)
+                    Array2.extend([random.randint(1, 5)
+                                        for _ in range(random.randint(1, 5))])
+                    with self.assertRaises(ValueError):
+                        self.TestFunction(Array1, Array2, PowerX, PowerY)
+                    with self.assertRaises(ValueError):
+                        self.TestFunction(Array2, Array1, PowerX, PowerY)
+                    for FlagA in [True, False]:
+                        for FlagB in [True, False]:
+                            with self.assertRaises(ValueError):
+                                self.TestFunction(Array1, Array2, PowerX,
+                                                    PowerY, IsCentral = FlagA,
+                                                        IsNormalized = FlagB)
+                            with self.assertRaises(ValueError):
+                                self.TestFunction(Array2, Array1, PowerX,
+                                                    PowerY, IsCentral = FlagA,
+                                                        IsNormalized = FlagB)
+        for PowerX in range(-8, 1): #negative powers
+            with self.assertRaises(ValueError):
+                self.TestFunction(self.AllInt, self.AllInt, PowerX,
+                                                        random.randint(1, 5))
+            with self.assertRaises(ValueError):
+                self.TestFunction(self.AllInt, self.AllInt,
+                                                random.randint(1, 5), PowerX)
+            with self.assertRaises(ValueError):
+                self.TestFunction(self.AllInt, self.AllInt, PowerX, PowerX)
+            for FlagA in [True, False]:
+                for FlagB in [True, False]:
+                    with self.assertRaises(ValueError):
+                        self.TestFunction(self.AllInt, self.AllInt, PowerX,
+                                                        random.randint(1, 5))
+                    with self.assertRaises(ValueError):
+                        self.TestFunction(self.AllInt, self.AllInt,
+                                                random.randint(1, 5), PowerX)
+                    with self.assertRaises(ValueError):
+                        self.TestFunction(self.AllInt, self.AllInt, PowerX,
+                                                                        PowerX)
+        Array1 = [1 for _ in range(len(self.AllInt))]
+        for PowerX in range(1, 4): #Non-central normalized of constant sequence
+            for PowerY in range(1, 4):
+                with self.assertRaises(ValueError):
+                    self.TestFunction(Array1, self.AllInt, PowerX, PowerY,
+                                        IsCentral = False, IsNormalized = True)
+                with self.assertRaises(ValueError):
+                    self.TestFunction(self.AllInt, Array1, PowerX, PowerY,
+                                        IsCentral = False, IsNormalized = True)
+                with self.assertRaises(ValueError):
+                    self.TestFunction(Array1, Array1, PowerX, PowerY,
+                                        IsCentral = False, IsNormalized = True)
+    
+    def test_OkOperation(self) -> None:
+        """
+        Checks the normal operation mode of the function being tested
+
+        Implements test TEST-T-100.
+        Covers the requirement REQ-FUN-101.
+        """
+        for PowerX in range(1, 4):
+            for PowerY in range(1, 4):
+                for TestInputX, BaseInputX in ((self.AllInt, self.AllInt),
+                                                (self.AllFloat, self.AllFloat),
+                                                (self.Mixed, self.Mixed),
+                                                (self.IntErr, self.AllInt),
+                                                (self.FloatErr, self.AllFloat),
+                                                (self.MixedErr, self.Mixed),
+                                                (self.TotalMixed, self.Mixed)):
+                    for TestInputY, BaseInputY in ((self.AllInt, self.AllInt),
+                                                (self.AllFloat, self.AllFloat),
+                                                (self.Mixed, self.Mixed),
+                                                (self.IntErr, self.AllInt),
+                                                (self.FloatErr, self.AllFloat),
+                                                (self.MixedErr, self.Mixed),
+                                                (self.TotalMixed, self.Mixed)):
+                        Length = min(len(BaseInputX), len(BaseInputY))
+                        SigmaX = statistics.pstdev(BaseInputX[:Length])
+                        MeanX = statistics.mean(BaseInputX[:Length])
+                        SigmaY = statistics.pstdev(BaseInputY[:Length])
+                        MeanY = statistics.mean(BaseInputY[:Length])
+                        #non-central not normalized
+                        TestResult = self.TestFunction(TestInputX[:Length],
+                                            TestInputY[:Length], PowerX, PowerY)
+                        self.assertIsInstance(TestResult, (int, float))
+                        TestCheck = sum(
+                                pow(Item, PowerX) * pow(BaseInputY[i], PowerY)
+                                    for i,Item in enumerate(BaseInputX[:Length])
+                                                                    ) / Length
+                        self.assertAlmostEqual(TestResult, TestCheck, 
+                                                        delta = DELTA_PRECISION)
+                        TestResult=self.TestFunction(tuple(TestInputX[:Length]),
+                                                    tuple(TestInputY[:Length]),
+                                                                PowerX, PowerY)
+                        self.assertIsInstance(TestResult, (int, float))
+                        self.assertAlmostEqual(TestResult, TestCheck, 
+                                                        delta = DELTA_PRECISION)
+                        #non-central normalized
+                        TestResult = self.TestFunction(TestInputX[:Length],
+                                            TestInputY[:Length], PowerX, PowerY,
+                                                            IsNormalized = True)
+                        self.assertIsInstance(TestResult, (int, float))
+                        TestCheck = sum(
+                                pow(Item / SigmaX, PowerX) * pow(
+                                        BaseInputY[i] / SigmaY, PowerY)
+                                    for i,Item in enumerate(BaseInputX[:Length])
+                                                                    ) / Length
+                        self.assertAlmostEqual(TestResult, TestCheck, 
+                                                places = FLOAT_CHECK_PRECISION)
+                        TestResult=self.TestFunction(tuple(TestInputX[:Length]),
+                                                    tuple(TestInputY[:Length]),
+                                                        PowerX, PowerY,
+                                                            IsNormalized = True)
+                        self.assertIsInstance(TestResult, (int, float))
+                        self.assertAlmostEqual(TestResult, TestCheck, 
+                                                places = FLOAT_CHECK_PRECISION)
+                        #central not normalized
+                        TestResult = self.TestFunction(TestInputX[:Length],
+                                            TestInputY[:Length], PowerX, PowerY,
+                                                            IsCentral = True)
+                        self.assertIsInstance(TestResult, (int, float))
+                        TestCheck = sum(
+                                    pow(Item - MeanX, PowerX) * pow(
+                                        BaseInputY[i] - MeanY, PowerY)
+                                    for i,Item in enumerate(BaseInputX[:Length])
+                                                                    ) / Length
+                        self.assertAlmostEqual(TestResult, TestCheck, 
+                                                        delta = DELTA_PRECISION)
+                        TestResult=self.TestFunction(tuple(TestInputX[:Length]),
+                                                    tuple(TestInputY[:Length]),
+                                                            PowerX, PowerY,
+                                                            IsCentral = True)
+                        self.assertIsInstance(TestResult, (int, float))
+                        self.assertAlmostEqual(TestResult, TestCheck, 
+                                                        delta = DELTA_PRECISION)
+                        #central normalized
+                        TestResult = self.TestFunction(TestInputX[:Length],
+                                            TestInputY[:Length], PowerX, PowerY,
+                                        IsCentral = True, IsNormalized = True)
+                        self.assertIsInstance(TestResult, (int, float))
+                        TestCheck = sum(
+                                pow((Item - MeanX) / SigmaX, PowerX) * pow(
+                                    (BaseInputY[i] - MeanY) / SigmaY, PowerY)
+                                    for i,Item in enumerate(BaseInputX[:Length])
+                                                                    ) / Length
+                        self.assertAlmostEqual(TestResult, TestCheck, 
+                                                places = FLOAT_CHECK_PRECISION)
+                        TestResult=self.TestFunction(tuple(TestInputX[:Length]),
+                                                    tuple(TestInputY[:Length]),
+                                                        PowerX, PowerY,
+                                        IsCentral = True, IsNormalized = True)
+                        self.assertIsInstance(TestResult, (int, float))
+                        self.assertAlmostEqual(TestResult, TestCheck, 
+                                                places = FLOAT_CHECK_PRECISION)
+    
+    def test_EdgeCase(self) -> None:
+        """
+        Checks the edge case of a sequence of a single value and constant values
+        sequences.
+
+        Implements tests: TEST-T-100.
+        Covers the requirements REQ-FUN-101.
+        """
+        for PowerX in range(1, 4):
+            for PowerY in range(1, 4):
+                for Item in [2, 3.4, MeasuredValue(3.2, 0.1)]:
+                    TestCheck = pow(Item, PowerX) * pow(Item, PowerY)
+                    #non-central not normalized
+                    TestResult = self.TestFunction([Item], [Item], PowerX,
+                                                                        PowerY)
+                    self.assertIsInstance(TestResult, (int, float))
+                    self.assertAlmostEqual(TestResult, TestCheck,
+                                                places = FLOAT_CHECK_PRECISION)
+                    TestResult = self.TestFunction([Item], [Item], PowerX,
+                                                        PowerY,
+                                                        IsCentral = False,
+                                                        IsNormalized = False)
+                    self.assertIsInstance(TestResult, (int, float))
+                    self.assertAlmostEqual(TestResult, TestCheck,
+                                                places = FLOAT_CHECK_PRECISION)
+                    #central not normalized
+                    TestResult = self.TestFunction([Item], [Item], PowerX,
+                                                    PowerY, IsCentral = True)
+                    self.assertIsInstance(TestResult, (int, float))
+                    self.assertAlmostEqual(TestResult, 0,
+                                                places = FLOAT_CHECK_PRECISION)
+                    TestResult = self.TestFunction([Item], [Item], PowerX,
+                                                    PowerY, IsCentral = True,
+                                                        IsNormalized = False)
+                    self.assertIsInstance(TestResult, (int, float))
+                    self.assertAlmostEqual(TestResult, 0,
+                                                places = FLOAT_CHECK_PRECISION)
+                    #central normalized
+                    TestResult = self.TestFunction([Item], [Item], PowerX,
+                                                    PowerY, IsCentral = True,
+                                                            IsNormalized = True)
+                    self.assertIsInstance(TestResult, (int, float))
+                    self.assertAlmostEqual(TestResult, 0,
+                                                places = FLOAT_CHECK_PRECISION)
+        for _ in range(10):
+            Const = random.random() + random.randint(-3, 4)
+            Array1 = [Const for _ in range(len(self.AllInt))]
+            PowerX = random.randint(1, 4)
+            PowerY = random.randint(1, 4)
+            TestCheck1 = sum(pow(Const, PowerX) * pow(Item, PowerY)
+                                        for Item in self.AllInt) / len(Array1)
+            TestCheck2 = sum(pow(Const, PowerY) * pow(Item, PowerX)
+                                        for Item in self.AllInt) / len(Array1)
+            TestCheck3 = pow(Const, PowerX) * pow(Const, PowerY)
+            #non-central not normalized
+            TestResult = self.TestFunction(Array1, self.AllInt, PowerX, PowerY)
+            self.assertIsInstance(TestResult, (int, float))
+            self.assertAlmostEqual(TestResult, TestCheck1,
+                                                    delta = DELTA_PRECISION)
+            TestResult = self.TestFunction(Array1, self.AllInt, PowerX, PowerY,
+                                                        IsCentral = False,
+                                                        IsNormalized = False)
+            self.assertIsInstance(TestResult, (int, float))
+            self.assertAlmostEqual(TestResult, TestCheck1,
+                                                    delta = DELTA_PRECISION)
+            TestResult = self.TestFunction(self.AllInt, Array1, PowerX, PowerY)
+            self.assertIsInstance(TestResult, (int, float))
+            self.assertAlmostEqual(TestResult, TestCheck2,
+                                                    delta = DELTA_PRECISION)
+            TestResult = self.TestFunction(self.AllInt, Array1, PowerX, PowerY,
+                                                        IsCentral = False,
+                                                        IsNormalized = False)
+            self.assertIsInstance(TestResult, (int, float))
+            self.assertAlmostEqual(TestResult, TestCheck2,
+                                                    delta = DELTA_PRECISION)
+            TestResult = self.TestFunction(Array1, Array1, PowerX, PowerY)
+            self.assertIsInstance(TestResult, (int, float))
+            self.assertAlmostEqual(TestResult, TestCheck3,
+                                                    delta = DELTA_PRECISION)
+            TestResult = self.TestFunction(Array1, Array1, PowerX, PowerY,
+                                                        IsCentral = False,
+                                                        IsNormalized = False)
+            self.assertIsInstance(TestResult, (int, float))
+            self.assertAlmostEqual(TestResult, TestCheck3,
+                                                    delta = DELTA_PRECISION)
+            #central not normalized
+            TestResult = self.TestFunction(Array1, self.AllInt, PowerX, PowerY,
+                                                            IsCentral = True)
+            self.assertIsInstance(TestResult, (int, float))
+            self.assertAlmostEqual(TestResult, 0,
+                                                places = FLOAT_CHECK_PRECISION)
+            TestResult = self.TestFunction(self.AllInt, Array1, PowerX, PowerY,
+                                                            IsCentral = True)
+            self.assertIsInstance(TestResult, (int, float))
+            self.assertAlmostEqual(TestResult, 0,
+                                                places = FLOAT_CHECK_PRECISION)
+            TestResult = self.TestFunction(Array1, Array1, PowerX, PowerY,
+                                                            IsCentral = True)
+            self.assertIsInstance(TestResult, (int, float))
+            self.assertAlmostEqual(TestResult, 0,
+                                                places = FLOAT_CHECK_PRECISION)
+            TestResult = self.TestFunction(Array1, self.AllInt, PowerX, PowerY,
+                                                            IsCentral = True,
+                                                        IsNormalized = False)
+            self.assertIsInstance(TestResult, (int, float))
+            self.assertAlmostEqual(TestResult, 0,
+                                                places = FLOAT_CHECK_PRECISION)
+            TestResult = self.TestFunction(self.AllInt, Array1, PowerX, PowerY,
+                                                            IsCentral = True,
+                                                        IsNormalized = False)
+            self.assertIsInstance(TestResult, (int, float))
+            self.assertAlmostEqual(TestResult, 0,
+                                                places = FLOAT_CHECK_PRECISION)
+            TestResult = self.TestFunction(Array1, Array1, PowerX, PowerY,
+                                                            IsCentral = True,
+                                                        IsNormalized = False)
+            self.assertIsInstance(TestResult, (int, float))
+            self.assertAlmostEqual(TestResult, 0,
+                                                places = FLOAT_CHECK_PRECISION)
+            #central normalized
+            TestResult = self.TestFunction(Array1, self.AllInt, PowerX, PowerY,
+                                                            IsCentral = True,
+                                                            IsNormalized = True)
+            self.assertIsInstance(TestResult, (int, float))
+            self.assertAlmostEqual(TestResult, 0,
+                                                places = FLOAT_CHECK_PRECISION)
+            TestResult = self.TestFunction(self.AllInt, Array1, PowerX, PowerY,
+                                                            IsCentral = True,
+                                                            IsNormalized = True)
+            self.assertIsInstance(TestResult, (int, float))
+            self.assertAlmostEqual(TestResult, 0,
+                                                places = FLOAT_CHECK_PRECISION)
+            TestResult = self.TestFunction(Array1, Array1, PowerX, PowerY,
+                                                            IsCentral = True,
+                                                            IsNormalized = True)
+
+
 #+ test suites
 
 TestSuite1 = unittest.TestLoader().loadTestsFromTestCase(Test_GetMean)
@@ -986,11 +1430,13 @@ TestSuite14 = unittest.TestLoader().loadTestsFromTestCase(Test_GetCovariance)
 
 TestSuite15 = unittest.TestLoader().loadTestsFromTestCase(Test_GetPearsonR)
 
+TestSuite16 = unittest.TestLoader().loadTestsFromTestCase(Test_GetMoment2)
+
 TestSuite = unittest.TestSuite()
 TestSuite.addTests([TestSuite1, TestSuite2, TestSuite3, TestSuite4, TestSuite5,
                     TestSuite6, TestSuite7, TestSuite8, TestSuite9, TestSuite10,
                     TestSuite11, TestSuite12, TestSuite13, TestSuite14,
-                    TestSuite15])
+                    TestSuite15, TestSuite16])
 
 if __name__ == "__main__":
     sys.stdout.write(

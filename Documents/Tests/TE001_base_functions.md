@@ -60,7 +60,7 @@ All these function pass TEST-T-100, TEST-T-101 and TEST-T-102.
 
 **Test steps:** Analyze the source code of the module [base\_functions](../../base_functions.py) as well as of the unit-test module [/Tests/UT001\_base\_functions](../../Tests/UT001_base_functions.py). Execute the mentioned unit-test module.
 
-**Test result:** PASS / FAIL
+**Test result:** PASS
 
 ## Tests definition (Test)
 
@@ -105,7 +105,7 @@ Repeat the test coverting the same lists into tuples before passing into the fun
 
 In case of of the 2D statistic functions 2 sets of the lists of these data types should be generated. Before passing into a function, the longest of the two sequence argumnets must be truncated to match the length of the shortest one.
 
-**Test result:** PASS / FAIL
+**Test result:** PASS
 
 ___
 
@@ -121,7 +121,7 @@ ___
 
 **Test steps:** Try to call the funcion being tested with an appropriate data type argument. Check that the expected exception is raised.
 
-**Test result:** PASS / FAIL
+**Test result:** PASS
 
 ___
 
@@ -145,7 +145,7 @@ ___
 
 **Test steps:** Try to call the funcion being tested with an appropriate argument (see above). Check that the expected exception is raised.
 
-**Test result:** PASS / FAIL
+**Test result:** PASS
 
 ## Traceability
 
@@ -153,11 +153,11 @@ For traceability the relation between tests and requirements is summarized in th
 
 | **Requirement ID** | **Covered in test(s)**             | **Verified \[YES/NO\]**) |
 | :----------------- | :--------------------------------- | :----------------------- |
-| REQ-FUN-100        | TEST-A-100                         | NO                       |
-| REQ-FUN-101        | TEST-T-100                         | NO                       |
-| REQ-AWM-100        | TEST-T-101                         | NO                       |
-| REQ-AWM-101        | TEST-T-102                         | NO                       |
+| REQ-FUN-100        | TEST-A-100                         | YES                      |
+| REQ-FUN-101        | TEST-T-100                         | YES                      |
+| REQ-AWM-100        | TEST-T-101                         | YES                      |
+| REQ-AWM-101        | TEST-T-102                         | YES                      |
 
 | **Software ready for production \[YES/NO\]** | **Rationale**        |
 | :------------------------------------------: | :------------------- |
-| NO                                           | Under development    |
+| YES                                          | All tests are passed |
