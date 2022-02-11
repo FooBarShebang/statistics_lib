@@ -151,12 +151,12 @@ ___
 
 For traceability the relation between tests and requirements is summarized in the table below:
 
-| **Requirement ID** | **Covered in test(s)**             | **Verified \[YES/NO\]**) |
-| :----------------- | :--------------------------------- | :----------------------- |
-| REQ-FUN-100        | TEST-A-100                         | YES                      |
-| REQ-FUN-101        | TEST-T-100                         | YES                      |
-| REQ-AWM-100        | TEST-T-101                         | YES                      |
-| REQ-AWM-101        | TEST-T-102                         | YES                      |
+| **Requirement ID** | **Covered in test(s)** | **Verified \[YES/NO\]**) |
+| :----------------- | :--------------------- | :----------------------- |
+| REQ-FUN-100        | TEST-A-100             | YES                      |
+| REQ-FUN-101        | TEST-T-100             | YES                      |
+| REQ-AWM-100        | TEST-T-101             | YES                      |
+| REQ-AWM-101        | TEST-T-102             | YES                      |
 
 | **Software ready for production \[YES/NO\]** | **Rationale**        |
 | :------------------------------------------: | :------------------- |

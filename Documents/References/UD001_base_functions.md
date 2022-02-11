@@ -7,18 +7,18 @@ This document describes the intended usage, design and implementation of the fun
 This module provides functions for calculation of:
 
 * 1D statstics
-  * Arithmetic mean
-  * Variance with the Bessel correction (sample variance) and without the correction (population variance)
-  * Standard deviation with the Bessel correction (sample deviation) and without the correction (population deviation)
-  * Standard error of the mean of a data set (as population - i.e. without Bessel correction)
-  * Skewness with the Bessel correction (sample skewness) and without the correction (population skewness)
-  * Excess kurtosis with the Bessel correction (sample kurtosis) and without the correction (population kurtosis)
-  * Generic Nth moment of a data set distributiion (as population - i.e. without Bessel correction) - both central and non-central variants
-  * 'Full' standard error of the mean of a data set as population and including the individual data ppints 'measurement uncertainties'
+  * Arithmetic mean - *GetMean*()
+  * Variance with the Bessel correction (sample variance) and without the correction (population variance) - *GetVarianceS*() and *GetVarianceP*()
+  * Standard deviation with the Bessel correction (sample deviation) and without the correction (population deviation) - *GetStdevS*() and *GetStdevP*()
+  * Standard error of the mean of a data set (as population - i.e. without Bessel correction) - *GetSE*()
+  * Skewness with the Bessel correction (sample skewness) and without the correction (population skewness) - *GetSkewnessS*() and *GetSkewnessP*()
+  * Excess kurtosis with the Bessel correction (sample kurtosis) and without the correction (population kurtosis) - *GetKurtosisS*() and *GetKurtosisP*()
+  * Generic Nth moment of a data set distributiion (as population - i.e. without Bessel correction) - both central and non-central variants as well as normalized and not normalized - *GetMoment*()
+  * 'Full' standard error of the mean of a data set as population and including the individual data points 'measurement uncertainties' - *GetFullSE*()
 * 2D statics
-  * Covariance of a 2D data set (as population - i.e. without Bessel correction)
-  * Pearson's coefficient of correlation *r* of a 2D data set (as population - i.e. without Bessel correction)
-  * Generic Nth-Mth moment of a 2D data set distributiion (as population - i.e. without Bessel correction) - both central and non-central variants
+  * Covariance of a 2D data set (as population - i.e. without Bessel correction) - *GetCovariance*()
+  * Pearson's coefficient of correlation *r* of a 2D data set (as population - i.e. without Bessel correction) - *GetPearsonR*()
+  * Generic Nth-Mth moment of a 2D data set distributiion (as population - i.e. without Bessel correction) - both central and non-central variants as well as normalized and not normalized - *GetMoment2*()
 
 ## Intended Use and Functionality
 
@@ -27,8 +27,6 @@ The module should provide functionality to calcualte specific statistic moments 
 The unique feature of this module is that the statistic properties can be computed not only on sequences of real numbers (integers or floating point), but the measurements with uncertainties can also be included into the data set. A measurement with uncertainty is, basically, a tuple of two real numbers $(x_i, z_i)$, where $x_i$ represents the 'mean' of the measured value, and $z_i \geq 0$ is the measurement uncertainty. Thus, any real number $x_i$ can also be represented as a measurement with *zero* uncertainty, i.e. $(x_i, 0)$.
 
 The functions defined in this module can accept an arbirary mixture of real numbers and such measurements with uncertainties tuples - as a generic sequence argument - and treat it as a list or tuple of real numbers (ignoring the measurement uncertainties in all but one function).
-
-The second assumption is that in the majority of the practical cases the data set $<X>$ is large, i.e. its length $N\gg1$, and, most probably, it represents the entire population to be analyzed. Therefore, the Bessel correction is not applied.
 
 The aritmetic mean of the data distribution is calculated as the first non-central moment
 
@@ -50,7 +48,7 @@ For instance, the variance is the second central moment
 
 $$Var(X) = E[(X-<X>)^2] = \frac{\sum\limits_{i=1}^{N}{(x_i - <X>)^2}}{N}$$
 
-The standard deviation is computed as the square root of the variance
+The standard deviation (population) is computed as the square root of the variance
 
 $$\sigma(X) = \sqrt{Var(X)}$$
 
@@ -72,7 +70,7 @@ and normalized central moment as
 
 $$E\left[\left(\frac{X-<X>}{\sigma(X)}\right)^K\right] = \frac{\sum\limits_{i=1}^{N}{(x_i - <X>)^K}}{N \times {\sigma(X)}^K}$$
 
-This functionality (as generic moment) is not implemented in the module, however, two special cases are indeed implemented - skewness and kurtosis:
+The two special cases are skewness and kurtosis:
 
 $$Skew(X) = E\left[\left(\frac{X-<X>}{\sigma(X)}\right)^3\right] = \frac{\sum\limits_{i=1}^{N}{(x_i - <X>)^3}}{N \times {\sigma(X)}^3}$$
 
@@ -146,7 +144,7 @@ Since the described input data sanity check is a routine common for all function
 The checks on the argument(s) type, i.e. the input data being a sequence, is performed as 'IS A' test, but using the generic, ABC **collections.abc.Sequence**. The elements of a sequence are checked 2-ways (with OR conjunction):
 
 * 'IS A' test on being instance of **int** or **float** type
-* 'HAS A' test on having *Value* attribute
+* 'HAS A' test on having *Value* and *SE* attributes
 
 Apart from the data sanity checks these helper functions also 'unify' the input, i.e. they return the same length sequence of only real numbers, into which each real number from the input sequence is copied, and for the measurements with uncertainty the value its attribute *Value* is copied instead.
 
@@ -170,280 +168,536 @@ except (TypeError, ValueError) as err:
 
 In this case, the traceback printed by the statement ```print(err.Traceback.Info)``` will end in the frame of the call ```Mean = bsf.GetMean([1, 2.3, '1'])```, thus hiding the implementation details, i.e. where inside *GetMean*() function the helper function was called, and where inside the helper function the exception was actually raised.
 
-Note that if the raised exception is not caught, and it has propagated to the interactive console, the printed (system) traceback will include both frames - for the *GetMean*() and the helper function, with the helper function being the innermost (last) frame.
+Note that if the raised exception is not caught, and it has propagated to the interactive console, the printed (system) traceback will include all frames - for the *GetMean*() and the helper functions, with the helper functions being the innermost (last) frames.
 
-The functions implementing Bessel corrected calculations: *GetStandardDeviationBessel*(), *GetVarianceBessel*(), *GetSkewnessBessel*() and *GetKurtosisBessel*() also checks that the length of the sequence is not smaller than the reduced 'degrees of freedom' number (2, 3 and 4 respectively), and they raise **UT_ValueError** otherwise, indicating to skip the innermost frame from the traceback analysis.
+The functions implementing Bessel corrected calculations: *GetStdevS*(), *GetVarianceS*(), *GetSkewnessS*() and *GetKurtosisS*() also checks that the length of the sequence is not smaller than the reduced 'degrees of freedom' number (2, 3 and 4 respectively), and they raise **UT_ValueError** otherwise, indicating to skip the innermost frame from the traceback analysis.
 
 The functions *GetMoment*() and *GetMoment2*() also check that the passed required power(s) of the moment to be calculated is (are) positive integer(s), raising **UT_TypeError** or **UT_ValueError** otherwise, and they indicate to skip the innermost frame from the traceback analysis.
 
+All 2D statistics functions check that the both sequences (X and Y data) have the same length, otherwise **UT_ValueError** exception is raised.
+
 Thus, using *try...except* paradigm, the traceback analysis provided by the custom exceptions allows 'hiding' of the implementation details, which facilites the debugging procedure, since the last (innermost) frame will point to the 'offending' call.
 
-The actual calculations performed by the provided functions are, in principle, reduced to finding a specific central or non-central moment of the input data distribution, which is implemented using the built-in *pow*() function (since all powers in moments are positive integers) and *math.fsum*() function, which ensures extended precision of the floating point summation.
+The actual calculations performed by the provided functions are, in principle, reduced to finding a specific central or non-central, normalized or non-normalized (cross-) moment of the input data distribution(s), which is implemented using the built-in *pow*() function (since all powers in moments are positive integers) and the built-in *sum*() function.
+
+### Special, edge-cases
+
+The special case is the *constant value* sequence, i.e. such where all elements are the same number, which includes a sequence of one element as a partial case. The following rules are applied:
+
+* Central K-th moment, normalized or not normalized is 0, which rule also applies to
+  * standard error of the mean and population variance, standard deviation, skewness and kurtosis
+* Non-central not normalized K-th moment is the (any) element to the K-th power
+* Non-cental normalized K-th moment is not defined, **UT_ValueError** exception is raised
+* Central K-th / N-th cross-moment, normalized or not normalized is 0, which rule also applies to
+  * covariance, but not to Person's correlation coefficient r
+* Non-central not normalized K-th / N-th cross-moment is the (any) element of X data to the K-th power times the (any) element of Y data to N-th power
+* Non-cental normalized K-th / N-th cross-moment is not defined, **UT_ValueError** exception is raised
+
+The calculation of the Person's correlation coefficient r treats such edge cases differently:
+
+* If only one of the data sequences is contant, r = 0
+* If both sequences are constant, r = 1
+
+### API conventions
+
+The functions *GetMoment*() and *GetMoment2*() calculating the N-th moment and N-th / M-th cross-moment *by default* compute the non-central not normalized moments. This behaviour can be modified using two keyword-only boolean arguments *IsCentral* and *IsNormalized*. The both defaults to **False**; by passing *IsCentral* = **True** these functions are switched to the calculation of the central moments, and by passing *IsNormalized* = **True** the normalized moments are calculated. The both keyword arguments can be used simultaneously.
+
+All defined functions also support the keyword-only arguments *SkipFrames* (defaults to 1, should be a positive integer) and *DoCheck* (defaults to **True**, should be any data type, which can be used in the Boolean context). Both these arguments are used for the optimization purposes, and they are not supposed to be used by the end-clients of the module directly.
+
+The *SkipFrames* argument is used for truncation of the exception traceback (see module *base\_exceptions* in the library **introspection\_lib**) for the purposes of debuging and errors logging, when it is more important to find the place of the improper input data when to show all the path to where the exception is raised. Consider the previous example
+
+```python
+import statistics_lib.base_functions as bsf
+...
+#do something
+...
+#make faulty call
+try:
+    Mean = bsf.GetMean([1, 2.3, '1'])
+except (TypeError, ValueError) as err:
+    print(err.__class__.__name__, ':', err)
+    print(err.Traceback.Info)
+...
+```
+
+In this case the innermost frame shown in the traceback will be `Mean = bsf.GetMean([1, 2.3, '1'])`, whereas the internal process within th function *GetMean* will not be shown. If the same function is called inside another function as:
+
+```python
+import statistics_lib.base_functions as bsf
+
+def Wrapper(Data)
+  #do something
+  return bsf.GetMean(Data)
+...
+#make faulty call
+try:
+    Mean = Wrapper([1, 2.3, '1'])
+except (TypeError, ValueError) as err:
+    print(err.__class__.__name__, ':', err)
+    print(err.Traceback.Info)
+...
+```
+
+the shown frames will be `Mean = Wrapper([1, 2.3, '1'])` -> `return bsf.GetMean(Data)`. However, this behavior can be modified as:
+
+```python
+import statistics_lib.base_functions as bsf
+
+def Wrapper(Data):
+  #do something
+  return bsf.GetMean(Data, SkipFrames = 2)
+...
+#make faulty call
+try:
+    Mean = Wrapper([1, 2.3, '1'])
+except (TypeError, ValueError) as err:
+    print(err.__class__.__name__, ':', err)
+    print(err.Traceback.Info)
+...
+```
+
+in which case the traceback will be `Mean = Wrapper([1, 2.3, '1'])`. Such nesting (call chain) can be extended further as:
+
+```python
+import statistics_lib.base_functions as bsf
+
+def Outer(Data):
+  #do something
+  Temp = Inner(Data)
+  #do something
+
+def Inner(Data):
+  #do something
+  return bsf.GetMean(Data, SkipFrames = 3)
+...
+#make faulty call
+try:
+    Mean = Wrapper([1, 2.3, '1'])
+except (TypeError, ValueError) as err:
+    print(err.__class__.__name__, ':', err)
+    print(err.Traceback.Info)
+...
+```
+
+in which case the traceback will be `Mean = Outer([1, 2.3, '1'])`.
+
+The second keyword-only argument *DoCheck* is used only for the optimization as in avoiding redundant data sanity checks and convertion (i.e. extraction of the 'mean' values from a mixed sequence of real numbers and measurements with uncertainty). For instance, if the input data is quaranteed to be a sequence of only real numbers, the input data sanity check and conversion is not needed. Basically, if the functions are called from other functions or class methods, which already sanitized the data, it is better to pass *DoCheck* = **False**, which is beneficial for the calculation speed.
+
+**Note**, *DoCheck* = **False** should be passed only if the input is quaranteed to be a sequence of
+
+* only real numbers (**int** or **float**) - for all functions except *GetMeanSqrSE*() and *GetFullSE*()
+* a mixture of real numbers and 'measurements with uncertainty' - only for *GetMeanSqrSE*() and *GetFullSE*() functions
 
 ## API Reference
 
 ### Functions
 
-**GetMean**(Data)
+**GetMean**(Data, *, SkipFrames = 1, DoCheck = True)
 
 *Signature*:
 
-seq(type A) -> float
-
-*Raises*:
-
-* **UT_TypeError**: the passed argument is not a sequence, OR any of its elements is not a real number (int or float, 'is a' check) or an instance of 'real life measurement' class ('has a' check)
-* **UT_ValueError**: the passed sequence is empty
-
-*Description*:
-
-Calculates the arithmetic mean of a sequence, which can be a mix of int or float (real) numbers and instances of the 'real life measurements' class, i.e. the 2-tuples of the 'mean' value of a measurement and the associated measurement uncertainty.
-
-**GetMeanSquares**(Data)
-
-*Signature*:
-
-seq(type A) -> float
-
-*Raises*:
-
-* **UT_TypeError**: the passed argument is not a sequence, OR any of its elements is not a real number (int or float, 'is a' check) or an instance of 'real life measurement' class ('has a' check)
-* **UT_ValueError**: the passed sequence is empty
-
-*Description*:
-
-Calculates the arithmetic mean of the squares of the values in a sequence, which can be a mix of int or float (real) numbers and instances of the 'real life measurements' class, i.e. the 2-tuples of the 'mean' value of a measurement and the associated measurement uncertainty.
-
-**GetVariance**(Data)
-
-*Signature*:
-
-seq(type A) -> float
-
-*Raises*:
-
-* **UT_TypeError**: the passed argument is not a sequence, OR any of its elements is not a real number (int or float, 'is a' check) or an instance of 'real life measurement' class ('has a' check)
-* **UT_ValueError**: the passed sequence is empty
-
-*Description*:
-
-Calculates the variance of the values in a sequence (without the Bessel correction, i.e. assuming the sequence is the full population), which can be a mix of int or float (real) numbers and instances of the 'real life measurements' class, i.e. the 2-tuples of the 'mean' value of a measurement and the associated measurement uncertainty.
-
-**GetVarianceBessel**(Data)
-
-*Signature*:
-
-seq(type A) -> float
-
-*Raises*:
-
-* **UT_TypeError**: the passed argument is not a sequence, OR any of its elements is not a real number (int or float, 'is a' check) or an instance of 'real life measurement' class ('has a' check)
-* **UT_ValueError**: the passed sequence is shorter than 2 elements
-
-*Description*:
-
-Calculates the variance of the values in a sequence (with the Bessel correction, i.e. assuming the sequence is not full population), which can be a mix of int or float (real) numbers and instances of the 'real life measurements' class, i.e. the 2-tuples of the 'mean' value of a measurement and the associated measurement uncertainty.
-
-**GetStandardDeviation**(Data)
-
-*Signature*:
-
-seq(type A) -> float
-
-*Raises*:
-
-* **UT_TypeError**: the passed argument is not a sequence, OR any of its elements is not a real number (int or float, 'is a' check) or an instance of 'real life measurement' class ('has a' check)
-* **UT_ValueError**: the passed sequence is empty
-
-*Description*:
-
-Calculates the Std.Deviation of the values in a sequence (without the Bessel correction, i.e. assuming the sequence is the full population), which can be a mix of int or float (real) numbers and instances of the 'real life measurements' class, i.e. the 2-tuples of the 'mean' value of a measurement and the associated measurement uncertainty.
-
-**GetStandardDeviationBessel**(Data)
-
-*Signature*:
-
-seq(type A) -> float
-
-*Raises*:
-
-* **UT_TypeError**: the passed argument is not a sequence, OR any of its elements is not a real number (int or float, 'is a' check) or an instance of 'real life measurement' class ('has a' check)
-* **UT_ValueError**: the passed sequence is shorter than 2 elements
-
-*Description*:
-
-Calculates the Std.Deviation of the values in a sequence (with the Bessel correction, i.e. assuming the sequence is not full population), which can be a mix of int or float (real) numbers and instances of the 'real life measurements' class, i.e. the 2-tuples of the 'mean' value of a measurement and the associated measurement uncertainty.
-
-**GetStandardError**(Data)
-
-*Signature*:
-
-seq(type A) -> float
-
-*Raises*:
-
-* **UT_TypeError**: the passed argument is not a sequence, OR any of its elements is not a real number (int or float, 'is a' check) or an instance of 'real life measurement' class ('has a' check)
-* **UT_ValueError**: the passed sequence is empty
-
-*Description*:
-
-Calculates the standard error of the mean of the values in a sequence (without the Bessel correction, i.e. assuming the sequence is the full population) and without the acccount for the measurements uncertainties, which sequence can be a mix of int or float (real) numbers and instances of the 'real life measurements' class, i.e. the 2-tuples of the 'mean' value of a measurement and the associated measurement uncertainty.
-
-**GetFullStandardError**(Data)
-
-*Signature*:
-
-seq(type A) -> float
-
-*Raises*:
-
-* **UT_TypeError**: the passed argument is not a sequence, OR any of its elements is not a real number (int or float, 'is a' check) or an instance of 'real life measurement' class ('has a' check)
-* **UT_ValueError**: the passed sequence is empty
-
-*Description*:
-
-Calculates the standard error of the mean of the values in a sequence (without the Bessel correction, i.e. assuming the sequence is the full population) and including the individual measurements uncertainties, which sequence can be a mix of int or float (real) numbers and instances of the 'real life measurements' class, i.e. the 2-tuples of the 'mean' value of a measurement and the associated measurement uncertainty.
-
-**GetSkewness**(Data)
-
-*Signature*:
-
-seq(type A) -> float
-
-*Raises*:
-
-* **UT_TypeError**: the passed argument is not a sequence, OR any of its elements is not a real number (int or float, 'is a' check) or an instance of 'real life measurement' class ('has a' check)
-* **UT_ValueError**: the passed sequence is empty
-
-*Description*:
-
-Calculates the skewness of the values in a sequence (without the Bessel correction, i.e. assuming the sequence is the full population), which can be a mix of int or float (real) numbers and instances of the 'real life measurements' class, i.e. the 2-tuples of the 'mean' value of a measurement and the associated measurement uncertainty.
-
-**GetSkewnessBessel**(Data)
-
-*Signature*:
-
-seq(type A) -> float
-
-*Raises*:
-
-* **UT_TypeError**: the passed argument is not a sequence, OR any of its elements is not a real number (int or float, 'is a' check) or an instance of 'real life measurement' class ('has a' check)
-* **UT_ValueError**: the passed sequence is shorter than 3 elements
-
-*Description*:
-
-Calculates the skewness of the values in a sequence (with the Bessel correction, i.e. assuming the sequence is not full population), which can be a mix of int or float (real) numbers and instances of the 'real life measurements' class, i.e. the 2-tuples of the 'mean' value of a measurement and the associated measurement uncertainty.
-
-**GetKurtosis**(Data)
-
-*Signature*:
-
-seq(type A) -> float
-
-*Raises*:
-
-* **UT_TypeError**: the passed argument is not a sequence, OR any of its elements is not a real number (int or float, 'is a' check) or an instance of 'real life measurement' class ('has a' check)
-* **UT_ValueError**: the passed sequence is empty
-
-*Description*:
-
-Calculates the excess kurtosis of the values in a sequence (without the Bessel correction, i.e. assuming the sequence is the full population), which can be a mix of int or float (real) numbers and instances of the 'real life measurements' class, i.e. the 2-tuples of the 'mean' value of a measurement and the associated measurement uncertainty.
-
-**GetKurtosisBessel**(Data)
-
-*Signature*:
-
-seq(type A) -> float
-
-*Raises*:
-
-* **UT_TypeError**: the passed argument is not a sequence, OR any of its elements is not a real number (int or float, 'is a' check) or an instance of 'real life measurement' class ('has a' check)
-* **UT_ValueError**: the passed sequence is shorter than 4 elements
-
-*Description*:
-
-Calculates the excess kurtosis of the values in a sequence (with the Bessel correction, i.e. assuming the sequence is not full population), which can be a mix of int or float (real) numbers and instances of the 'real life measurements' class, i.e. the 2-tuples of the 'mean' value of a measurement and the associated measurement uncertainty.
-
-**GetMoment**(Data, N, *, IsCentral = True)
-
-*Signature*:
-
-seq(type A), int > 0 /, bool/ -> float
+seq(int OR float OR phyqus_lib.base_classes.MeasuredValue)/, *, int > 0, bool/ -> int OR float
 
 *Args*:
 
-* *Data*: seq(type A); the input data sequence, expected a mixture of real numbers and 'real life measurements' (mean + associated uncertainty)
-* *N*: int > 0; the power of the moment
-* *IsCentral*: (keyword) bool; flag if the central moment should be calculated, defaults to True
+* *Data*: **seq**(**int**0 OR **float** OR **phyqus_lib.base_classes.MeasuredValue**); a sequence of real numbers or 'measurements with uncertainty'
+* *SkipFrames*: (keyword) **int** > 0; how many frames to hide in the exception traceback, defaults to 1
+* *DoCheck*: (keyword) **bool**; flag if to perform the input data sanity check and convert the mixed sequence into a list of only real numbers
+
+*Returns*:
+
+**int** OR **float**: the calculated mean value
 
 *Raises*:
 
-* **UT_TypeError**: the passed argument is not a sequence, OR any of its elements is not a real number (int or float, 'is a' check) or an instance of 'real life measurement' class ('has a' check); OR the second passed argument is not an integer
-* **UT_ValueError**: the passed sequence is empty; OR the second passed argument is not positive
+* **UT_TypeError**: mandatory argument is not a sequence or real numbers or measurements with uncertainty, OR any keyword argument is of improper type
+* **UT_ValueError**: passed mandatory sequence is empty, OR any keyword argument is of the proper type but unacceptable value
 
 *Description*:
 
-Calculates the Nth moment of the values in a sequence (without the Bessel correction, i.e. assuming the sequence is the full population), which can be a mix of int or float (real) numbers and instances of the 'real life measurements' class, i.e. the 2-tuples of the 'mean' value of a measurement and the associated measurement uncertainty. By default, the central moment is calculated, pass keyword argument *IsCentral = False* explicitely to calculate a non-central moment.
+Calculates the arithmetic mean of a mixed sequence of real numbers and the measurements with uncertainty.
 
-**GetCovariance**(DataX, DataY)
+**GetVarianceP**(Data, *, SkipFrames = 1, DoCheck = True)
 
 *Signature*:
 
-seq(type A), seq(type A) -> float
+seq(int OR float OR phyqus_lib.base_classes.MeasuredValue)/, *, int > 0, bool/ -> int OR float
 
 *Args*:
 
-* *DataX*: seq(type A); the input data sequence, expected a mixture of real numbers and 'real life measurements' (mean + associated uncertainty) - the first data set sequence
-* *DataY*: seq(type A); the input data sequence, expected a mixture of real numbers and 'real life measurements' (mean + associated uncertainty) - the second data set sequence
+* *Data*: **seq**(**int**0 OR **float** OR **phyqus_lib.base_classes.MeasuredValue**); a sequence of real numbers or 'measurements with uncertainty'
+* *SkipFrames*: (keyword) **int** > 0; how many frames to hide in the exception traceback, defaults to 1
+* *DoCheck*: (keyword) **bool**; flag if to perform the input data sanity check and convert the mixed sequence into a list of only real numbers
+
+*Returns*:
+
+**int** OR **float**: the calculated variance value
 
 *Raises*:
 
-* **UT_TypeError**: any of the passed data sets is not a sequence, OR any of their elements is not a real number (int or float, 'is a' check) or an instance of 'real life measurement' class ('has a' check)
-* **UT_ValueError**: any of the passed sequence is empty, OR their lengths are not equal
+* **UT_TypeError**: mandatory argument is not a sequence or real numbers or measurements with uncertainty, OR any keyword argument is of improper type
+* **UT_ValueError**: passed mandatory sequence is empty, OR any keyword argument is of the proper type but unacceptable value
 
 *Description*:
 
-Calculates the covariance of the values in two data sets (without the Bessel correction, i.e. assuming the sequence is the full population), which can be a mix of int or float (real) numbers and instances of the 'real life measurements' class, i.e. the 2-tuples of the 'mean' value of a measurement and the associated measurement uncertainty.
+Calculates the population variance of a mixed sequence of real numbers and the measurements with uncertainty.
 
-**GetMoment2**(DataX, DataY, NX, NY, *, IsCentral = True)
+**GetStdevP**(Data, *, SkipFrames = 1, DoCheck = True)
 
 *Signature*:
 
-seq(type A), seq(type A), int > 0, int > 0 /, bool/ -> float
+seq(int OR float OR phyqus_lib.base_classes.MeasuredValue)/, *, int > 0, bool/ -> int OR float
 
 *Args*:
 
-* *DataX*: seq(type A); the input data sequence, expected a mixture of real numbers and 'real life measurements' (mean + associated uncertainty) - the first data set sequence
-* *DataY*: seq(type A); the input data sequence, expected a mixture of real numbers and 'real life measurements' (mean + associated uncertainty) - the second data set sequence
-* *NX*: int > 0; the power of the moment for X data set
-* *NY*: int > 0; the power of the moment for Y data set
-* *IsCentral*: (keyword) bool; flag if the central moment should be calculated, defaults to True
+* *Data*: **seq**(**int**0 OR **float** OR **phyqus_lib.base_classes.MeasuredValue**); a sequence of real numbers or 'measurements with uncertainty'
+* *SkipFrames*: (keyword) **int** > 0; how many frames to hide in the exception traceback, defaults to 1
+* *DoCheck*: (keyword) **bool**; flag if to perform the input data sanity check and convert the mixed sequence into a list of only real numbers
+
+*Returns*:
+
+**int** OR **float**: the calculated standard deviation value
 
 *Raises*:
 
-* **UT_TypeError**: any of the passed data sets is not a sequence, OR any of their elements is not a real number (int or float, 'is a' check) or an instance of 'real life measurement' class ('has a' check), OR any of the passed powers in not integer
-* **UT_ValueError**: any of the passed sequence is empty, OR their lengths are not equal, OR any of the passed powers is not positive
+* **UT_TypeError**: mandatory argument is not a sequence or real numbers or measurements with uncertainty, OR any keyword argument is of improper type
+* **UT_ValueError**: passed mandatory sequence is empty, OR any keyword argument is of the proper type but unacceptable value
 
 *Description*:
 
-Calculates the Nth-Mth moment of the values in two data sets (without the Bessel correction, i.e. assuming the sequence is the full population), which can be a mix of int or float (real) numbers and instances of the 'real life measurements' class, i.e. the 2-tuples of the 'mean' value of a measurement and the associated measurement uncertainty. By default, the central moment is calculated, pass keyword argument *IsCentral = False* explicitely to calculate a non-central moment.
+Calculates the population standard deviation of a mixed sequence of real numbers and the measurements with uncertainty.
 
-**GetPearsonR**(DataX, DataY)
+**GetVarianceS**(Data, *, SkipFrames = 1, DoCheck = True)
 
 *Signature*:
 
-seq(type A), seq(type A) -> float
+seq(int OR float OR phyqus_lib.base_classes.MeasuredValue)/, *, int > 0, bool/ -> int OR float
 
 *Args*:
 
-* *DataX*: seq(type A); the input data sequence, expected a mixture of real numbers and 'real life measurements' (mean + associated uncertainty) - the first data set sequence
-* *DataY*: seq(type A); the input data sequence, expected a mixture of real numbers and 'real life measurements' (mean + associated uncertainty) - the second data set sequence
+* *Data*: **seq**(**int**0 OR **float** OR **phyqus_lib.base_classes.MeasuredValue**); a sequence of real numbers or 'measurements with uncertainty'
+* *SkipFrames*: (keyword) **int** > 0; how many frames to hide in the exception traceback, defaults to 1
+* *DoCheck*: (keyword) **bool**; flag if to perform the input data sanity check and convert the mixed sequence into a list of only real numbers
+
+*Returns*:
+
+**int** OR **float**: the calculated variance (with Bessel correction) value
 
 *Raises*:
 
-* **UT_TypeError**: any of the passed data sets is not a sequence, OR any of their elements is not a real number (int or float, 'is a' check) or an instance of 'real life measurement' class ('has a' check)
-* **UT_ValueError**: any of the passed sequence is empty, OR their lengths are not equal
+* **UT_TypeError**: mandatory argument is not a sequence or real numbers or measurements with uncertainty, OR any keyword argument is of improper type
+* **UT_ValueError**: passed mandatory sequence is less then 2 elements long, OR any keyword argument is of the proper type but unacceptable value
 
 *Description*:
 
-Calculates the Pearson's coefficient of correlation r of the values in two data sets (without the Bessel correction, i.e. assuming the sequence is the full population), which can be a mix of int or float (real) numbers and instances of the 'real life measurements' class, i.e. the 2-tuples of the 'mean' value of a measurement and the associated measurement uncertainty.
+Calculates the sample variance with Bessel correction of a mixed sequence of real numbers and the measurements with uncertainty.
+
+**GetStdevS**(Data, *, SkipFrames = 1, DoCheck = True)
+
+*Signature*:
+
+seq(int OR float OR phyqus_lib.base_classes.MeasuredValue)/, *, int > 0, bool/ -> int OR float
+
+*Args*:
+
+* *Data*: **seq**(**int**0 OR **float** OR **phyqus_lib.base_classes.MeasuredValue**); a sequence of real numbers or 'measurements with uncertainty'
+* *SkipFrames*: (keyword) **int** > 0; how many frames to hide in the exception traceback, defaults to 1
+* *DoCheck*: (keyword) **bool**; flag if to perform the input data sanity check and convert the mixed sequence into a list of only real numbers
+
+*Returns*:
+
+**int** OR **float**: the calculated standard deviation (with Bessel correction) value
+
+*Raises*:
+
+* **UT_TypeError**: mandatory argument is not a sequence or real numbers or measurements with uncertainty, OR any keyword argument is of improper type
+* **UT_ValueError**: passed mandatory sequence is less than 2 elements long, OR any keyword argument is of the proper type but unacceptable value
+
+*Description*:
+
+Calculates the sample standard deviation with Bessel correction of a mixed sequence of real numbers and the measurements with uncertainty.
+
+**GetSE**(Data, *, SkipFrames = 1, DoCheck = True)
+
+*Signature*:
+
+seq(int OR float OR phyqus_lib.base_classes.MeasuredValue)/, *, int > 0, bool/ -> int OR float
+
+*Args*:
+
+* *Data*: **seq**(**int**0 OR **float** OR **phyqus_lib.base_classes.MeasuredValue**); a sequence of real numbers or 'measurements with uncertainty'
+* *SkipFrames*: (keyword) **int** > 0; how many frames to hide in the exception traceback, defaults to 1
+* *DoCheck*: (keyword) **bool**; flag if to perform the input data sanity check and convert the mixed sequence into a list of only real numbers
+
+*Returns*:
+
+**int** OR **float**: the calculated standard error value
+
+*Raises*:
+
+* **UT_TypeError**: mandatory argument is not a sequence or real numbers or measurements with uncertainty, OR any keyword argument is of improper type
+* **UT_ValueError**: passed mandatory sequence is empty, OR any keyword argument is of the proper type but unacceptable value
+
+*Description*:
+
+Calculates the standard error of the mean of a mixed sequence of real numbers and the measurements with uncertainty.
+
+**GetMeanSqrSE**(Data, *, SkipFrames = 1, DoCheck = True)
+
+*Signature*:
+
+seq(int OR float OR phyqus_lib.base_classes.MeasuredValue)/, *, int > 0, bool/ -> int OR float
+
+*Args*:
+
+* *Data*: **seq**(**int**0 OR **float** OR **phyqus_lib.base_classes.MeasuredValue**); a sequence of real numbers or 'measurements with uncertainty'
+* *SkipFrames*: (keyword) **int** > 0; how many frames to hide in the exception traceback, defaults to 1
+* *DoCheck*: (keyword) **bool**; flag if to perform the input data sanity check and convert the mixed sequence into a list of only real numbers
+
+*Returns*:
+
+**int** OR **float**: the calculated mean squared uncertainty value
+
+*Raises*:
+
+* **UT_TypeError**: mandatory argument is not a sequence or real numbers or measurements with uncertainty, OR any keyword argument is of improper type
+* **UT_ValueError**: passed mandatory sequence is empty, OR any keyword argument is of the proper type but unacceptable value
+
+*Description*:
+
+Calculates the mean squared uncertainty of a mixed sequence of real numbers and the measurements with uncertainty.
+
+**GetFullSE**(Data, *, SkipFrames = 1, DoCheck = True)
+
+*Signature*:
+
+seq(int OR float OR phyqus_lib.base_classes.MeasuredValue)/, *, int > 0, bool/ -> int OR float
+
+*Args*:
+
+* *Data*: **seq**(**int**0 OR **float** OR **phyqus_lib.base_classes.MeasuredValue**); a sequence of real numbers or 'measurements with uncertainty'
+* *SkipFrames*: (keyword) **int** > 0; how many frames to hide in the exception traceback, defaults to 1
+* *DoCheck*: (keyword) **bool**; flag if to perform the input data sanity check and convert the mixed sequence into a list of only real numbers
+
+*Returns*:
+
+**int** OR **float**: the calculated full uncertainty of the mean value
+
+*Raises*:
+
+* **UT_TypeError**: mandatory argument is not a sequence or real numbers or measurements with uncertainty, OR any keyword argument is of improper type
+* **UT_ValueError**: passed mandatory sequence is empty, OR any keyword argument is of the proper type but unacceptable value
+
+*Description*:
+
+Calculates the full uncertainty of the mean of a mixed sequence of real numbers and the measurements with uncertainty.
+
+**GetMoment**(Data, Power, *, IsCentral = False, IsNormalized = False, SkipFrames = 1, DoCheck = True)
+
+*Signature*:
+
+seq(int OR float OR phyqus_lib.base_classes.MeasuredValue), int > 0/, *, bool, bool, int > 0, bool/ -> int OR float
+
+*Args*:
+
+* *Data*: **seq**(**int**0 OR **float** OR **phyqus_lib.base_classes.MeasuredValue**); a sequence of real numbers or 'measurements with uncertainty'
+* *Power*: **int** > 0; the moment power
+* *IsCentral*: (keyword) **bool**; is the central moment is to be calculated, defaults to False
+* *IsNormalized*: (keyword) **bool**; is the normalized moment is to be calculated, defaults to False
+* *SkipFrames*: (keyword) **int** > 0; how many frames to hide in the exception traceback, defaults to 1
+* *DoCheck*: (keyword) **bool**; flag if to perform the input data sanity check and convert the mixed sequence into a list of only real numbers
+
+*Returns*:
+
+**int** OR **float**: the calculated full uncertainty of the mean value
+
+*Raises*:
+
+* **UT_TypeError**: mandatory argument is not a sequence or real numbers or measurements with uncertainty, OR the moment power is not an integer number, OR any keyword argument is of improper type
+* **UT_ValueError**: passed mandatory sequence is empty, OR the moment power is zero or negative integer, OR any keyword argument is of the proper type but unacceptable value
+
+*Description*:
+
+Calculates the generic N-th moment of a mixed sequence of real numbers and the measurements with uncertainty, which can be central or non-central, normailized or not normalized, depending on the values of the keyword arguments.
+
+**GetSkewnessP**(Data, *, SkipFrames = 1, DoCheck = True)
+
+*Signature*:
+
+seq(int OR float OR phyqus_lib.base_classes.MeasuredValue)/, *, int > 0, bool/ -> int OR float
+
+*Args*:
+
+* *Data*: **seq**(**int**0 OR **float** OR **phyqus_lib.base_classes.MeasuredValue**); a sequence of real numbers or 'measurements with uncertainty'
+* *SkipFrames*: (keyword) **int** > 0; how many frames to hide in the exception traceback, defaults to 1
+* *DoCheck*: (keyword) **bool**; flag if to perform the input data sanity check and convert the mixed sequence into a list of only real numbers
+
+*Returns*:
+
+**int** OR **float**: the calculated skewness value
+
+*Raises*:
+
+* **UT_TypeError**: mandatory argument is not a sequence or real numbers or measurements with uncertainty, OR any keyword argument is of improper type
+* **UT_ValueError**: passed mandatory sequence is empty, OR any keyword argument is of the proper type but unacceptable value
+
+*Description*:
+
+Calculates the population skewness of a mixed sequence of real numbers and the measurements with uncertainty.
+
+**GetSkewnessS**(Data, *, SkipFrames = 1, DoCheck = True)
+
+*Signature*:
+
+seq(int OR float OR phyqus_lib.base_classes.MeasuredValue)/, *, int > 0, bool/ -> int OR float
+
+*Args*:
+
+* *Data*: **seq**(**int**0 OR **float** OR **phyqus_lib.base_classes.MeasuredValue**); a sequence of real numbers or 'measurements with uncertainty'
+* *SkipFrames*: (keyword) **int** > 0; how many frames to hide in the exception traceback, defaults to 1
+* *DoCheck*: (keyword) **bool**; flag if to perform the input data sanity check and convert the mixed sequence into a list of only real numbers
+
+*Returns*:
+
+**int** OR **float**: the calculated skewness (with Bessel correction) value
+
+*Raises*:
+
+* **UT_TypeError**: mandatory argument is not a sequence or real numbers or measurements with uncertainty, OR any keyword argument is of improper type
+* **UT_ValueError**: passed mandatory sequence is less than 3 elements long, OR any keyword argument is of the proper type but unacceptable value
+
+*Description*:
+
+Calculates the sample skewness with the Bessel correction of a mixed sequence of real numbers and the measurements with uncertainty.
+
+**GetKurtosisP**(Data, *, SkipFrames = 1, DoCheck = True)
+
+*Signature*:
+
+seq(int OR float OR phyqus_lib.base_classes.MeasuredValue)/, *, int > 0, bool/ -> int OR float
+
+*Args*:
+
+* *Data*: **seq**(**int**0 OR **float** OR **phyqus_lib.base_classes.MeasuredValue**); a sequence of real numbers or 'measurements with uncertainty'
+* *SkipFrames*: (keyword) **int** > 0; how many frames to hide in the exception traceback, defaults to 1
+* *DoCheck*: (keyword) **bool**; flag if to perform the input data sanity check and convert the mixed sequence into a list of only real numbers
+
+*Returns*:
+
+**int** OR **float**: the calculated excess kurtosis value
+
+*Raises*:
+
+* **UT_TypeError**: mandatory argument is not a sequence or real numbers or measurements with uncertainty, OR any keyword argument is of improper type
+* **UT_ValueError**: passed mandatory sequence is empty, OR any keyword argument is of the proper type but unacceptable value
+
+*Description*:
+
+Calculates the population excess kurtosis of a mixed sequence of real numbers and the measurements with uncertainty.
+
+**GetKurtosisS**(Data, *, SkipFrames = 1, DoCheck = True)
+
+*Signature*:
+
+seq(int OR float OR phyqus_lib.base_classes.MeasuredValue)/, *, int > 0, bool/ -> int OR float
+
+*Args*:
+
+* *Data*: **seq**(**int**0 OR **float** OR **phyqus_lib.base_classes.MeasuredValue**); a sequence of real numbers or 'measurements with uncertainty'
+* *SkipFrames*: (keyword) **int** > 0; how many frames to hide in the exception traceback, defaults to 1
+* *DoCheck*: (keyword) **bool**; flag if to perform the input data sanity check and convert the mixed sequence into a list of only real numbers
+
+*Returns*:
+
+**int** OR **float**: the calculated excess kurtosis (with Bessel correction) value
+
+*Raises*:
+
+* **UT_TypeError**: mandatory argument is not a sequence or real numbers or measurements with uncertainty, OR any keyword argument is of improper type
+* **UT_ValueError**: passed mandatory sequence is less than 4 elements long, OR any keyword argument is of the proper type but unacceptable value
+
+*Description*:
+
+Calculates the sample excess kurtosis with the Bessel correction of a mixed sequence of real numbers and the measurements with uncertainty.
+
+**GetCovariance**(DataX, DataY, *, SkipFrames = 1, DoCheck = True)
+
+*Signature*:
+
+seq(int OR float OR phyqus_lib.base_classes.MeasuredValue), seq(int OR float OR phyqus_lib.base_classes.MeasuredValue)/, *, int > 0, bool/ -> int OR float
+
+*Args*:
+
+* *DataX*: **seq**(**int**0 OR **float** OR **phyqus_lib.base_classes.MeasuredValue**); a sequence of real numbers or 'measurements with uncertainty' as X data sequence
+* *DataY*: **seq**(**int**0 OR **float** OR **phyqus_lib.base_classes.MeasuredValue**); a sequence of real numbers or 'measurements with uncertainty' as Y data sequence
+* *SkipFrames*: (keyword) **int** > 0; how many frames to hide in the exception traceback, defaults to 1
+* *DoCheck*: (keyword) **bool**; flag if to perform the input data sanity check and convert the mixed sequence into a list of only real numbers
+
+*Returns*:
+
+**int** OR **float**: the calculated covariance value
+
+*Raises*:
+
+* **UT_TypeError**: any of mandatory data arguments is not a sequence or real numbers or measurements with uncertainty, OR any keyword argument is of improper type
+* **UT_ValueError**: any of the passed mandatory sequence is empty, OR any keyword argument is of the proper type but unacceptable value, OR the X and Y sequences are of different length
+
+*Description*:
+
+Calculates the covariance of the paired  mixed sequences of real numbers and the measurements with uncertainty.
+
+**GetMoment2**(DataX, DataY, PowerX, PowerY *, IsCentral = False, IsNormalized = False, SkipFrames = 1, DoCheck = True)
+
+*Signature*:
+
+seq(int OR float OR phyqus_lib.base_classes.MeasuredValue), seq(int OR float OR phyqus_lib.base_classes.MeasuredValue)/, *, int > 0, bool/ -> int OR float
+
+*Args*:
+
+* *DataX*: **seq**(**int**0 OR **float** OR **phyqus_lib.base_classes.MeasuredValue**); a sequence of real numbers or 'measurements with uncertainty' as X data sequence
+* *DataY*: **seq**(**int**0 OR **float** OR **phyqus_lib.base_classes.MeasuredValue**); a sequence of real numbers or 'measurements with uncertainty' as Y data sequence
+* *PowerX*: **int** > 0; the moment power of X
+* *PowerY*: **int** > 0; the moment power of Y
+* *IsCentral*: (keyword) **bool**; is the central moment is to be calculated, defaults to False
+* *IsNormalized*: (keyword) **bool**; is the normalized moment is to be calculated, defaults to False
+* *SkipFrames*: (keyword) **int** > 0; how many frames to hide in the exception traceback, defaults to 1
+* *DoCheck*: (keyword) **bool**; flag if to perform the input data sanity check and convert the mixed sequence into a list of only real numbers
+
+*Returns*:
+
+**int** OR **float**: the calculated moment value
+
+*Raises*:
+
+* **UT_TypeError**: any of mandatory data arguments is not a sequence or real numbers or measurements with uncertainty OR any moment power is not an integer number, OR any keyword argument is of improper type
+* **UT_ValueError**: any of the passed mandatory sequence is empty, OR any moment power is zero or negative integer, OR any keyword argument is of the proper type but unacceptable value, OR the X and Y sequences are of different length
+
+*Description*:
+
+Calculates the generic N-th / M-th moment of the paired mixed sequences of real numbers and the measurements with uncertainty, which can be central or non-central, normailized or not normalized, depending on the values of the keyword arguments.
+
+**GetPearsonR**(DataX, DataY, *, SkipFrames = 1, DoCheck = True)
+
+*Signature*:
+
+seq(int OR float OR phyqus_lib.base_classes.MeasuredValue), seq(int OR float OR phyqus_lib.base_classes.MeasuredValue)/, *, int > 0, bool/ -> int OR float
+
+*Args*:
+
+* *DataX*: **seq**(**int**0 OR **float** OR **phyqus_lib.base_classes.MeasuredValue**); a sequence of real numbers or 'measurements with uncertainty' as X data sequence
+* *DataY*: **seq**(**int**0 OR **float** OR **phyqus_lib.base_classes.MeasuredValue**); a sequence of real numbers or 'measurements with uncertainty' as Y data sequence
+* *SkipFrames*: (keyword) **int** > 0; how many frames to hide in the exception traceback, defaults to 1
+* *DoCheck*: (keyword) **bool**; flag if to perform the input data sanity check and convert the mixed sequence into a list of only real numbers
+
+*Returns*:
+
+**int** OR **float**: the calculated covariance value
+
+*Raises*:
+
+* **UT_TypeError**: any of mandatory data arguments is not a sequence or real numbers or measurements with uncertainty, OR any keyword argument is of improper type
+* **UT_ValueError**: any of the passed mandatory sequence is empty, OR any keyword argument is of the proper type but unacceptable value, OR the X and Y sequences are of different length
+
+*Description*:
+
+Calculates the Pearson`s correlation coefficient r of real numbers and the measurements with uncertainty.

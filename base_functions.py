@@ -15,53 +15,57 @@ population.
 
 Functions:
     GetMean(Data, *, SkipFrames = 1, DoCheck = True)
-        list(int OR float OR phyqus_lib.base_classes.MeasureValue)/, *, int > 0,
+        seq(int OR float OR phyqus_lib.base_classes.MeasuredValue)/, *, int > 0,
             bool/ -> int OR float
     GetVarianceP(Data, *, SkipFrames = 1, DoCheck = True)
-        list(int OR float OR phyqus_lib.base_classes.MeasureValue)/, *, int > 0,
+        seq(int OR float OR phyqus_lib.base_classes.MeasuredValue)/, *, int > 0,
             bool/ -> int OR float
     GetStdevP(Data, *, SkipFrames = 1, DoCheck = True)
-        list(int OR float OR phyqus_lib.base_classes.MeasureValue)/, *, int > 0,
+        seq(int OR float OR phyqus_lib.base_classes.MeasuredValue)/, *, int > 0,
             bool/ -> int OR float
     GetVarianceS(Data, *, SkipFrames = 1, DoCheck = True)
-        list(int OR float OR phyqus_lib.base_classes.MeasureValue)/, *, int > 0,
+        seq(int OR float OR phyqus_lib.base_classes.MeasuredValue)/, *, int > 0,
             bool/ -> int OR float
     GetStdevS(Data, *, SkipFrames = 1, DoCheck = True)
-        list(int OR float OR phyqus_lib.base_classes.MeasureValue)/, *, int > 0,
+        seq(int OR float OR phyqus_lib.base_classes.MeasuredValue)/, *, int > 0,
             bool/ -> int OR float
     GetSE(Data, *, SkipFrames = 1, DoCheck = True)
-        list(int OR float OR phyqus_lib.base_classes.MeasureValue)/, *, int > 0,
+        seq(int OR float OR phyqus_lib.base_classes.MeasuredValue)/, *, int > 0,
             bool/ -> int OR float
     GetMeanSqrSE(Data, *, SkipFrames = 1, DoCheck = True)
-        list(int OR float OR phyqus_lib.base_classes.MeasureValue)/, *, int > 0,
+        seq(int OR float OR phyqus_lib.base_classes.MeasuredValue)/, *, int > 0,
             bool/ -> int OR float
     GetFullSE(Data, *, SkipFrames = 1, DoCheck = True)
-        list(int OR float OR phyqus_lib.base_classes.MeasureValue)/, *, int > 0,
+        seq(int OR float OR phyqus_lib.base_classes.MeasuredValue)/, *, int > 0,
             bool/ -> int OR float
-    GetMoment(Data, Power, *, SkipFrames = 1, DoCheck = True)
-        list(int OR float OR phyqus_lib.base_classes.MeasureValue)/, int > 0,
-            *, int > 0, bool/ -> int OR float
+    GetMoment(Data, Power, *, IsCentral = False, IsNormalized = False,
+                                                SkipFrames = 1, DoCheck = True)
+        seq(int OR float OR phyqus_lib.base_classes.MeasuredValue), int > 0/,
+            *, bool, bool, int > 0, bool/ -> int OR float
     GetSkewnessP(Data, *, SkipFrames = 1, DoCheck = True)
-        list(int OR float OR phyqus_lib.base_classes.MeasureValue)/, *, int > 0,
+        seq(int OR float OR phyqus_lib.base_classes.MeasuredValue)/, *, int > 0,
             bool/ -> int OR float
     GetSkewnessS(Data, *, SkipFrames = 1, DoCheck = True)
-        list(int OR float OR phyqus_lib.base_classes.MeasureValue)/, *, int > 0,
+        seq(int OR float OR phyqus_lib.base_classes.MeasuredValue)/, *, int > 0,
             bool/ -> int OR float
     GetKurtosisP(Data, *, SkipFrames = 1, DoCheck = True)
-        list(int OR float OR phyqus_lib.base_classes.MeasureValue)/, *, int > 0,
+        seq(int OR float OR phyqus_lib.base_classes.MeasuredValue)/, *, int > 0,
             bool/ -> int OR float
     GetKurtosisS(Data, *, SkipFrames = 1, DoCheck = True)
-        list(int OR float OR phyqus_lib.base_classes.MeasureValue)/, *, int > 0,
+        seq(int OR float OR phyqus_lib.base_classes.MeasuredValue)/, *, int > 0,
             bool/ -> int OR float
     GetCovariance(DataX, DataY, *, SkipFrames = 1, DoCheck = True)
-        list(int OR float OR phyqus_lib.base_classes.MeasureValue)/,
-            list(int OR float OR phyqus_lib.base_classes.MeasureValue)/,
+        seq(int OR float OR phyqus_lib.base_classes.MeasuredValue)/,
+            seq(int OR float OR phyqus_lib.base_classes.MeasuredValue)/,
                 *, int > 0, bool/ -> int OR float
     GetMoment2(DataX, DataY, PowerX, PowerY, *, IsCentral = False,
                         IsNormalized = False, SkipFrames = 1, DoCheck = True)
+        seq(int OR float OR phyqus_lib.base_classes.MeasuredValue),
+            seq(int OR float OR phyqus_lib.base_classes.MeasuredValue),
+                int > 0, int > 0/, *, bool, bool, int > 0, bool/ -> int OR float
     GetPearsonR(DataX, DataY, *, SkipFrames = 1, DoCheck = True)
-        list(int OR float OR phyqus_lib.base_classes.MeasureValue)/,
-            list(int OR float OR phyqus_lib.base_classes.MeasureValue)/,
+        seq(int OR float OR phyqus_lib.base_classes.MeasuredValue)/,
+            seq(int OR float OR phyqus_lib.base_classes.MeasuredValue)/,
                 *, int > 0, bool/ -> int OR float
 """
 
@@ -174,11 +178,11 @@ def _ExtractMeans(Data: TGenericSequence, *, SkipFrames: int = 1,
     zero uncertainty.
 
     Signature:
-        list(int OR float OR phyqus_lib.base_classes.MeasureValue)/, *, int > 0,
+        seq(int OR float OR phyqus_lib.base_classes.MeasuredValue)/, *, int > 0,
             bool/ -> list(int OR float)
     
     Args:
-        Data: list(int OR float OR phyqus_lib.base_classes.MeasureValue); a
+        Data: seq(int OR float OR phyqus_lib.base_classes.MeasuredValue); a
             sequence of real numbers or 'measurements with uncertainty'
         SkipFrames: (keyword) int > 0; how many frames to hide in the
             exception traceback, defaults to 1
@@ -216,11 +220,11 @@ def _ExtractErrors(Data: TGenericSequence, *, SkipFrames: int = 1,
     zero uncertainty.
 
     Signature:
-        list(int OR float OR phyqus_lib.base_classes.MeasureValue)/, *, int > 0,
+        seq(int OR float OR phyqus_lib.base_classes.MeasuredValue)/, *, int > 0,
             bool/ -> list(int OR float)
     
     Args:
-        Data: list(int OR float OR phyqus_lib.base_classes.MeasureValue); a
+        Data: seq(int OR float OR phyqus_lib.base_classes.MeasuredValue); a
             sequence of real numbers or 'measurements with uncertainty'
         SkipFrames: (keyword) int > 0; how many frames to hide in the
             exception traceback, defaults to 1
@@ -261,11 +265,11 @@ def GetMean(Data: TGenericSequence, *, SkipFrames: int = 1,
     measurements with uncertainty.
 
     Signature:
-        list(int OR float OR phyqus_lib.base_classes.MeasureValue)/, *, int > 0,
+        seq(int OR float OR phyqus_lib.base_classes.MeasuredValue)/, *, int > 0,
             bool/ -> int OR float
     
     Args:
-        Data: list(int OR float OR phyqus_lib.base_classes.MeasureValue); a
+        Data: seq(int OR float OR phyqus_lib.base_classes.MeasuredValue); a
             sequence of real numbers or 'measurements with uncertainty'
         SkipFrames: (keyword) int > 0; how many frames to hide in the
             exception traceback, defaults to 1
@@ -302,11 +306,11 @@ def GetVarianceP(Data: TGenericSequence, *, SkipFrames: int = 1,
     the measurements with uncertainty.
 
     Signature:
-        list(int OR float OR phyqus_lib.base_classes.MeasureValue)/, *, int > 0,
+        seq(int OR float OR phyqus_lib.base_classes.MeasuredValue)/, *, int > 0,
             bool/ -> int OR float
     
     Args:
-        Data: list(int OR float OR phyqus_lib.base_classes.MeasureValue); a
+        Data: seq(int OR float OR phyqus_lib.base_classes.MeasuredValue); a
             sequence of real numbers or 'measurements with uncertainty'
         SkipFrames: (keyword) int > 0; how many frames to hide in the
             exception traceback, defaults to 1
@@ -344,11 +348,11 @@ def GetStdevP(Data: TGenericSequence, *, SkipFrames: int = 1,
     numbers and the measurements with uncertainty.
 
     Signature:
-        list(int OR float OR phyqus_lib.base_classes.MeasureValue)/, *, int > 0,
+        seq(int OR float OR phyqus_lib.base_classes.MeasuredValue)/, *, int > 0,
             bool/ -> int OR float
     
     Args:
-        Data: list(int OR float OR phyqus_lib.base_classes.MeasureValue); a
+        Data: seq(int OR float OR phyqus_lib.base_classes.MeasuredValue); a
             sequence of real numbers or 'measurements with uncertainty'
         SkipFrames: (keyword) int > 0; how many frames to hide in the
             exception traceback, defaults to 1
@@ -384,11 +388,11 @@ def GetVarianceS(Data: TGenericSequence, *, SkipFrames: int = 1,
     the measurements with uncertainty.
 
     Signature:
-        list(int OR float OR phyqus_lib.base_classes.MeasureValue)/, *, int > 0,
+        seq(int OR float OR phyqus_lib.base_classes.MeasuredValue)/, *, int > 0,
             bool/ -> int OR float
     
     Args:
-        Data: list(int OR float OR phyqus_lib.base_classes.MeasureValue); a
+        Data: seq(int OR float OR phyqus_lib.base_classes.MeasuredValue); a
             sequence of real numbers or 'measurements with uncertainty'
         SkipFrames: (keyword) int > 0; how many frames to hide in the
             exception traceback, defaults to 1
@@ -429,11 +433,11 @@ def GetStdevS(Data: TGenericSequence, *, SkipFrames: int = 1,
     numbers and the measurements with uncertainty.
 
     Signature:
-        list(int OR float OR phyqus_lib.base_classes.MeasureValue)/, *, int > 0,
+        seq(int OR float OR phyqus_lib.base_classes.MeasuredValue)/, *, int > 0,
             bool/ -> int OR float
     
     Args:
-        Data: list(int OR float OR phyqus_lib.base_classes.MeasureValue); a
+        Data: seq(int OR float OR phyqus_lib.base_classes.MeasuredValue); a
             sequence of real numbers or 'measurements with uncertainty'
         SkipFrames: (keyword) int > 0; how many frames to hide in the
             exception traceback, defaults to 1
@@ -469,11 +473,11 @@ def GetSE(Data: TGenericSequence, *, SkipFrames: int = 1,
     numbers and the measurements with uncertainty.
 
     Signature:
-        list(int OR float OR phyqus_lib.base_classes.MeasureValue)/, *, int > 0,
+        seq(int OR float OR phyqus_lib.base_classes.MeasuredValue)/, *, int > 0,
             bool/ -> int OR float
     
     Args:
-        Data: list(int OR float OR phyqus_lib.base_classes.MeasureValue); a
+        Data: seq(int OR float OR phyqus_lib.base_classes.MeasuredValue); a
             sequence of real numbers or 'measurements with uncertainty'
         SkipFrames: (keyword) int > 0; how many frames to hide in the
             exception traceback, defaults to 1
@@ -509,11 +513,11 @@ def GetMeanSqrSE(Data: TGenericSequence, *, SkipFrames: int = 1,
     numbers and the measurements with uncertainty.
 
     Signature:
-        list(int OR float OR phyqus_lib.base_classes.MeasureValue)/, *, int > 0,
+        seq(int OR float OR phyqus_lib.base_classes.MeasuredValue)/, *, int > 0,
             bool/ -> int OR float
     
     Args:
-        Data: list(int OR float OR phyqus_lib.base_classes.MeasureValue); a
+        Data: seq(int OR float OR phyqus_lib.base_classes.MeasuredValue); a
             sequence of real numbers or 'measurements with uncertainty'
         SkipFrames: (keyword) int > 0; how many frames to hide in the
             exception traceback, defaults to 1
@@ -547,11 +551,11 @@ def GetFullSE(Data: TGenericSequence, *, SkipFrames: int = 1,
     numbers and the measurements with uncertainty.
 
     Signature:
-        list(int OR float OR phyqus_lib.base_classes.MeasureValue)/, *, int > 0,
+        seq(int OR float OR phyqus_lib.base_classes.MeasuredValue)/, *, int > 0,
             bool/ -> int OR float
     
     Args:
-        Data: list(int OR float OR phyqus_lib.base_classes.MeasureValue); a
+        Data: seq(int OR float OR phyqus_lib.base_classes.MeasuredValue); a
             sequence of real numbers or 'measurements with uncertainty'
         SkipFrames: (keyword) int > 0; how many frames to hide in the
             exception traceback, defaults to 1
@@ -587,11 +591,11 @@ def GetMoment(Data: TGenericSequence, Power: int, *, IsCentral: bool = False,
     arguments.
 
     Signature:
-        list(int OR float OR phyqus_lib.base_classes.MeasureValue), int > 0/,
+        seq(int OR float OR phyqus_lib.base_classes.MeasuredValue), int > 0/,
             *, bool, bool, int > 0, bool/ -> int OR float
     
     Args:
-        Data: list(int OR float OR phyqus_lib.base_classes.MeasureValue); a
+        Data: seq(int OR float OR phyqus_lib.base_classes.MeasuredValue); a
             sequence of real numbers or 'measurements with uncertainty'
         Power: int > 0; the moment power
         IsCentral: (keyword) bool; is the central moment is to be calculated,
@@ -605,7 +609,7 @@ def GetMoment(Data: TGenericSequence, Power: int, *, IsCentral: bool = False,
             numbers
     
     Returns:
-        int OR float: the calculated full uncertainty of the mean value
+        int OR float: the calculated moment value
     
     Raises:
         UT_TypeError: the mandatory data argument is not a sequence or real
@@ -655,11 +659,11 @@ def GetSkewnessP(Data: TGenericSequence, *, SkipFrames: int = 1,
     the measurements with uncertainty.
 
     Signature:
-        list(int OR float OR phyqus_lib.base_classes.MeasureValue)/, *, int > 0,
+        seq(int OR float OR phyqus_lib.base_classes.MeasuredValue)/, *, int > 0,
             bool/ -> int OR float
     
     Args:
-        Data: list(int OR float OR phyqus_lib.base_classes.MeasureValue); a
+        Data: seq(int OR float OR phyqus_lib.base_classes.MeasuredValue); a
             sequence of real numbers or 'measurements with uncertainty'
         SkipFrames: (keyword) int > 0; how many frames to hide in the
             exception traceback, defaults to 1
@@ -691,11 +695,11 @@ def GetSkewnessS(Data: TGenericSequence, *, SkipFrames: int = 1,
     measurements with uncertainty.
 
     Signature:
-        list(int OR float OR phyqus_lib.base_classes.MeasureValue)/, *, int > 0,
+        seq(int OR float OR phyqus_lib.base_classes.MeasuredValue)/, *, int > 0,
             bool/ -> int OR float
     
     Args:
-        Data: list(int OR float OR phyqus_lib.base_classes.MeasureValue); a
+        Data: seq(int OR float OR phyqus_lib.base_classes.MeasuredValue); a
             sequence of real numbers or 'measurements with uncertainty'
         SkipFrames: (keyword) int > 0; how many frames to hide in the
             exception traceback, defaults to 1
@@ -735,11 +739,11 @@ def GetKurtosisP(Data: TGenericSequence, *, SkipFrames: int = 1,
     numbers and the measurements with uncertainty.
 
     Signature:
-        list(int OR float OR phyqus_lib.base_classes.MeasureValue)/, *, int > 0,
+        seq(int OR float OR phyqus_lib.base_classes.MeasuredValue)/, *, int > 0,
             bool/ -> int OR float
     
     Args:
-        Data: list(int OR float OR phyqus_lib.base_classes.MeasureValue); a
+        Data: seq(int OR float OR phyqus_lib.base_classes.MeasuredValue); a
             sequence of real numbers or 'measurements with uncertainty'
         SkipFrames: (keyword) int > 0; how many frames to hide in the
             exception traceback, defaults to 1
@@ -771,11 +775,11 @@ def GetKurtosisS(Data: TGenericSequence, *, SkipFrames: int = 1,
     and the measurements with uncertainty.
 
     Signature:
-        list(int OR float OR phyqus_lib.base_classes.MeasureValue)/, *, int > 0,
+        list(int OR float OR phyqus_lib.base_classes.MeasuredValue)/, *, int > 0,
             bool/ -> int OR float
     
     Args:
-        Data: list(int OR float OR phyqus_lib.base_classes.MeasureValue); a
+        Data: list(int OR float OR phyqus_lib.base_classes.MeasuredValue); a
             sequence of real numbers or 'measurements with uncertainty'
         SkipFrames: (keyword) int > 0; how many frames to hide in the
             exception traceback, defaults to 1
@@ -818,14 +822,14 @@ def GetCovariance(DataX: TGenericSequence, DataY: TGenericSequence, *,
     the measurements with uncertainty.
 
     Signature:
-        list(int OR float OR phyqus_lib.base_classes.MeasureValue)/,
-            list(int OR float OR phyqus_lib.base_classes.MeasureValue)/,
+        list(int OR float OR phyqus_lib.base_classes.MeasuredValue)/,
+            list(int OR float OR phyqus_lib.base_classes.MeasuredValue)/,
                 *, int > 0, bool/ -> int OR float
     
     Args:
-        DataX: list(int OR float OR phyqus_lib.base_classes.MeasureValue); a
+        DataX: list(int OR float OR phyqus_lib.base_classes.MeasuredValue); a
             sequence of real numbers or 'measurements with uncertainty' as X
-        DataY: list(int OR float OR phyqus_lib.base_classes.MeasureValue); a
+        DataY: list(int OR float OR phyqus_lib.base_classes.MeasuredValue); a
             sequence of real numbers or 'measurements with uncertainty' as Y
         SkipFrames: (keyword) int > 0; how many frames to hide in the
             exception traceback, defaults to 1
@@ -834,7 +838,7 @@ def GetCovariance(DataX: TGenericSequence, DataY: TGenericSequence, *,
             numbers
     
     Returns:
-        int OR float: the calculated full uncertainty of the mean value
+        int OR float: the calculated covariance value
     
     Raises:
         UT_TypeError: any of mandatory data arguments is not a sequence or real
@@ -875,14 +879,14 @@ def GetMoment2(DataX: TGenericSequence, DataY: TGenericSequence, PowerX: int,
     keyword arguments.
 
     Signature:
-        list(int OR float OR phyqus_lib.base_classes.MeasureValue),
-            list(int OR float OR phyqus_lib.base_classes.MeasureValue),
+        seq(int OR float OR phyqus_lib.base_classes.MeasuredValue),
+            seq(int OR float OR phyqus_lib.base_classes.MeasuredValue),
                 int > 0, int > 0/, *, bool, bool, int > 0, bool/ -> int OR float
     
     Args:
-        DataX: list(int OR float OR phyqus_lib.base_classes.MeasureValue); a
+        DataX: seq(int OR float OR phyqus_lib.base_classes.MeasuredValue); a
             sequence of real numbers or 'measurements with uncertainty' as X
-        DataY: list(int OR float OR phyqus_lib.base_classes.MeasureValue); a
+        DataY: seq(int OR float OR phyqus_lib.base_classes.MeasuredValue); a
             sequence of real numbers or 'measurements with uncertainty' as Y
         PowerX: int > 0; the moment power of X
         PowerY: int > 0; the moment power of Y
@@ -897,7 +901,7 @@ def GetMoment2(DataX: TGenericSequence, DataY: TGenericSequence, PowerX: int,
             numbers
     
     Returns:
-        int OR float: the calculated full uncertainty of the mean value
+        int OR float: the calculated moment value
     
     Raises:
         UT_TypeError: any of mandatory data arguments is not a sequence or real
@@ -963,14 +967,14 @@ def GetPearsonR(DataX: TGenericSequence, DataY: TGenericSequence, *,
     sequences of real numbers and the measurements with uncertainty.
 
     Signature:
-        list(int OR float OR phyqus_lib.base_classes.MeasureValue)/,
-            list(int OR float OR phyqus_lib.base_classes.MeasureValue)/,
+        list(int OR float OR phyqus_lib.base_classes.MeasuredValue)/,
+            list(int OR float OR phyqus_lib.base_classes.MeasuredValue)/,
                 *, int > 0, bool/ -> int OR float
     
     Args:
-        DataX: list(int OR float OR phyqus_lib.base_classes.MeasureValue); a
+        DataX: list(int OR float OR phyqus_lib.base_classes.MeasuredValue); a
             sequence of real numbers or 'measurements with uncertainty' as X
-        DataY: list(int OR float OR phyqus_lib.base_classes.MeasureValue); a
+        DataY: list(int OR float OR phyqus_lib.base_classes.MeasuredValue); a
             sequence of real numbers or 'measurements with uncertainty' as Y
         SkipFrames: (keyword) int > 0; how many frames to hide in the
             exception traceback, defaults to 1
@@ -979,7 +983,7 @@ def GetPearsonR(DataX: TGenericSequence, DataY: TGenericSequence, *,
             numbers
     
     Returns:
-        int OR float: the calculated full uncertainty of the mean value
+        int OR float: the correlation value
     
     Raises:
         UT_TypeError: any of mandatory data arguments is not a sequence or real
