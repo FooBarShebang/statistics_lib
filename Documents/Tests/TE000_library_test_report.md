@@ -103,7 +103,7 @@ The returned values are of the native Python data types - **int**, **float**, **
 
 **Test steps:** Check / review the source code. Run all unit-test suits defined for the individual modules.
 
-**Test result:** PASS / FAIL 
+**Test result:** PASS / FAIL
 
 ## Tests definition (Demonstration)
 

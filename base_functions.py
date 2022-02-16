@@ -81,7 +81,6 @@ import sys
 import os
 import math
 import collections.abc as c_abc
-from tkinter import S
 
 from typing import Any, Sequence, Union, List, Tuple
 

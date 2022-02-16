@@ -7,3 +7,4 @@ This library  requires the Python 3, specifically version >= 3.6.
 ### Other own libraries
 
 * [introspection_lib](https://github.com/FooBarShebang/introspection_lib)
+* [phyqus_lib](https://github.com/FooBarShebang/phyqus_lib)

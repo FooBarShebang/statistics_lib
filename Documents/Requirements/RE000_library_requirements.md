@@ -68,11 +68,16 @@ The numerical data may come in a form of a generic sequence of either real numbe
   * Student`s t-distribution
   * $\chi^2$-distribution
   * F-distribution
+  * Poisson distribution
+  * Binomial distribution
 * Basic test statistics functions:
   * Z-test for means comparison
   * t-test for means comparison
   * $\chi^2$-test for variance
   * F-test for comparison of variances
+  * Levene's test
+  * Brown-Forsythe test
+  * Barlett's test
 
 **Verification Method:** A
 

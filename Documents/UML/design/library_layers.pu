@@ -1,0 +1,33 @@
+@startuml library_layers
+
+!if %not(%variable_exists("$COMPONENTS"))
+    !include ../Templates/Components2.cuml
+!endif
+
+rectangle " " as backend <<back-end>> {
+    $function("special\nmathematical\nfunctions", SF)
+    
+    $function("moments\nrelated\nproperties", MF)
+
+    $function("distribution\nshape related\nproperties", OF)
+}
+
+rectangle " " as frontend <<front-end>> {
+    $class("sample\ndata\ndistributions", SD)
+    
+    $function("statistic\ntests", ST)
+
+    $class("population\nmodel\ndistributions", MD)
+    
+    SD <|- ST
+    
+    ST -|> MD
+}
+
+MF <|-- SD
+
+OF <|-- SD
+
+SF <|-- MD
+
+@enduml
