@@ -47,6 +47,7 @@ The verification method for a requirement is given by a single letter according 
   * Generic Nth-Mth moment of a 2D data set distributiion (as population - i.e. without Bessel correction) - both central and non-central variants, as well as central and non-central normalized variants
 
 **Verification Method:** A
+
 ___
 
 **Requirement ID:** REQ-FUN-101

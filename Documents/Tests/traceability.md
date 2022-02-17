@@ -4,6 +4,7 @@
 
 * global requirements - 00x
 * module **base_functions** - 10x
+* module **ordered_functions** - 2xy
 
 ## Requirements vs Tests Traceability
 

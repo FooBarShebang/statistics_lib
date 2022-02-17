@@ -2,9 +2,12 @@
 """
 Module statistics_lib.base_functions
 
-Implements class to store a 2-tuple of the mean value of a measurement and its
-associated uncertainty as well as basic arithmetics with this new data type.
-The input data is supposed to be long sequences, which can be assumed to
+Implements functions calculating the statistical properties of 1D or 2D data set
+related to the (cross-) moments of the sample data distribution. These functions
+accept a generic sequence of a mixed integers, floating point number values and
+instances of a class implementing 'measurements with uncertainty'.
+
+The input data is supposed to be long sequences often, which can be assumed to
 represent the full population. Therefore, the Bessel corrections does not have
 a lot of sense or importance. Hence, the 'base' versions of the functions do
 not employ the Bessel correction, and they have 'P' suffix in their neames.
@@ -82,7 +85,7 @@ import os
 import math
 import collections.abc as c_abc
 
-from typing import Any, Sequence, Union, List, Tuple
+from typing import Any, Sequence, Union, List
 
 #+ custom modules
 
