@@ -113,7 +113,7 @@ ___
 
 **Test goal:** A sub-class of **TypeError** exception is raised in response to the improper type of the input data.
 
-**Expected result:** Such an exception is raised if, at least, one of the data set arguments is not a flat sequence of real numbers and / or measurements with uncertainties, or any of the moment powers is not an integer.
+**Expected result:** Such an exception is raised if, at least, one of the data set arguments is not a flat sequence of real numbers and / or measurements with uncertainties, or any of the moment powers is not an integer; OR the required quantile index or total number of quantiles argument is not an integer number
 
 **Test steps:** Try to call the funcion being tested with an appropriate data type argument. Check that the expected exception is raised.
 
@@ -134,6 +134,8 @@ ___
 * At least, one of the sequence data set arguments is an empty sequence
 * Inequal length of the sequence arguments of a 2D statistics function (in general)
 * The sequence is 1 element long in the case of quartile and quantile functions
+* The total number of quantiles is an integer, but not positive - quantile function
+* The required quantile index is negative or larger than the total number of quantiles - quantile function
 
 **Test steps:** Try to call the funcion being tested with an appropriate argument (see above). Check that the expected exception is raised.
 
@@ -199,7 +201,7 @@ ___
 
 **Expected result:** With a random sequence of the mix of integer, floating point numbers and instances of the measurements with uncertainty class passed into the function (length >= 2), it returns the first quartile value of all 'mean' values using the linear interpolation between the values of the adjacent elements in the sorted sample. Using Python v3.8 or later it should return the same value as the first element of the list returned by the Standard Library function *statistics.quantiles*() with n=4 (default).
 
-**Test steps:** Prepare the test sequences same way as described in the TEST-T-200. Pass each of the test sequences into the function being tested. Check that the returned values is either an integer or floating point data type. Sort the base real numbers only sequence. Check that the previously calculated value is greater than or equal to the sorted sequence element index (N-1) // 4 and less than or equal to the element index ((N-1) // 4) + 1, where N is the length of the data sequence. If the Python v3.8 or later interprer is used, check the calculated value against the first element of the list returned by *statistics.quantiles*() with n=4 (default) function, into which the base but nor sorted real numbers only sequence is passed.
+**Test steps:** Prepare the test sequences same way as described in the TEST-T-200. Pass each of the test sequences into the function being tested. Check that the returned values is either an integer or floating point data type. Sort the base real numbers only sequence. Check that the previously calculated value is greater than or equal to the sorted sequence element index (N-1) // 4 and less than or equal to the element index ((N-1) // 4) + 1, where N is the length of the data sequence. If the Python v3.8 or later interprer is used, check the calculated value against the first element of the list returned by *statistics.quantiles*() function with n=4 (default) and method = 'inclusive' keyword arguments, into which the base but nor sorted real numbers only sequence is passed.
 
 **Test result:** PASS
 
@@ -215,9 +217,35 @@ ___
 
 **Expected result:** With a random sequence of the mix of integer, floating point numbers and instances of the measurements with uncertainty class passed into the function (length >= 2), it returns the third quartile value of all 'mean' values using the linear interpolation between the values of the adjacent elements in the sorted sample. Using Python v3.8 or later it should return the same value as the last element of the list returned by the Standard Library function *statistics.quantiles*() with n=4 (default).
 
-**Test steps:** Prepare the test sequences same way as described in the TEST-T-200. Pass each of the test sequences into the function being tested. Check that the returned values is either an integer or floating point data type. Sort the base real numbers only sequence. Check that the previously calculated value is greater than or equal to the sorted sequence element index ((N-1) \* 3) // 4 and less than or equal to the element index (((N-1) \* 3) // 4) + 1, where N is the length of the data sequence. If the Python v3.8 or later interprer is used, check the calculated value against the last element of the list returned by *statistics.quantiles*() with n=4 (default) function, into which the base but nor sorted real numbers only sequence is passed.
+**Test steps:** Prepare the test sequences same way as described in the TEST-T-200. Pass each of the test sequences into the function being tested. Check that the returned values is either an integer or floating point data type. Sort the base real numbers only sequence. Check that the previously calculated value is greater than or equal to the sorted sequence element index ((N-1) \* 3) // 4 and less than or equal to the element index (((N-1) \* 3) // 4) + 1, where N is the length of the data sequence. If the Python v3.8 or later interprer is used, check the calculated value against the last element of the list returned by *statistics.quantiles*() function with n=4 (default) and method = 'inclusive' keyword arguments, into which the base but nor sorted real numbers only sequence is passed.
 
 **Test result:** PASS
+
+___
+
+**Test Identifier:** TEST-T-260
+
+**Requirement ID(s)**: REQ-FUN-260
+
+**Verification method:** T
+
+**Test goal:** The performance of the function *GetQuantile*().
+
+**Expected result:** With a random sequence of the mix of integer, floating point numbers and instances of the measurements with uncertainty class passed into the function (length >= 2), it returns the k-th of m-quartile value of all 'mean' values using the linear interpolation between the values of the adjacent elements in the sorted sample. Using Python v3.8 or later it should return the same value as the (k-1)th element (indexing from 0) of the list returned by the Standard Library function *statistics.quantiles*() with n=m, providing 0 < k < m. The 0-th quantile is the first element of the sorted in ascending order sequence of the 'mean' values, whereas the m-th quantile is the last element of that sequence.
+
+**Test steps:** Prepare the test sequences same way as described in the TEST-T-200. For each of the test sequences do the following:
+* Sort the base real numbers only sequence.
+* Select m from [4, 10, 25, 33, 100]
+* For each 0 < k < m:
+  * Pass the current test sequence (not sorted) into the function being tested with the selected k and m arguments
+  * Check that the returned values is either an integer or floating point data type.
+  * Check that the previously calculated value is greater than or equal to the sorted sequence element index ((N-1) \* k) // m and less than or equal to the element index (((N-1) \* k) // m) + 1, where N is the length of the data sequence.
+  * If the Python v3.8 or later interprer is used, check the calculated value against the (k-1)-th element (index starts at 0) of the list returned by *statistics.quantiles*() function with n=m (default) and method = 'inclusive' keyword arguments, into which the base but nor sorted real numbers only sequence is passed.
+* Check that the result of the function call with k = 0 is the first element of the sorted base sequence
+* Check that the result of the function call witk k = m is the last element of the sorted base sequence
+* Repeat the process with other m values
+
+**Test result:** PASS/FAIL
 
 ## Traceability
 
@@ -232,6 +260,7 @@ For traceability the relation between tests and requirements is summarized in th
 | REQ-FUN-230        | TEST-T-230             | YES                      |
 | REQ-FUN-240        | TEST-T-240             | YES                      |
 | REQ-FUN-250        | TEST-T-250             | YES                      |
+| REQ-FUN-260        | TEST-T-260             | YES                      |
 | REQ-AWM-200        | TEST-T-201             | NO                       |
 | REQ-AWM-201        | TEST-T-202             | NO                       |
 

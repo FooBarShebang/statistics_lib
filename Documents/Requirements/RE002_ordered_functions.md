@@ -108,6 +108,16 @@ ___
 
 **Verification Method:** T
 
+___
+
+**Requirement ID:** REQ-FUN-260
+
+**Title:** Performance of function to calculate a generic k-th of m-quantile of the data sample
+
+**Description:** With a random sequence of the mix of integer, floating point numbers and instances of the measurements with uncertainty class passed into the function (length >= 2), it returns the k-th of m-quartile value of all 'mean' values using the linear interpolation between the values of the adjacent elements in the sorted sample. Using Python v3.8 or later it should return the same value as the (k-1)th element (indexing from 0) of the list returned by the Standard Library function *statistics.quantiles*() with n=m, providing 0 < k < m. The 0-th quantile is the first element of the sorted in ascending order sequence of the 'mean' values, whereas the m-th quantile is the last element of that sequence.
+
+**Verification Method:** T
+
 ## Alarms, warnings and operator messages
 
 **Requirement ID:** REQ-AWM-200
@@ -117,8 +127,9 @@ ___
 **Description:** The **TypeError** or its sub-class should be raised in response to the unacceptable input (argument(s) data type(s)) in the following situations:
 
 * A 1D data set (or one of the sub-sets of the 2D data set) is not a flat sequence of real numbers of 'real life measurements' with the associated uncertainties, which means:
-  * The respective argument is not a sequence, OR
-  * The respective argument is a sequence, but, at least, one element of it is neither integer, or floating point number, or an instance of a measurement with the associated uncertainty data type class
+* The respective argument is not a sequence, OR
+* The respective argument is a sequence, but, at least, one element of it is neither integer, or floating point number, or an instance of a measurement with the associated uncertainty data type class
+* The required quantile index or total number of quantiles argument is not an integer number
 
 **Verification Method:** T
 ___
@@ -132,5 +143,7 @@ ___
 * A 1D data set (or one of the sub-sets of the 2D data set) is an empty sequence
 * A 1D data set is shorter than 2 points in the case of the 1st and the 3rd quartile as well as the quantile functions
 * The lengths of the sub-sets of a 2D data set are not equal
+* The total number of quantiles is an integer, but not positive
+* The required quantile index is negative or larger than the total number of quantiles
 
 **Verification Method:** T

@@ -211,14 +211,15 @@ class Test_GetFirstQuartile(Test_GetMin):
             Sorted = sorted(BaseInput)
             N = len(Sorted)
             Index = (N-1) // 4
-            Left = Sorted[Index]
-            Right = Sorted[Index + 1]
+            Left = Sorted[Index] - FLOAT_CHECK_PRECISION
+            Right = Sorted[Index + 1] + FLOAT_CHECK_PRECISION
             TestResult = self.TestFunction(BaseInput)
             self.assertIsInstance(TestResult, (int, float))
             self.assertGreaterEqual(TestResult, Left)
             self.assertLessEqual(TestResult, Right)
             if self.ExtraCheck:
-                TestCheck = self.CheckFunction(BaseInput, n = 4)[0]
+                TestCheck = self.CheckFunction(BaseInput, n = 4,
+                                                        method = 'inclusive')[0]
                 self.assertAlmostEqual(TestResult, TestCheck, 
                                                 places = FLOAT_CHECK_PRECISION)
             TestResult = self.TestFunction(tuple(BaseInput))
@@ -235,14 +236,15 @@ class Test_GetFirstQuartile(Test_GetMin):
             Sorted = sorted(BaseInput)
             N = len(Sorted)
             Index = (N-1) // 4
-            Left = Sorted[Index]
-            Right = Sorted[Index + 1]
+            Left = Sorted[Index] - FLOAT_CHECK_PRECISION
+            Right = Sorted[Index + 1] + FLOAT_CHECK_PRECISION
             TestResult = self.TestFunction(TestInput)
             self.assertIsInstance(TestResult, (int, float))
             self.assertGreaterEqual(TestResult, Left)
             self.assertLessEqual(TestResult, Right)
             if self.ExtraCheck:
-                TestCheck = self.CheckFunction(BaseInput, n = 4)[0]
+                TestCheck = self.CheckFunction(BaseInput, n = 4,
+                                                        method = 'inclusive')[0]
                 self.assertAlmostEqual(TestResult, TestCheck,
                                                 places = FLOAT_CHECK_PRECISION)
             TestResult = self.TestFunction(tuple(TestInput))
@@ -296,14 +298,15 @@ class Test_GetThirdQuartile(Test_GetFirstQuartile):
             Sorted = sorted(BaseInput)
             N = len(Sorted)
             Index = ((N-1) * 3) // 4
-            Left = Sorted[Index]
-            Right = Sorted[Index + 1]
+            Left = Sorted[Index] - FLOAT_CHECK_PRECISION
+            Right = Sorted[Index + 1] + FLOAT_CHECK_PRECISION
             TestResult = self.TestFunction(BaseInput)
             self.assertIsInstance(TestResult, (int, float))
             self.assertGreaterEqual(TestResult, Left)
             self.assertLessEqual(TestResult, Right)
             if self.ExtraCheck:
-                TestCheck = self.CheckFunction(BaseInput, n = 4)[-1]
+                TestCheck = self.CheckFunction(BaseInput, n = 4,
+                                                    method = 'inclusive')[-1]
                 self.assertAlmostEqual(TestResult, TestCheck, 
                                                 places = FLOAT_CHECK_PRECISION)
             TestResult = self.TestFunction(tuple(BaseInput))
@@ -320,14 +323,15 @@ class Test_GetThirdQuartile(Test_GetFirstQuartile):
             Sorted = sorted(BaseInput)
             N = len(Sorted)
             Index = ((N-1) * 3) // 4
-            Left = Sorted[Index]
-            Right = Sorted[Index + 1]
+            Left = Sorted[Index] - FLOAT_CHECK_PRECISION
+            Right = Sorted[Index + 1] + FLOAT_CHECK_PRECISION
             TestResult = self.TestFunction(TestInput)
             self.assertIsInstance(TestResult, (int, float))
             self.assertGreaterEqual(TestResult, Left)
             self.assertLessEqual(TestResult, Right)
             if self.ExtraCheck:
-                TestCheck = self.CheckFunction(BaseInput, n = 4)[-1]
+                TestCheck = self.CheckFunction(BaseInput, n = 4,
+                                                    method = 'inclusive')[-1]
                 self.assertAlmostEqual(TestResult, TestCheck,
                                                 places = FLOAT_CHECK_PRECISION)
             TestResult = self.TestFunction(tuple(TestInput))
@@ -337,6 +341,119 @@ class Test_GetThirdQuartile(Test_GetFirstQuartile):
             if self.ExtraCheck:
                 self.assertAlmostEqual(TestResult, TestCheck,
                                                 places = FLOAT_CHECK_PRECISION)
+
+class Test_GetQuantile(Test_GetFirstQuartile):
+    """
+    Unit-test class implementing testing of the function GetQuantile() from the
+    module statistics_lib.ordered_functions.
+
+    Implements tests: TEST-T-200, TEST-T-201, TEST-T-202 and TEST-T-260.
+    Covers the requirements REQ-FUN-201, REQ-FUN-260, REQ-AWM-200, REQ-AWM-201.
+    """
+    
+    @classmethod
+    def setUpClass(cls) -> None:
+        """
+        Preparation for the test cases, done only once.
+        """
+        super().setUpClass()
+        cls.TestFunction = staticmethod(test_module.GetQuantile)
+        if cls.ExtraCheck:
+            cls.CheckFunction = staticmethod(statistics.quantiles)
+    
+    def test_OkOperation(self) -> None:
+        """
+        Checks the normal operation mode of the function being tested
+
+        Implements test TEST-T-200, TEST-T-250.
+        Covers the requirement REQ-FUN-201, REQ-FUN-250.
+        """
+        for TestInput, BaseInput in ((self.AllInt, self.AllInt),
+                                        (self.AllFloat, self.AllFloat),
+                                        (self.Mixed, self.Mixed),
+                                        (self.IntErr, self.AllInt),
+                                        (self.FloatErr, self.AllFloat),
+                                        (self.MixedErr, self.Mixed),
+                                        (self.TotalMixed, self.Mixed)):
+            Sorted = sorted(BaseInput)
+            N = len(Sorted)
+            for m in [4, 10, 25, 30, 100]:
+                for k in range (1, m):
+                    Index = ((N-1) * k) // m
+                    Left = Sorted[Index] - FLOAT_CHECK_PRECISION
+                    Right = Sorted[Index + 1] + FLOAT_CHECK_PRECISION
+                    TestResult = self.TestFunction(TestInput, k, m)
+                    self.assertIsInstance(TestResult, (int, float))
+                    self.assertGreaterEqual(TestResult, Left)
+                    self.assertLessEqual(TestResult, Right)
+                    if self.ExtraCheck:
+                        TestCheck = self.CheckFunction(BaseInput, n = m,
+                                                    method = 'inclusive')[k-1]
+                    self.assertAlmostEqual(TestResult, TestCheck, 
+                                                places = FLOAT_CHECK_PRECISION)
+                    TestResult = self.TestFunction(tuple(TestInput), k, m)
+                    self.assertIsInstance(TestResult, (int, float))
+                    self.assertGreaterEqual(TestResult, Left)
+                    self.assertLessEqual(TestResult, Right)
+                    if self.ExtraCheck:
+                        self.assertAlmostEqual(TestResult, TestCheck, 
+                                                places = FLOAT_CHECK_PRECISION)
+                TestResult = self.TestFunction(TestInput, 0, m)
+                self.assertIsInstance(TestResult, (int, float))
+                self.assertEqual(TestResult, Sorted[0])
+                TestResult = self.TestFunction(TestInput, m, m)
+                self.assertIsInstance(TestResult, (int, float))
+                self.assertEqual(TestResult, Sorted[-1])
+    
+    def test_EdgeCase(self):
+        """
+        Checks that ValueError sub-class exception is raised if the sequence is
+        only 1 element long.
+        
+        Implements test TEST-T-202.
+        Covers the requirement REQ-AWM-201.
+        """
+        for Item in [(1, ), (1.0, ), (MeasuredValue(1), ), [1], [1.0],
+                                                            [MeasuredValue(1)]]:
+            with self.assertRaises(ValueError):
+                self.TestFunction(Item, 1, 2)
+    
+    def test_TypeError(self) -> None:
+        """
+        Checks that sub-class of TypeError is raised with improper input data
+        type.
+
+        Implements test TEST-T-201.
+        Covers the requirement REQ-AWM-200.
+        """
+        for Temp in self.BadCases:
+            with self.assertRaises(TypeError):
+                self.TestFunction(Temp, 1, 2)
+        for k in [1.0, '1', [1], (1, 2), MeasuredValue(1), {1:1}]:
+            with self.assertRaises(TypeError):
+                self.TestFunction([1, 2, 3], k, 10)
+            with self.assertRaises(TypeError):
+                self.TestFunction([1, 2, 3], 1, k)
+
+    def test_ValueError(self) -> None:
+        """
+        Checks that sub-class of ValueError is raised with proper input data
+        type but wrong value.
+
+        Implements test TEST-T-202.
+        Covers the requirement REQ-AWM-201.
+        """
+        with self.assertRaises(ValueError):
+            self.TestFunction([], 1, 2) #empty sequence
+        for m in [0, -1, -10]:
+            with self.assertRaises(ValueError):
+                self.TestFunction([1, 2, 3], 1, m)
+            with self.assertRaises(ValueError):
+                self.TestFunction([1, 2, 3], m - 1, 4)
+        for m in [4, 10, 25]:
+            for k in [1, 4, 10]:
+                with self.assertRaises(ValueError):
+                    self.TestFunction([1, 2, 3], m + k , m)
 
 #+ test suites
 
@@ -350,8 +467,11 @@ TestSuite4 = unittest.TestLoader().loadTestsFromTestCase(Test_GetFirstQuartile)
 
 TestSuite5 = unittest.TestLoader().loadTestsFromTestCase(Test_GetThirdQuartile)
 
+TestSuite6 = unittest.TestLoader().loadTestsFromTestCase(Test_GetQuantile)
+
 TestSuite = unittest.TestSuite()
-TestSuite.addTests([TestSuite1, TestSuite2, TestSuite3, TestSuite4, TestSuite5])
+TestSuite.addTests([TestSuite1, TestSuite2, TestSuite3, TestSuite4, TestSuite5,
+                        TestSuite6])
 
 if __name__ == "__main__":
     sys.stdout.write(

@@ -25,10 +25,13 @@ Functions:
     GetThirdQuartle(Data, *, SkipFrames = 1, DoCheck = True)
         seq(int OR float OR phyqus_lib.base_classes.MeasuredValue)/, *, int > 0,
             bool/ -> int OR float
+    GetQuantile(Data, k, m, *, SkipFrames = 1, DoCheck = True)
+        seq(int OR float OR phyqus_lib.base_classes.MeasuredValue),
+            int >= 0, int > 0/, *, int > 0, bool/ -> int OR float
 """
 
 __version__= '1.0.0.0'
-__date__ = '17-02-2022'
+__date__ = '18-02-2022'
 __status__ = 'Development'
 
 #imports
@@ -290,4 +293,69 @@ def GetThirdQuartile(Data: TGenericSequence, *, SkipFrames: int = 1,
         Index, Remainder = divmod((N - 1) * 3, 4)
         Portion = Remainder / 4
         Result = _Data[Index] * (1 - Portion) + _Data[Index + 1] * Portion
+    return Result
+
+def GetQuantile(Data: TGenericSequence, k: int, m: int, *, SkipFrames: int = 1,
+                                            DoCheck: bool = True) -> TReal:
+    """
+    Calculates the k-th of m-quantile value of a mixed sequence of real numbers
+    and the measurements with uncertainty. Computation speed is O(N*log(N)),
+    unless the passed sequence is already sorted in ascending order sequence of
+    real numbers, which is indicated by the keyword argument DoCheck = False, in
+    which case the calculation speed is O(1).
+
+    Signature:
+        seq(int OR float OR phyqus_lib.base_classes.MeasuredValue),
+            int >= 0, int > 0/, *, int > 0, bool/ -> int OR float
+    
+    Args:
+        Data: seq(int OR float OR phyqus_lib.base_classes.MeasuredValue); a
+            sequence of real numbers or 'measurements with uncertainty'
+        k: int >= 0; the quantile index, between 0 and m inclusively
+        m: int > 0; the total number of quantiles
+        SkipFrames: (keyword) int > 0; how many frames to hide in the
+            exception traceback, defaults to 1
+        DoCheck: (keyword) bool; flag if to perform the input data sanity
+            check, convert the mixed sequence into a list of only real numbers
+            and sort the values
+    
+    Returns:
+        int OR float: the calculated Q3 value
+    
+    Raises:
+        UT_TypeError: mandatory argument is not a sequence or real numbers or
+            measurements with uncertainty, OR any keyword argument is of
+            improper type, OR quantile index is not an integer, OR the total
+            number of quantiles is not an integer
+        UT_ValueError: passed mandatory sequence is empty, OR any keyword
+            argument is of the proper type but unacceptable value, OR the total
+            number of quantilies is negative integer or zero, OR the quantile
+            index is negative integer or integer greater than the total number
+            of qunatiles
+
+    Version 1.0.0.0
+    """
+    _CheckPositiveInteger(SkipFrames)
+    _CheckPositiveInteger(m)
+    if not isinstance(k, int):
+        raise UT_TypeError(k, int, SkipFrames = SkipFrames)
+    if (k < 0) or (k > m):
+        raise UT_ValueError(k, '>= 0 and <= {} - quantile index'.format(m))
+    if DoCheck:
+        _Data = sorted(_ExtractMeans(Data, SkipFrames = SkipFrames + 1))
+    else:
+        _Data = Data
+    N = len(_Data)
+    if N == 1:
+        raise UT_ValueError(N, '>= 2 - length of the sequence',
+                                                        SkipFrames = SkipFrames)
+    else:
+        if k == m:
+            Result = _Data[N-1]
+        elif k == 0:
+            Result = _Data[0]
+        else:
+            Index, Remainder = divmod((N - 1) * k, m)
+            Portion = Remainder / m
+            Result = _Data[Index] * (1 - Portion) + _Data[Index + 1] * Portion
     return Result
