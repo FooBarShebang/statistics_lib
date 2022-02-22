@@ -20,7 +20,6 @@ import os
 import unittest
 import random
 import statistics
-import math
 
 #+ custom modules
 
@@ -455,6 +454,256 @@ class Test_GetQuantile(Test_GetFirstQuartile):
                 with self.assertRaises(ValueError):
                     self.TestFunction([1, 2, 3], m + k , m)
 
+class Test_GetHistogram(Test_GetMin):
+    """
+    Unit-test class implementing testing of the function GetHistogram() from the
+    module statistics_lib.ordered_functions.
+
+    Implements tests: TEST-T-200, TEST-T-201, TEST-T-202 and TEST-T-270.
+    Covers the requirements REQ-FUN-201, REQ-FUN-270, REQ-AWM-200, REQ-AWM-201.
+    """
+    
+    @classmethod
+    def setUpClass(cls) -> None:
+        """
+        Preparation for the test cases, done only once.
+        """
+        super().setUpClass()
+        cls.TestFunction = staticmethod(test_module.GetHistogram)
+    
+    def test_TypeError(self) -> None:
+        """
+        Checks that sub-class of TypeError is raised with improper input data
+        type.
+
+        Implements test TEST-T-201.
+        Covers the requirement REQ-AWM-200.
+        """
+        super().test_TypeError()
+        for Value in ['1', 1.0, (1, ), [1], MeasuredValue(1), {1:1}]:
+            with self.assertRaises(TypeError):
+                self.TestFunction([1, 2, 3], NBins = Value)
+        for Value in ['1', (1, ), [1], MeasuredValue(1), {1:1}]:
+            with self.assertRaises(TypeError):
+                self.TestFunction([1, 2, 3], BinSize = Value)
+
+    def test_ValueError(self) -> None:
+        """
+        Checks that sub-class of ValueError is raised with proper input data
+        type but wrong value.
+
+        Implements test TEST-T-202.
+        Covers the requirement REQ-AWM-201.
+        """
+        super().test_ValueError()
+        for Value in [0, -1, -10]:
+            with self.assertRaises(ValueError):
+                self.TestFunction([1, 2, 3], NBins = Value)
+        for Value in [0, -1, -0.5, -10]:
+            with self.assertRaises(ValueError):
+                self.TestFunction([1, 2, 3], BinSize = Value)
+    
+    def test_OkOperation(self) -> None:
+        """
+        Checks the normal operation mode of the function being tested with the
+        default values of the keyword arguments.
+
+        Implements test TEST-T-200, TEST-T-270.
+        Covers the requirement REQ-FUN-201, REQ-FUN-270.
+        """
+        for TestInput, BaseInput in ((self.AllInt, self.AllInt),
+                                        (self.AllFloat, self.AllFloat),
+                                        (self.Mixed, self.Mixed),
+                                        (self.IntErr, self.AllInt),
+                                        (self.FloatErr, self.AllFloat),
+                                        (self.MixedErr, self.Mixed),
+                                        (self.TotalMixed, self.Mixed)):
+            TestResult = self.TestFunction(TestInput)
+            self.assertIsInstance(TestResult, dict)
+            self.assertEqual(len(TestResult), 20)
+            Keys = list(TestResult.keys())
+            Values = list(TestResult.values())
+            Length = len(BaseInput)
+            self.assertAlmostEqual(Keys[0], min(BaseInput),
+                                                places = FLOAT_CHECK_PRECISION)
+            self.assertAlmostEqual(Keys[-1], max(BaseInput),
+                                                places = FLOAT_CHECK_PRECISION)
+            self.assertEqual(sum(Values), Length)
+            Step = round((Keys[-1] - Keys[0]) / 19, 16)
+            for Index in range(1, len(Keys)):
+                self.assertAlmostEqual(Keys[Index] - Keys[Index - 1], Step,
+                                                places = FLOAT_CHECK_PRECISION)
+            for Key in Keys:
+                self.assertIsInstance(Key, (int, float))
+                self.assertIsInstance(TestResult[Key], int)
+                self.assertGreaterEqual(TestResult[Key], 0)
+                N = 0
+                for Item in BaseInput:
+                    bCond1 = round(Item, 16) >= round(Key - 0.5 * Step, 16)
+                    bCond2 = round(Item, 16) < round(Key + 0.5 * Step, 16)
+                    if bCond1 and bCond2:
+                        N += 1
+                self.assertEqual(N, TestResult[Key])
+
+    def test_OkBins(self) -> None:
+        """
+        Checks the normal operation mode of the function being tested with the
+        desired number of bins requested
+
+        Implements test TEST-T-200, TEST-T-270.
+        Covers the requirement REQ-FUN-201, REQ-FUN-270.
+        """
+        for TestInput, BaseInput in ((self.AllInt, self.AllInt),
+                                        (self.AllFloat, self.AllFloat),
+                                        (self.Mixed, self.Mixed),
+                                        (self.IntErr, self.AllInt),
+                                        (self.FloatErr, self.AllFloat),
+                                        (self.MixedErr, self.Mixed),
+                                        (self.TotalMixed, self.Mixed)):
+            NBins = random.randint(10, 30)
+            TestResult = self.TestFunction(TestInput, NBins = NBins)
+            self.assertIsInstance(TestResult, dict)
+            self.assertEqual(len(TestResult), NBins)
+            Keys = list(TestResult.keys())
+            Values = list(TestResult.values())
+            Length = len(BaseInput)
+            self.assertAlmostEqual(Keys[0], min(BaseInput),
+                                                places = FLOAT_CHECK_PRECISION)
+            self.assertAlmostEqual(Keys[-1], max(BaseInput),
+                                                places = FLOAT_CHECK_PRECISION)
+            self.assertEqual(sum(Values), Length)
+            Step = round((Keys[-1] - Keys[0]) / (NBins - 1), 16)
+            for Index in range(1, len(Keys)):
+                self.assertAlmostEqual(Keys[Index] - Keys[Index - 1], Step,
+                                                places = FLOAT_CHECK_PRECISION)
+            for Key in Keys:
+                self.assertIsInstance(Key, (int, float))
+                self.assertIsInstance(TestResult[Key], int)
+                self.assertGreaterEqual(TestResult[Key], 0)
+                N = 0
+                for Item in BaseInput:
+                    bCond1 = round(Item, 16) >= round(Key - 0.5 * Step, 16)
+                    bCond2 = round(Item, 16) < round(Key + 0.5 * Step, 16)
+                    if bCond1 and bCond2:
+                        N += 1
+                self.assertEqual(N, TestResult[Key])
+    
+    def test_OkBinsSize(self) -> None:
+        """
+        Checks the normal operation mode of the function being tested with the
+        desired number of bins requested and the bin size also requested
+
+        Implements test TEST-T-200, TEST-T-270.
+        Covers the requirement REQ-FUN-201, REQ-FUN-270.
+        """
+        for TestInput, BaseInput in ((self.AllInt, self.AllInt),
+                                        (self.AllFloat, self.AllFloat),
+                                        (self.Mixed, self.Mixed),
+                                        (self.IntErr, self.AllInt),
+                                        (self.FloatErr, self.AllFloat),
+                                        (self.MixedErr, self.Mixed),
+                                        (self.TotalMixed, self.Mixed)):
+            NBins = random.randint(10, 30)
+            BinSize = (max(BaseInput) - min(BaseInput)) / 5
+            TestResult = self.TestFunction(TestInput, NBins = NBins,
+                                                            BinSize = BinSize)
+            self.assertIsInstance(TestResult, dict)
+            self.assertEqual(len(TestResult), NBins)
+            Keys = list(TestResult.keys())
+            Values = list(TestResult.values())
+            Length = len(BaseInput)
+            self.assertAlmostEqual(Keys[0], min(BaseInput),
+                                                places = FLOAT_CHECK_PRECISION)
+            self.assertAlmostEqual(Keys[-1], max(BaseInput),
+                                                places = FLOAT_CHECK_PRECISION)
+            self.assertEqual(sum(Values), Length)
+            Step = round((Keys[-1] - Keys[0]) / (NBins - 1), 16)
+            for Index in range(1, len(Keys)):
+                self.assertAlmostEqual(Keys[Index] - Keys[Index - 1], Step,
+                                                places = FLOAT_CHECK_PRECISION)
+            for Key in Keys:
+                self.assertIsInstance(Key, (int, float))
+                self.assertIsInstance(TestResult[Key], int)
+                self.assertGreaterEqual(TestResult[Key], 0)
+                N = 0
+                for Item in BaseInput:
+                    bCond1 = round(Item, 16) >= round(Key - 0.5 * Step, 16)
+                    bCond2 = round(Item, 16) < round(Key + 0.5 * Step, 16)
+                    if bCond1 and bCond2:
+                        N += 1
+                self.assertEqual(N, TestResult[Key])
+    
+    def test_OkSize(self) -> None:
+        """
+        Checks the normal operation mode of the function being tested with the
+        desired bin size requested.
+
+        Implements test TEST-T-200, TEST-T-270.
+        Covers the requirement REQ-FUN-201, REQ-FUN-270.
+        """
+        for TestInput, BaseInput in ((self.AllInt, self.AllInt),
+                                        (self.AllFloat, self.AllFloat),
+                                        (self.Mixed, self.Mixed),
+                                        (self.IntErr, self.AllInt),
+                                        (self.FloatErr, self.AllFloat),
+                                        (self.MixedErr, self.Mixed),
+                                        (self.TotalMixed, self.Mixed)):
+            BinSize = (max(BaseInput) - min(BaseInput)) / random.randint(10, 30)
+            TestResult = self.TestFunction(TestInput, BinSize = BinSize)
+            self.assertIsInstance(TestResult, dict)
+            NBins = len(TestResult)
+            Check = (max(BaseInput) - min(BaseInput)) / BinSize
+            self.assertLessEqual(NBins - 2, Check)
+            self.assertGreaterEqual(NBins, Check)
+            Keys = list(TestResult.keys())
+            Values = list(TestResult.values())
+            Length = len(BaseInput)
+            self.assertLessEqual(Keys[0] - 0.5 * BinSize, min(BaseInput))
+            self.assertGreater(Keys[0] + 0.5 * BinSize, min(BaseInput))
+            self.assertLessEqual(Keys[-1] - 0.5 * BinSize, max(BaseInput))
+            self.assertGreater(Keys[-1] + 0.5 * BinSize, max(BaseInput))
+            self.assertEqual(sum(Values), Length)
+            Step = round(BinSize, 16)
+            for Index in range(1, len(Keys)):
+                self.assertAlmostEqual(Keys[Index] - Keys[Index - 1], Step,
+                                                places = FLOAT_CHECK_PRECISION)
+            for Key in Keys:
+                self.assertIsInstance(Key, (int, float))
+                self.assertIsInstance(TestResult[Key], int)
+                self.assertGreaterEqual(TestResult[Key], 0)
+                N = 0
+                for Item in BaseInput:
+                    bCond1 = round(Item, 16) >= round(Key - 0.5 * Step, 16)
+                    bCond2 = round(Item, 16) < round(Key + 0.5 * Step, 16)
+                    if bCond1 and bCond2:
+                        N += 1
+                self.assertEqual(N, TestResult[Key])
+    
+    def test_EdgeCases(self) -> None:
+        """
+        Checks the edge cases, which must result in a single bin histogram.
+
+        Implements test TEST-T-200, TEST-T-270.
+        Covers the requirement REQ-FUN-201, REQ-FUN-270.
+        """
+        #same elements in the input
+        for BaseInput in [[1], [2.5, 2.5], [3, 3, 3]]:
+            DictCheck = {BaseInput[0] : len(BaseInput)}
+            TestResult = self.TestFunction(BaseInput)
+            self.assertDictEqual(TestResult, DictCheck)
+            TestResult = self.TestFunction(BaseInput, NBins = 10)
+            self.assertDictEqual(TestResult, DictCheck)
+            TestResult = self.TestFunction(BaseInput, BinSize = 0.1)
+            self.assertDictEqual(TestResult, DictCheck)
+        #single bin is explicitely requested
+        BaseInput = [1, 1.4, 2, 0.5, 1.3]
+        DictCheck = {statistics.mean(BaseInput) : len(BaseInput)}
+        TestResult = self.TestFunction(BaseInput, NBins = 1)
+        self.assertDictEqual(TestResult, DictCheck)
+        # single bin results from too broad bin size
+        TestResult = self.TestFunction(BaseInput, BinSize = 5)
+        self.assertDictEqual(TestResult, DictCheck)
+
 #+ test suites
 
 TestSuite1 = unittest.TestLoader().loadTestsFromTestCase(Test_GetMin)
@@ -469,9 +718,11 @@ TestSuite5 = unittest.TestLoader().loadTestsFromTestCase(Test_GetThirdQuartile)
 
 TestSuite6 = unittest.TestLoader().loadTestsFromTestCase(Test_GetQuantile)
 
+TestSuite7 = unittest.TestLoader().loadTestsFromTestCase(Test_GetHistogram)
+
 TestSuite = unittest.TestSuite()
 TestSuite.addTests([TestSuite1, TestSuite2, TestSuite3, TestSuite4, TestSuite5,
-                        TestSuite6])
+                        TestSuite6, TestSuite7])
 
 if __name__ == "__main__":
     sys.stdout.write(

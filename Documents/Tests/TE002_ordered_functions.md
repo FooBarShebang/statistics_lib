@@ -113,7 +113,14 @@ ___
 
 **Test goal:** A sub-class of **TypeError** exception is raised in response to the improper type of the input data.
 
-**Expected result:** Such an exception is raised if, at least, one of the data set arguments is not a flat sequence of real numbers and / or measurements with uncertainties, or any of the moment powers is not an integer; OR the required quantile index or total number of quantiles argument is not an integer number
+**Expected result:** Such an exception is raised in the following cases:
+
+* A 1D data set (or one of the sub-sets of the 2D data set) is not a flat sequence of real numbers of 'real life measurements' with the associated uncertainties, which means:
+* The respective argument is not a sequence, OR
+* The respective argument is a sequence, but, at least, one element of it is neither integer, or floating point number, or an instance of a measurement with the associated uncertainty data type class
+* The required quantile index or total number of quantiles argument is not an integer number
+* The requested number of bins (in histogram) is not an integer number
+* The requested bin size (in histogram) is not a real number
 
 **Test steps:** Try to call the funcion being tested with an appropriate data type argument. Check that the expected exception is raised.
 
@@ -136,6 +143,8 @@ ___
 * The sequence is 1 element long in the case of quartile and quantile functions
 * The total number of quantiles is an integer, but not positive - quantile function
 * The required quantile index is negative or larger than the total number of quantiles - quantile function
+* The requested number of bins (in histogram) is an integer but not positive
+* The requested bin size (in histogram) is a real number but not positiv
 
 **Test steps:** Try to call the funcion being tested with an appropriate argument (see above). Check that the expected exception is raised.
 
@@ -245,7 +254,57 @@ ___
 * Check that the result of the function call witk k = m is the last element of the sorted base sequence
 * Repeat the process with other m values
 
-**Test result:** PASS/FAIL
+**Test result:** PASS
+
+___
+
+**Test Identifier:** TEST-T-270
+
+**Requirement ID(s)**: REQ-FUN-270
+
+**Verification method:** T
+
+**Test goal:** The performance of the function *GetHistogram*().
+
+**Expected result:** With a random sequence of the mix of integer, floating point numbers and instances of the measurements with uncertainty class passed into the function (length >= 2), it returns a histogram of all 'mean' values, i.e. how many data points fall into each of the equidistant bins. The following rules are applied:
+
+* The minimum value observed in the data sample belong to the left-most (min value) bin
+* The maximum value observed in the data sample belong to the right-most (max value) bin
+* The value of a bin is the mid-point of the range that bin covers
+* The bins are equidistant, i.e. each cover the same range, equal to the difference between the values of the adjacent bins
+* All bins are present, even if they are empty
+* The min/max values of the data sample, number of bins **_N_** and the bin size **_S_** are related as $N - 2 \leq \frac{max(X) - min(X)}{S} \leq N$
+* The number of bins or the bin size can be requested specifically via keyword-only arguments:
+  * If the number of bins **_N_** is passed, the minimum and maximum values in the sample are centered to the left- and right-most bins, and the step is defined as $S = \frac{max(X) - min(X)}{N-1}$
+  * If the bin size **_S_** is passed, the arithmetic mean of the sample is centered to its respective bin, and the total number of bins is defined as $N = \lceil \frac{max(X) - \langle X \rangle}{S} - \frac{1}{2}\rceil + \lceil \frac{\langle X \rangle - min(X)}{S} - \frac{1}{2}\rceil + 1$, where the first and the second parts of the sum are the number of bins to the right and to the left from the 'central' one
+  * If neither **_N_** nor **_S_** are defined by the user, the **_N_** = 20 number of bins is used
+  * If both **_N_** and **_S_** are defined by the user, the bin size argument is ignored, and value defined by the number of bins is used instead
+
+**Test steps:** Prepare the test sequence (mixed types) same way as described in the TEST-T-200.
+
+* Call the test function without keyword arguments (default 20 bins).
+* Check that the returned result is a dictionary.
+* Check that is has exactly the expected number N of key : value pairs
+* Check that all keys are real numbers
+* Check that all values are non-negative integers
+* Check that keys are sorted in the ascending order, the first key is the almost equal to the minimum value in the data sample, the last key - to the maximum value in the sample
+* Define the bin size as (max - min) / (N - 1), check that the difference between each pair of the adjacent keys almost equals this size
+* Check that the sum of all values equals the length of the sample
+* Check that for each key K and the calculated bin size S the amound of the data points between >= K - S/2 and < K + S/2  equals the value of that key
+* Repeat the test with the explicitely passed desired number of bins with and without indication of the desired bin size
+* Repeat the test only indicating the desired bin size; apply the following modifications to the test:
+  * The bin size is as requested
+  * Number of bins satisfies the double inequality above
+* The edge case is when the data sample contain only the same value elements, in which case the histogram should contain only a single key : value pair
+
+**N.B.** The exact number of the items per bin calculated in the function and in the unit test may differ due to the rounding errors in the case of the values close to the boundaries between the bins, especially if different algorithms are used in the unit test and in the actual function. The result of the test should be accepted even if the unit-testing sometimes fails, provided that:
+
+* Total number of the elements in all bins is preserved
+* The bin's number of elements comparison is the only reported failure
+* The reported difference is small (~ 1 - 2 items)
+* The failure doesn't happen often (< 10% of the consequitive runs)
+
+**Test result:** PASS
 
 ## Traceability
 
@@ -261,6 +320,7 @@ For traceability the relation between tests and requirements is summarized in th
 | REQ-FUN-240        | TEST-T-240             | YES                      |
 | REQ-FUN-250        | TEST-T-250             | YES                      |
 | REQ-FUN-260        | TEST-T-260             | YES                      |
+| REQ-FUN-270        | TEST-T-270             | YES                      |
 | REQ-AWM-200        | TEST-T-201             | NO                       |
 | REQ-AWM-201        | TEST-T-202             | NO                       |
 

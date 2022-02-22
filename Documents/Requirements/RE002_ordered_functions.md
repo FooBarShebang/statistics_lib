@@ -118,6 +118,29 @@ ___
 
 **Verification Method:** T
 
+___
+
+**Requirement ID:** REQ-FUN-270
+
+**Title:** Performance of function to calculate a histogram of the data sample
+
+**Description:** With a random sequence of the mix of integer, floating point numbers and instances of the measurements with uncertainty class passed into the function (length >= 2), it returns a histogram of all 'mean' values, i.e. how many data points fall into each of the equidistant bins. The following rules are applied:
+
+* The minimum value observed in the data sample belong to the left-most (min value) bin
+* The maximum value observed in the data sample belong to the right-most (max value) bin
+* The value of a bin is the mid-point of the range that bin covers
+* The bins are equidistant, i.e. each cover the same range, equal to the difference between the values of the adjacent bins
+* All bins are present, even if they are empty
+* The min/max values of the data sample, number of bins **_N_** and the bin size **_S_** are related as $N - 2 \leq \frac{max(X) - min(X)}{S} \leq N$
+* The number of bins or the bin size can be requested specifically via keyword-only arguments:
+  * If the number of bins **_N_** is passed, the minimum and maximum values in the sample are centered to the left- and right-most bins, and the step is defined as $S = \frac{max(X) - min(X)}{N-1}$
+  * If the bin size **_S_** is passed, the arithmetic mean of the sample is centered to its respective bin, and the total number of bins is defined as $N = \lceil \frac{max(X) - \langle X \rangle}{S} - \frac{1}{2}\rceil + \lceil \frac{\langle X \rangle - min(X)}{S} - \frac{1}{2}\rceil + 1$, where the first and the second parts of the sum are the number of bins to the right and to the left from the 'central' one
+  * If neither **_N_** nor **_S_** are defined by the user, the **_N_** = 20 number of bins is used
+  * If both **_N_** and **_S_** are defined by the user, the bin size argument is ignored, and value defined by the number of bins is used instead
+* The edge case is when the data sample contain only the same value elements, in which case the histogram should contain only a single key : value pair
+
+**Verification Method:** T
+
 ## Alarms, warnings and operator messages
 
 **Requirement ID:** REQ-AWM-200
@@ -130,6 +153,8 @@ ___
 * The respective argument is not a sequence, OR
 * The respective argument is a sequence, but, at least, one element of it is neither integer, or floating point number, or an instance of a measurement with the associated uncertainty data type class
 * The required quantile index or total number of quantiles argument is not an integer number
+* The requested number of bins (in histogram) is not an integer number
+* The requested bin size (in histogram) is not a real number
 
 **Verification Method:** T
 ___
@@ -145,5 +170,7 @@ ___
 * The lengths of the sub-sets of a 2D data set are not equal
 * The total number of quantiles is an integer, but not positive
 * The required quantile index is negative or larger than the total number of quantiles
+* The requested number of bins (in histogram) is an integer but not positive
+* The requested bin size (in histogram) is a real number but not positive
 
 **Verification Method:** T

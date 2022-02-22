@@ -28,6 +28,10 @@ Functions:
     GetQuantile(Data, k, m, *, SkipFrames = 1, DoCheck = True)
         seq(int OR float OR phyqus_lib.base_classes.MeasuredValue),
             int >= 0, int > 0/, *, int > 0, bool/ -> int OR float
+    GetHistogram(Data, *, NBins=None, BinSize=None, SkipFrames=1, DoCheck=True)
+        seq(int OR float OR phyqus_lib.base_classes.MeasuredValue)/, *,
+            int > 0 OR None, int > 0 OR float > 0 OR None, int > 0, bool/
+                -> dict(int OR float -> int >=0)
 """
 
 __version__= '1.0.0.0'
@@ -40,8 +44,9 @@ __status__ = 'Development'
 
 import sys
 import os
+import math
 
-from typing import Any, Sequence, Union, List
+from typing import Sequence, Union, List, Optional, Dict
 
 #+ custom modules
 
@@ -58,7 +63,7 @@ from introspection_lib.base_exceptions import UT_TypeError, UT_ValueError
 
 from phyqus_lib.base_classes import MeasuredValue
 
-from statistics_lib.base_functions import TGenericSequence, TReal
+from statistics_lib.base_functions import TGenericSequence, TReal, GetMean
 from statistics_lib.base_functions import  _ExtractMeans, _CheckPositiveInteger
 
 #functions
@@ -358,4 +363,88 @@ def GetQuantile(Data: TGenericSequence, k: int, m: int, *, SkipFrames: int = 1,
             Index, Remainder = divmod((N - 1) * k, m)
             Portion = Remainder / m
             Result = _Data[Index] * (1 - Portion) + _Data[Index + 1] * Portion
+    return Result
+
+def GetHistogram(Data: TGenericSequence, *, NBins: Optional[int] = None,
+                        BinSize: Optional[TReal] = None, SkipFrames: int = 1,
+                            DoCheck: bool = True) -> Dict[TReal, int]:
+    """
+    Calculates the histogram of number of apperance of 'mean' values belonging
+    to the respective bins for the data sample. Either total number of bins OR
+    the desired bin width can be specified, where number of bins takes the
+    precedence. When neither value is defined, the default number of bins is 20.
+    Computation speed is always O(N).
+
+    Signature:
+        seq(int OR float OR phyqus_lib.base_classes.MeasuredValue)/, *,
+            int > 0 OR None, int > 0 OR float > 0 OR None, int > 0, bool/
+                -> dict(int OR float -> int >= 0)
+    
+    Args:
+        Data: seq(int OR float OR phyqus_lib.base_classes.MeasuredValue); a
+            sequence of real numbers or 'measurements with uncertainty'
+        NBins: (keyword) int > 0 OR None; the desired number of bins
+        BinSize: (keyword) int > 0 OR float > 0 OR None; the desired bin size,
+            ignored is NBins is passed as not None value
+        SkipFrames: (keyword) int > 0; how many frames to hide in the
+            exception traceback, defaults to 1
+        DoCheck: (keyword) bool; flag if to perform the input data sanity
+            check, convert the mixed sequence into a list of only real numbers
+            and sort the values
+    
+    Returns:
+        dict(int OR float -> int >= 0): the calculated histogram
+    
+    Raises:
+        UT_TypeError: mandatory argument is not a sequence or real numbers or
+            measurements with uncertainty, OR any keyword argument is of
+            improper type
+        UT_ValueError: passed mandatory sequence is empty, OR any keyword
+            argument is of the proper type but unacceptable value
+
+    Version 1.0.0.0
+    """
+    _CheckPositiveInteger(SkipFrames)
+    if (NBins is None) and (BinSize is None):
+        _NBins = 20
+    elif not (NBins is None):
+        _CheckPositiveInteger(NBins)
+        _NBins = NBins
+    else:
+        if not isinstance(BinSize, (int, float)):
+            raise UT_TypeError(BinSize, (int, float), SkipFrames = SkipFrames)
+        elif BinSize <= 0:
+            raise UT_ValueError(BinSize, '> 0 - bin size',
+                                                        SkipFrames = SkipFrames)
+        _NBins = None
+    if DoCheck:
+        _Data = _ExtractMeans(Data, SkipFrames = SkipFrames + 1)
+    else:
+        _Data = Data
+    Min = min(_Data)
+    Max = max(_Data)
+    if not (_NBins is None):
+        NSteps = _NBins
+        if NSteps > 1:
+            Start = round(Min, 16)
+            Step = round((Max - Min) / (_NBins - 1), 16)
+        else:
+            Start = round(GetMean(_Data, DoCheck = False), 16)
+            Step = 0
+    else:
+        Step = round(BinSize, 16)
+        Mean = GetMean(_Data, DoCheck = False)
+        NLeft = int(math.ceil((Mean - Min) / Step - 0.5))
+        NRight = int(math.ceil((Max - Mean) / Step - 0.5))
+        NSteps = NLeft + NRight + 1
+        Start = Mean - NLeft * Step
+    if Step == 0 or NSteps == 1:
+        Result = {Start : len(_Data)}
+    else:
+        Temp = [0 for _ in range(NSteps)]
+        for Item in _Data:
+            Index = int((round(Item,16) - Start) / Step + 0.5)
+            Temp[Index] += 1
+        Result = {round(Start+Index*Step, 16) : Item
+                                            for Index, Item in enumerate(Temp)}
     return Result
