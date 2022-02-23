@@ -32,11 +32,22 @@ Functions:
         seq(int OR float OR phyqus_lib.base_classes.MeasuredValue)/, *,
             int > 0 OR None, int > 0 OR float > 0 OR None, int > 0, bool/
                 -> dict(int OR float -> int >=0)
+    GetModes(Data, *, SkipFrames = 1, DoCheck = True)
+        seq(int OR float OR phyqus_lib.base_classes.MeasuredValue)/, *, int > 0,
+            bool/ -> list(int OR float)
+    GetSpearman(DataX, DataY, *, SkipFrames = 1, DoCheck = True)
+        seq(int OR float OR phyqus_lib.base_classes.MeasuredValue)/,
+            seq(int OR float OR phyqus_lib.base_classes.MeasuredValue)/,
+                *, int > 0, bool/ -> int OR float
+    GetKendall(DataX, DataY, *, SkipFrames = 1, DoCheck = True)
+        seq(int OR float OR phyqus_lib.base_classes.MeasuredValue)/,
+            seq(int OR float OR phyqus_lib.base_classes.MeasuredValue)/,
+                *, int > 0, bool/ -> int OR float
 """
 
 __version__= '1.0.0.0'
-__date__ = '18-02-2022'
-__status__ = 'Development'
+__date__ = '23-02-2022'
+__status__ = 'Production'
 
 #imports
 
@@ -63,12 +74,73 @@ from introspection_lib.base_exceptions import UT_TypeError, UT_ValueError
 
 from phyqus_lib.base_classes import MeasuredValue
 
-from statistics_lib.base_functions import TGenericSequence, TReal, GetMean
-from statistics_lib.base_functions import  _ExtractMeans, _CheckPositiveInteger
+from statistics_lib.base_functions import TGenericSequence, TReal, TRealList
+from statistics_lib.base_functions import GetMean, GetPearsonR
+from statistics_lib.base_functions import _ExtractMeans, _CheckPositiveInteger
 
 #functions
 
 #+ helper functions - not for usage outside the module
+
+def _GetRanks(Data: TGenericSequence, *, SkipFrames: int = 1,
+                                            DoCheck: bool = True) -> TRealList:
+    """
+    Calculates the fractional ranks of the elements of a mixed sequence of real
+    numbers and the measurements with uncertainty. Computation speed is
+    O(N*log(N)), unless the passed sequence is already sorted in ascending order
+    sequence of real numbers, which is indicated by the keyword argument
+    DoCheck = False, in which case the calculation speed is O(N).
+
+    Signature:
+        seq(int OR float OR phyqus_lib.base_classes.MeasuredValue)/, *, int > 0,
+            bool/ -> list(int OR float)
+    
+    Args:
+        Data: seq(int OR float OR phyqus_lib.base_classes.MeasuredValue); a
+            sequence of real numbers or 'measurements with uncertainty'
+        SkipFrames: (keyword) int > 0; how many frames to hide in the
+            exception traceback, defaults to 1
+        DoCheck: (keyword) bool; flag if to perform the input data sanity
+            check, convert the mixed sequence into a list of only real numbers
+            and sort the values, and sort them
+    
+    Returns:
+        list(int OR float): the calculated ranks, in the same order as the
+            initial sequence
+    
+    Raises:
+        UT_TypeError: mandatory argument is not a sequence or real numbers or
+            measurements with uncertainty, OR any keyword argument is of
+            improper type
+        UT_ValueError: passed mandatory sequence is empty, OR any keyword
+            argument is of the proper type but unacceptable value
+
+    Version 1.0.0.0
+    """
+    _CheckPositiveInteger(SkipFrames)
+    if DoCheck:
+        _Data = _ExtractMeans(Data, SkipFrames = SkipFrames + 1)
+        _DataSorted = sorted(_Data)
+    else:
+        _Data = Data
+        _DataSorted = _Data
+    dictFrequencies = dict()
+    for Item in _DataSorted:
+        dictFrequencies[Item] = dictFrequencies.get(Item, 0) + 1
+    dictRanks = dict()
+    Last = 0
+    for Key, Value in dictFrequencies.items():
+        if Value == 1:
+            dictRanks[Key] = Last + 1
+        else:
+            dictRanks[Key] = Last + (Value + 1) / 2
+        Last += Value
+    Result = [dictRanks[Key] for Key in _Data]
+    return Result
+
+#+ main, public functions
+
+#++ 1D statistics
 
 def GetMin(Data: TGenericSequence, *, SkipFrames: int = 1,
                                             DoCheck: bool = True) -> TReal:
@@ -188,7 +260,7 @@ def GetMedian(Data: TGenericSequence, *, SkipFrames: int = 1,
     """
     _CheckPositiveInteger(SkipFrames)
     if DoCheck:
-        _Data = sorted(_ExtractMeans(Data, SkipFrames = SkipFrames + 1))
+        _Data = sorted(_ExtractMeans(Data, SkipFrames = SkipFrames + 2))
     else:
         _Data = Data
     N = len(_Data)
@@ -238,7 +310,7 @@ def GetFirstQuartile(Data: TGenericSequence, *, SkipFrames: int = 1,
     """
     _CheckPositiveInteger(SkipFrames)
     if DoCheck:
-        _Data = sorted(_ExtractMeans(Data, SkipFrames = SkipFrames + 1))
+        _Data = sorted(_ExtractMeans(Data, SkipFrames = SkipFrames + 2))
     else:
         _Data = Data
     N = len(_Data)
@@ -287,7 +359,7 @@ def GetThirdQuartile(Data: TGenericSequence, *, SkipFrames: int = 1,
     """
     _CheckPositiveInteger(SkipFrames)
     if DoCheck:
-        _Data = sorted(_ExtractMeans(Data, SkipFrames = SkipFrames + 1))
+        _Data = sorted(_ExtractMeans(Data, SkipFrames = SkipFrames + 2))
     else:
         _Data = Data
     N = len(_Data)
@@ -347,7 +419,7 @@ def GetQuantile(Data: TGenericSequence, k: int, m: int, *, SkipFrames: int = 1,
     if (k < 0) or (k > m):
         raise UT_ValueError(k, '>= 0 and <= {} - quantile index'.format(m))
     if DoCheck:
-        _Data = sorted(_ExtractMeans(Data, SkipFrames = SkipFrames + 1))
+        _Data = sorted(_ExtractMeans(Data, SkipFrames = SkipFrames + 2))
     else:
         _Data = Data
     N = len(_Data)
@@ -443,8 +515,190 @@ def GetHistogram(Data: TGenericSequence, *, NBins: Optional[int] = None,
     else:
         Temp = [0 for _ in range(NSteps)]
         for Item in _Data:
-            Index = int((round(Item,16) - Start) / Step + 0.5)
+            Index = int((round(Item, 16) - Start) / Step + 0.5)
+            if Index >= NSteps: #rounding-up errors
+                Index = NSteps + 1
+            elif Index < 0:
+                Index = 0
             Temp[Index] += 1
         Result = {round(Start+Index*Step, 16) : Item
                                             for Index, Item in enumerate(Temp)}
+    return Result
+
+def GetModes(Data: TGenericSequence, *, SkipFrames: int = 1,
+                                            DoCheck: bool = True) -> TRealList:
+    """
+    Calculates the mode(s) of a mixed sequence of real numbers and the
+    measurements with uncertainty. Computation speed is always O(N).
+
+    Signature:
+        seq(int OR float OR phyqus_lib.base_classes.MeasuredValue)/, *, int > 0,
+            bool/ -> list(int OR float)
+    
+    Args:
+        Data: seq(int OR float OR phyqus_lib.base_classes.MeasuredValue); a
+            sequence of real numbers or 'measurements with uncertainty'
+        SkipFrames: (keyword) int > 0; how many frames to hide in the
+            exception traceback, defaults to 1
+        DoCheck: (keyword) bool; flag if to perform the input data sanity
+            check, convert the mixed sequence into a list of only real numbers
+            and sort the values
+    
+    Returns:
+        list(int OR float): the calculated modes
+    
+    Raises:
+        UT_TypeError: mandatory argument is not a sequence or real numbers or
+            measurements with uncertainty, OR any keyword argument is of
+            improper type
+        UT_ValueError: passed mandatory sequence is empty, OR any keyword
+            argument is of the proper type but unacceptable value
+
+    Version 1.0.0.0
+    """
+    _CheckPositiveInteger(SkipFrames)
+    if DoCheck:
+        _Data = _ExtractMeans(Data, SkipFrames = SkipFrames + 1)
+    else:
+        _Data = Data
+    dictTemp = dict()
+    for Item in _Data:
+        dictTemp[Item] = dictTemp.get(Item, 0) + 1
+    MaxCount = max(dictTemp.values())
+    Result = []
+    for Key, Value in dictTemp.items():
+        if Value == MaxCount:
+            Result.append(Key)
+    return Result
+
+#++ 2D statistics
+
+def GetSpearman(DataX: TGenericSequence, DataY: TGenericSequence, *,
+                            SkipFrames: int = 1, DoCheck: bool = True) -> TReal:
+    """
+    Calculates the Spearman rank correlation coeffificent of the paired  mixed
+    sequences of real numbers and the measurements with uncertainty. Computation
+    speed is O(N*log(N)), unless the passed sequences are already sorted in
+    ascending order sequences of real numbers, which is indicated by the keyword
+    argument DoCheck = False, in which case the calculation speed is O(N).
+
+    Signature:
+        seq(int OR float OR phyqus_lib.base_classes.MeasuredValue)/,
+            seq(int OR float OR phyqus_lib.base_classes.MeasuredValue)/,
+                *, int > 0, bool/ -> int OR float
+    
+    Args:
+        DataX: seq(int OR float OR phyqus_lib.base_classes.MeasuredValue); a
+            sequence of real numbers or 'measurements with uncertainty' as X
+        DataY: seq(int OR float OR phyqus_lib.base_classes.MeasuredValue); a
+            sequence of real numbers or 'measurements with uncertainty' as Y
+        SkipFrames: (keyword) int > 0; how many frames to hide in the
+            exception traceback, defaults to 1
+        DoCheck: (keyword) bool; flag if to perform the input data sanity
+            check and convert the mixed sequence into a list of only real
+            numbers, and sort the sequence(s)
+    
+    Returns:
+        int OR float: the calculated rank correlation value
+    
+    Raises:
+        UT_TypeError: any of mandatory data arguments is not a sequence or real
+            numbers or measurements with uncertainty, OR any keyword argument is
+            of improper type
+        UT_ValueError: any of the passed mandatory sequence is empty, OR any
+            keyword argument is of the proper type but unacceptable value, OR
+            the X and Y sequences are of different length
+
+    Version 1.0.0.0
+    """
+    _CheckPositiveInteger(SkipFrames)
+    RankX = _GetRanks(DataX, SkipFrames = SkipFrames + 1, DoCheck = DoCheck)
+    RankY = _GetRanks(DataY, SkipFrames = SkipFrames + 1, DoCheck = DoCheck)
+    Length = len(RankX)
+    if Length != len(RankY):
+        raise UT_ValueError(
+                Length, '== {} - X and Y data length'.format(len(RankY)),
+                                                    SkipFrames = SkipFrames)
+    if Length == 1:
+        Result = 1
+    else:
+        Result = GetPearsonR(RankX, RankY, DoCheck = False)
+    return Result
+
+def GetKendall(DataX: TGenericSequence, DataY: TGenericSequence, *,
+                            SkipFrames: int = 1, DoCheck: bool = True) -> TReal:
+    """
+    Calculates the Kendall rank correlation coeffificent of the paired  mixed
+    sequences of real numbers and the measurements with uncertainty. Computation
+    speed is always O(N^2).
+
+    Signature:
+        seq(int OR float OR phyqus_lib.base_classes.MeasuredValue)/,
+            seq(int OR float OR phyqus_lib.base_classes.MeasuredValue)/,
+                *, int > 0, bool/ -> int OR float
+    
+    Args:
+        DataX: seq(int OR float OR phyqus_lib.base_classes.MeasuredValue); a
+            sequence of real numbers or 'measurements with uncertainty' as X
+        DataY: seq(int OR float OR phyqus_lib.base_classes.MeasuredValue); a
+            sequence of real numbers or 'measurements with uncertainty' as Y
+        SkipFrames: (keyword) int > 0; how many frames to hide in the
+            exception traceback, defaults to 1
+        DoCheck: (keyword) bool; flag if to perform the input data sanity
+            check and convert the mixed sequence into a list of only real
+            numbers
+    
+    Returns:
+        int OR float: the calculated rank correlation value
+    
+    Raises:
+        UT_TypeError: any of mandatory data arguments is not a sequence or real
+            numbers or measurements with uncertainty, OR any keyword argument is
+            of improper type
+        UT_ValueError: any of the passed mandatory sequence is empty, OR any
+            keyword argument is of the proper type but unacceptable value, OR
+            the X and Y sequences are of different length
+
+    Version 1.0.0.0
+    """
+    _CheckPositiveInteger(SkipFrames)
+    if DoCheck:
+        _DataX = _ExtractMeans(DataX, SkipFrames = SkipFrames + 1)
+        _DataY = _ExtractMeans(DataY, SkipFrames = SkipFrames + 1)
+    else:
+        _DataX = DataX
+        _DataY = DataY
+    Length = len(_DataX)
+    if Length != len(_DataY):
+        raise UT_ValueError(
+                Length, '== {} - X and Y data length'.format(len(_DataY)),
+                                                    SkipFrames = SkipFrames)
+    if Length== 1:
+        Result = 1
+    else:
+        NConcord = 0
+        NDiscord = 0
+        NXTies = 0
+        NYTies = 0
+        for FirstIdx in range(Length - 1):
+            for SecondIdx in range(FirstIdx + 1, Length):
+                X1 = _DataX[FirstIdx]
+                X2 = _DataX[SecondIdx]
+                Y1 = _DataY[FirstIdx]
+                Y2 = _DataY[SecondIdx]
+                if X1 == X2 and Y1 != Y2:
+                    NXTies += 1
+                elif X1 != X2 and Y1 == Y2:
+                    NYTies += 1
+                elif (X1 > X2 and Y1 > Y2) or (X1 < X2 and Y1 < Y2):
+                    NConcord += 1
+                elif (X1 > X2 and Y1 < Y2) or (X1 < X2 and Y1 > Y2):
+                    NDiscord += 1
+        Difference = NConcord - NDiscord
+        Correction = math.sqrt((NConcord + NDiscord + NXTies) *
+                                                (NConcord + NDiscord + NYTies))
+        if Correction == 0:
+            Result = 1
+        else:
+            Result = Difference / Correction
     return Result

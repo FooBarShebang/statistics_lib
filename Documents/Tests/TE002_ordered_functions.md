@@ -58,7 +58,7 @@ All these function pass TEST-T-200, TEST-T-201 and TEST-T-202, as well as indivi
 
 **Test steps:** Analyze the source code of the module [ordered\_functions](../../ordered_functions.py) as well as of the unit-test module [/Tests/UT002\_ordered\_functions](../../Tests/UT002_ordered_functions.py). Execute the mentioned unit-test module.
 
-**Test result:** PASS / FAIL
+**Test result:** PASS
 
 ## Tests definition (Test)
 
@@ -101,7 +101,7 @@ In case of of the 2D statistic functions 2 sets of the lists of these data types
 
 This test is applied to all functions!
 
-**Test result:** PASS / FAIL
+**Test result:** PASS
 
 ___
 
@@ -124,7 +124,7 @@ ___
 
 **Test steps:** Try to call the funcion being tested with an appropriate data type argument. Check that the expected exception is raised.
 
-**Test result:** PASS / FAIL
+**Test result:** PASS
 
 ___
 
@@ -148,7 +148,7 @@ ___
 
 **Test steps:** Try to call the funcion being tested with an appropriate argument (see above). Check that the expected exception is raised.
 
-**Test result:** PASS / FAIL
+**Test result:** PASS
 
 ___
 
@@ -306,14 +306,88 @@ ___
 
 **Test result:** PASS
 
+___
+
+**Test Identifier:** TEST-T-280
+
+**Requirement ID(s)**: REQ-FUN-280
+
+**Verification method:** T
+
+**Test goal:** The performance of the function *GetModes*().
+
+**Expected result:** With a random sequence of the mix of integer, floating point numbers and instances of the measurements with uncertainty class passed into the function, it returns a list of all values, which occur most frequently occuring values, i.e. the mode(s) of the sample distribution. Using Python v3.8 or later it should return a list containing the same elements but, possibly, in a different order as the list returned by the Standard Library function *statistics.multimode*().
+
+**Test steps:** Prepare the test sequence (mixed types). Manually define the expected mode(s) values. Pass the formed sequence into the function being tested, and compare the returned list with the expected modes list. Repeat the process with the samples containg 1, 2, 3 modes and the edge case of all values being unique, i.e. each value is a mode.
+
+In running Python 3.8+ interpreter, use the same randomly generated sequences as in TEST-T-200, and compare the result with the return values of *statistics.multimode*() function, into wich the base real number sequences are passed.
+
+**Test result:** PASS
+
+___
+
+**Test Identifier:** TEST-T-290
+
+**Requirement ID(s)**: REQ-FUN-290
+
+**Verification method:** T
+
+**Test goal:** The performance of the function *GetSpearman*().
+
+**Expected result:** With a random sequence of the mix of integer, floating point numbers and instances of the measurements with uncertainty class passed into the function, it returns the Spearman rank correlation coefficient of the 'means', which is the Pearson's correlation of the *fractional ranks* of the sorted X and Y sequences.
+
+**Test steps:** Prepare the test sequences (mixed types) of the same length. Pass them into the function being tested and compare the returned result with the expected value calculated manually. Do the same for the sequences containg also:
+
+* Few X-ties only
+* Few Y-ties only
+* Few X-only ties and Y-only ties
+* Few X-Y ties (identical, duplicating data points)
+* Few X-only, Y-only and X-Y ties
+
+For the edge cases the following sequences should be used:
+
+* $y_i = \sqrt(x_i)$ - expected correlation coefficient ~ 1
+* $y_i = \frac{1}{x_i}$ - expected correlation coefficient ~ -1
+* $y_i = (-1)^i \times x_i$ - expected correlation coefficient ~ 0, expected in the range -0.25 to + 0.25
+
+**Test result:** PASS
+
+___
+
+**Test Identifier:** TEST-T-2A0
+
+**Requirement ID(s)**: REQ-FUN-2A0
+
+**Verification method:** T
+
+**Test goal:** The performance of the function *GetKendall*().
+
+**Expected result:** With a random sequence of the mix of integer, floating point numbers and instances of the measurements with uncertainty class passed into the function, it returns the Kendall rank correlation coefficient of the 'means' using the $\tau$-b variant of the algorithm, i.e. accounting for the ties.
+
+**Test steps:** Prepare the test sequences (mixed types) of the same length, which does not include any ties. Pass them into the function being tested and compare the returned result with the expected value calculated manually. Do the same for the sequences containg also:
+
+* Few X-ties only
+* Few Y-ties only
+* Few X-only ties and Y-only ties
+* Few X-Y ties (identical, duplicating data points)
+* Few X-only, Y-only and X-Y ties
+
+For the edge cases the same sequences as in TEST-T-290 should be used:
+
+* $y_i = \sqrt(x_i)$ - expected correlation coefficient ~ 1
+* $y_i = \frac{1}{x_i}$ - expected correlation coefficient ~ -1
+* $y_i = (-1)^i \times x_i$ - expected correlation coefficient ~ 0, expected in the range -0.25 to + 0.25
+
+**Test result:** PASS
+
 ## Traceability
 
 For traceability the relation between tests and requirements is summarized in the table below:
 
 | **Requirement ID** | **Covered in test(s)** | **Verified \[YES/NO\]**) |
 | :----------------- | :--------------------- | :----------------------- |
-| REQ-FUN-200        | TEST-A-200             | NO                       |
-| REQ-FUN-201        | TEST-T-200             | NO                       |
+| REQ-FUN-200        | TEST-A-200             | YES                      |
+| REQ-FUN-201        | TEST-T-200             | YES                      |
 | REQ-FUN-210        | TEST-T-210             | YES                      |
 | REQ-FUN-220        | TEST-T-220             | YES                      |
 | REQ-FUN-230        | TEST-T-230             | YES                      |
@@ -321,9 +395,12 @@ For traceability the relation between tests and requirements is summarized in th
 | REQ-FUN-250        | TEST-T-250             | YES                      |
 | REQ-FUN-260        | TEST-T-260             | YES                      |
 | REQ-FUN-270        | TEST-T-270             | YES                      |
-| REQ-AWM-200        | TEST-T-201             | NO                       |
-| REQ-AWM-201        | TEST-T-202             | NO                       |
+| REQ-FUN-280        | TEST-T-280             | YES                      |
+| REQ-FUN-290        | TEST-T-290             | YES                      |
+| REQ-FUN-2A0        | TEST-T-2A0             | YES                      |
+| REQ-AWM-200        | TEST-T-201             | YES                      |
+| REQ-AWM-201        | TEST-T-202             | YES                      |
 
 | **Software ready for production \[YES/NO\]** | **Rationale**        |
 | :------------------------------------------: | :------------------- |
-| NO                                           | Under development    |
+| YES                                          | All tests passed     |

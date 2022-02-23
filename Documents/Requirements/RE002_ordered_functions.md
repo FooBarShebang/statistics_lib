@@ -141,6 +141,36 @@ ___
 
 **Verification Method:** T
 
+___
+
+**Requirement ID:** REQ-FUN-280
+
+**Title:** Performance of function to calculate the modes of sample data
+
+**Description:** With a random sequence of the mix of integer, floating point numbers and instances of the measurements with uncertainty class passed into the function, it returns a list of all values, which occur most frequently occuring values, i.e. the mode(s) of the sample distribution. Using Python v3.8 or later it should return a list containing the same elements but, possibly, in a different order as the list returned by the Standard Library function *statistics.multimode*().
+
+**Verification Method:** T
+
+___
+
+**Requirement ID:** REQ-FUN-290
+
+**Title:** Performance of function to calculate the Spearman rank correlation coefficient of the data sample
+
+**Description:** With a random sequence of the mix of integer, floating point numbers and instances of the measurements with uncertainty class passed into the function, it returns the Spearman rank correlation coefficient of the 'means', which is the Pearson's correlation of the *fractional ranks* of the sorted X and Y sequences.
+
+**Verification Method:** T
+
+___
+
+**Requirement ID:** REQ-FUN-2A0
+
+**Title:** Performance of function to calculate the Kendall rank correlation coefficient of the data sample
+
+**Description:** With a random sequence of the mix of integer, floating point numbers and instances of the measurements with uncertainty class passed into the function, it returns the Kendall rank correlation coefficient of the 'means' using the $\tau$-b variant of the algorithm, i.e. accounting for the ties.
+
+**Verification Method:** T
+
 ## Alarms, warnings and operator messages
 
 **Requirement ID:** REQ-AWM-200

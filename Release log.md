@@ -1,5 +1,9 @@
 # Release log of library statistics_lib
 
+## 2022-02-23 v0.3.0-dev1
+
+Implemented and tested module *ordered_functions*, which provides functionality to calculate median, quartiles, quantiles and modes of a sample data distribution, as well as Spearman and Kendall rank correlation coefficients.
+
 ## 2022-02-10 v0.2.0-dev1
 
 * Refactored the code of *base_functions* module to avoid redundant input data sanity checks and allow proper exception traceback manipulation with the chained functions call

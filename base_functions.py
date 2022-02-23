@@ -777,11 +777,11 @@ def GetKurtosisS(Data: TGenericSequence, *, SkipFrames: int = 1,
     and the measurements with uncertainty.
 
     Signature:
-        list(int OR float OR phyqus_lib.base_classes.MeasuredValue)/, *, int > 0,
+        seq(int OR float OR phyqus_lib.base_classes.MeasuredValue)/, *, int > 0,
             bool/ -> int OR float
     
     Args:
-        Data: list(int OR float OR phyqus_lib.base_classes.MeasuredValue); a
+        Data: seq(int OR float OR phyqus_lib.base_classes.MeasuredValue); a
             sequence of real numbers or 'measurements with uncertainty'
         SkipFrames: (keyword) int > 0; how many frames to hide in the
             exception traceback, defaults to 1
@@ -824,14 +824,14 @@ def GetCovariance(DataX: TGenericSequence, DataY: TGenericSequence, *,
     the measurements with uncertainty.
 
     Signature:
-        list(int OR float OR phyqus_lib.base_classes.MeasuredValue)/,
-            list(int OR float OR phyqus_lib.base_classes.MeasuredValue)/,
+        seq(int OR float OR phyqus_lib.base_classes.MeasuredValue)/,
+            seq(int OR float OR phyqus_lib.base_classes.MeasuredValue)/,
                 *, int > 0, bool/ -> int OR float
     
     Args:
-        DataX: list(int OR float OR phyqus_lib.base_classes.MeasuredValue); a
+        DataX: seq(int OR float OR phyqus_lib.base_classes.MeasuredValue); a
             sequence of real numbers or 'measurements with uncertainty' as X
-        DataY: list(int OR float OR phyqus_lib.base_classes.MeasuredValue); a
+        DataY: seq(int OR float OR phyqus_lib.base_classes.MeasuredValue); a
             sequence of real numbers or 'measurements with uncertainty' as Y
         SkipFrames: (keyword) int > 0; how many frames to hide in the
             exception traceback, defaults to 1
@@ -861,7 +861,8 @@ def GetCovariance(DataX: TGenericSequence, DataY: TGenericSequence, *,
         _DataY = DataY
     if len(_DataX) != len(_DataY):
         raise UT_ValueError(
-                len(_DataX), '== {} - X and Y data length'.format(len(_DataY)))
+                len(_DataX), '== {} - X and Y data length'.format(len(_DataY)),
+                                                    SkipFrames = SkipFrames)
     MeanX = GetMean(_DataX, SkipFrames = SkipFrames + 1, DoCheck = False)
     MeanY = GetMean(_DataY, SkipFrames = SkipFrames + 1, DoCheck = False)
     Length = len(_DataX)
@@ -969,14 +970,14 @@ def GetPearsonR(DataX: TGenericSequence, DataY: TGenericSequence, *,
     sequences of real numbers and the measurements with uncertainty.
 
     Signature:
-        list(int OR float OR phyqus_lib.base_classes.MeasuredValue)/,
-            list(int OR float OR phyqus_lib.base_classes.MeasuredValue)/,
+        seq(int OR float OR phyqus_lib.base_classes.MeasuredValue)/,
+            seq(int OR float OR phyqus_lib.base_classes.MeasuredValue)/,
                 *, int > 0, bool/ -> int OR float
     
     Args:
-        DataX: list(int OR float OR phyqus_lib.base_classes.MeasuredValue); a
+        DataX: seq(int OR float OR phyqus_lib.base_classes.MeasuredValue); a
             sequence of real numbers or 'measurements with uncertainty' as X
-        DataY: list(int OR float OR phyqus_lib.base_classes.MeasuredValue); a
+        DataY: seq(int OR float OR phyqus_lib.base_classes.MeasuredValue); a
             sequence of real numbers or 'measurements with uncertainty' as Y
         SkipFrames: (keyword) int > 0; how many frames to hide in the
             exception traceback, defaults to 1

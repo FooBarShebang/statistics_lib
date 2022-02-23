@@ -21,10 +21,10 @@ Modules:
 """
 
 __project__ = 'Statistics of the measurements with experimental uncertainties'
-__version_info__= (0, 2, 0)
+__version_info__= (0, 3, 0)
 __version_suffix__= '-dev1'
 __version__= ''.join(['.'.join(map(str, __version_info__)), __version_suffix__])
-__date__ = '17-02-2022'
+__date__ = '23-02-2022'
 __status__ = 'Development'
 __author__ = 'Anton Azarov'
 __maintainer__ = 'a.azarov@diagnoptics.com'

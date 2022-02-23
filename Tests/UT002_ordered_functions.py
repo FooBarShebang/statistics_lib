@@ -8,18 +8,20 @@ report TE002_ordered_functions.md
 
 
 __version__= '1.0.0.0'
-__date__ = '17-02-2022'
+__date__ = '23-02-2022'
 __status__ = 'Testing'
 
 #imports
 
 #+ standard library
 
+import enum
 import sys
 import os
 import unittest
 import random
 import statistics
+import math
 
 #+ custom modules
 
@@ -704,6 +706,273 @@ class Test_GetHistogram(Test_GetMin):
         TestResult = self.TestFunction(BaseInput, BinSize = 5)
         self.assertDictEqual(TestResult, DictCheck)
 
+class Test_GetModes(Test_GetMin):
+    """
+    Unit-test class implementing testing of the function GetModes() from the
+    module statistics_lib.ordered_functions.
+
+    Implements tests: TEST-T-200, TEST-T-201, TEST-T-202 and TEST-T-280.
+    Covers the requirements REQ-FUN-201, REQ-FUN-280, REQ-AWM-200, REQ-AWM-201.
+    """
+    
+    @classmethod
+    def setUpClass(cls) -> None:
+        """
+        Preparation for the test cases, done only once.
+        """
+        super().setUpClass()
+        cls.TestFunction = staticmethod(test_module.GetModes)
+        cls.ExtraCheck = sys.version_info[0] >= 3 and sys.version_info[1] >= 8
+        if cls.ExtraCheck:
+            cls.CheckFunction = staticmethod(statistics.multimode)
+    
+    def test_OkOperation(self) -> None:
+        """
+        Checks the normal operation mode of the function being tested.
+
+        Implements test TEST-T-200, TEST-T-280.
+        Covers the requirement REQ-FUN-201, REQ-FUN-280.
+        """
+        #single mode
+        TestInput = [1, 1.5, 2, MeasuredValue(1.5), 3]
+        CheckResult = [1.5]
+        TestResult = self.TestFunction(TestInput)
+        self.assertIsInstance(TestResult, list)
+        self.assertListEqual(TestResult, CheckResult)
+        TestResult = self.TestFunction(tuple(TestInput))
+        self.assertIsInstance(TestResult, list)
+        self.assertListEqual(TestResult, CheckResult)
+        #two modes
+        TestInput = [1, 1.5, 2, MeasuredValue(1.5), 3, MeasuredValue(2)]
+        CheckResult = [1.5, 2]
+        TestResult = self.TestFunction(TestInput)
+        self.assertIsInstance(TestResult, list)
+        self.assertListEqual(TestResult, CheckResult)
+        TestResult = self.TestFunction(tuple(TestInput))
+        self.assertIsInstance(TestResult, list)
+        self.assertListEqual(TestResult, CheckResult)
+        #three modes
+        TestInput = [1, 1.5, 2, MeasuredValue(1.5), 3, MeasuredValue(2), 1, 4.2]
+        CheckResult = [1, 1.5, 2]
+        TestResult = self.TestFunction(TestInput)
+        self.assertIsInstance(TestResult, list)
+        self.assertListEqual(TestResult, CheckResult)
+        TestResult = self.TestFunction(tuple(TestInput))
+        self.assertIsInstance(TestResult, list)
+        self.assertListEqual(TestResult, CheckResult)
+        #edge case - all modes
+        TestInput = [1, 1.5, 2.1, MeasuredValue(1.3), MeasuredValue(2), 4.2]
+        CheckResult = [1, 1.5, 2.1, 1.3, 2, 4.2]
+        TestResult = self.TestFunction(TestInput)
+        self.assertIsInstance(TestResult, list)
+        self.assertListEqual(TestResult, CheckResult)
+        TestResult = self.TestFunction(tuple(TestInput))
+        self.assertIsInstance(TestResult, list)
+        self.assertListEqual(TestResult, CheckResult)
+        #edge case - single value
+        self.assertListEqual(self.TestFunction([1]), [1])
+        self.assertListEqual(self.TestFunction((1.2,)), [1.2])
+        if self.ExtraCheck:
+            for TestInput, BaseInput in ((self.AllInt, self.AllInt),
+                                        (self.AllFloat, self.AllFloat),
+                                        (self.Mixed, self.Mixed),
+                                        (self.IntErr, self.AllInt),
+                                        (self.FloatErr, self.AllFloat),
+                                        (self.MixedErr, self.Mixed),
+                                        (self.TotalMixed, self.Mixed)):
+                TestResult = self.TestFunction(TestInput)
+                CheckResult = self.CheckFunction(BaseInput)
+                self.assertIsInstance(TestResult, list)
+                self.assertCountEqual(TestResult, CheckResult)
+                TestResult = self.TestFunction(tuple(TestInput))
+                self.assertIsInstance(TestResult, list)
+                self.assertCountEqual(TestResult, CheckResult)
+
+class Test_GetSpearman(Test_GetMin):
+    """
+    Unit-test class implementing testing of the function GetSpearman() from the
+    module statistics_lib.ordered_functions.
+
+    Implements tests: TEST-T-200, TEST-T-201, TEST-T-202 and TEST-T-290.
+    Covers the requirements REQ-FUN-201, REQ-FUN-290, REQ-AWM-200, REQ-AWM-201.
+    """
+    
+    @classmethod
+    def setUpClass(cls) -> None:
+        """
+        Preparation for the test cases, done only once.
+        """
+        super().setUpClass()
+        cls.TestFunction = staticmethod(test_module.GetSpearman)
+    
+    def test_OkOperation(self) -> None:
+        """
+        Checks the normal operation mode of the function being tested.
+
+        Implements test TEST-T-200, TEST-T-290.
+        Covers the requirement REQ-FUN-201, REQ-FUN-290.
+        """
+        DataX = [35, 23.0, MeasuredValue(47), 17, 10.0, 43, 9, 6.0, 28.0]
+        DataY = [30, 33.0, 45, MeasuredValue(23.0), 8.0, 49, 12.0, 4.0, 31.0]
+        TestResult = self.TestFunction(DataX, DataY)
+        self.assertAlmostEqual(TestResult, 0.9, places = FLOAT_CHECK_PRECISION)
+
+    def test_EdgeCases(self) -> None:
+        """
+        Checks the normal operation mode of the function being tested.
+
+        Implements test TEST-T-200, TEST-T-290.
+        Covers the requirement REQ-FUN-201, REQ-FUN-290.
+        """
+        #same sequence
+        for TestInput in (self.AllInt, tuple(self.AllInt),
+                            self.AllFloat, tuple(self.AllFloat),
+                            self.Mixed, tuple(self.Mixed),
+                            self.IntErr, tuple(self.AllInt),
+                            self.FloatErr, tuple(self.AllFloat),
+                            self.MixedErr, tuple(self.Mixed),
+                            self.TotalMixed, tuple(self.Mixed)):
+            TestResult = self.TestFunction(TestInput, TestInput)
+            self.assertIsInstance(TestResult, (int, float))
+            self.assertAlmostEqual(TestResult, 1.0,
+                                                places = FLOAT_CHECK_PRECISION)
+        #single element sequences
+        for DataX, DataY in (([1], [1.0]), ((1.0, ), [2]), ((2.0, ), (3, )),
+                                                                ([2], (3.0, ))):
+            TestResult = self.TestFunction(DataX, DataY)
+            self.assertIsInstance(TestResult, (int, float))
+            self.assertAlmostEqual(TestResult, 1.0,
+                                                places = FLOAT_CHECK_PRECISION)
+        #strictly growing function relation
+        DataX = [abs(Item) for Item in self.Mixed]
+        DataY = [math.sqrt(abs(Item)) for Item in self.Mixed]
+        TestResult = self.TestFunction(DataX, DataY)
+        self.assertIsInstance(TestResult, (int, float))
+        self.assertAlmostEqual(TestResult, 1.0, places = FLOAT_CHECK_PRECISION)
+        #strictly falling function relation
+        DataX = [abs(Item) for Item in self.Mixed if Item != 0]
+        DataY = [1.0 / Item for Item in DataX]
+        TestResult = self.TestFunction(DataX, DataY)
+        self.assertIsInstance(TestResult, (int, float))
+        self.assertAlmostEqual(TestResult, -1.0, places = FLOAT_CHECK_PRECISION)
+        #mostly uncorrelated data
+        DataX = self.Mixed
+        DataY = [pow(-1, Index) * Item for Index, Item in enumerate(DataX)]
+        TestResult = self.TestFunction(DataX, DataY)
+        self.assertIsInstance(TestResult, (int, float))
+        self.assertLessEqual(abs(TestResult), 0.25)
+
+    def test_TypeError(self) -> None:
+        """
+        Checks that sub-class of TypeError is raised with improper input data
+        type.
+
+        Implements test TEST-T-201.
+        Covers the requirement REQ-AWM-200.
+        """
+        for Temp in self.BadCases:
+            with self.assertRaises(TypeError):
+                self.TestFunction(Temp, [1, 1])
+            with self.assertRaises(TypeError):
+                self.TestFunction([1, 1], Temp)
+            with self.assertRaises(TypeError):
+                self.TestFunction(Temp, Temp)
+    
+    def test_ValueError(self) -> None:
+        """
+        Checks that sub-class of ValueError is raised with proper input data
+        type but wrong value.
+
+        Implements test TEST-T-202.
+        Covers the requirement REQ-AWM-201.
+        """
+        with self.assertRaises(ValueError):
+            self.TestFunction([], [1, 1])
+        with self.assertRaises(ValueError):
+            self.TestFunction([1, 1], [])
+        with self.assertRaises(ValueError):
+            self.TestFunction([], [])
+        for _ in range(10):
+            Array1 = [random.randint(1, 5) for _ in range(random.randint(1, 5))]
+            Array2 = list(Array1)
+            Array2.extend([random.randint(1, 5)
+                                        for _ in range(random.randint(1, 5))])
+            with self.assertRaises(ValueError):
+                self.TestFunction(Array1, Array2)
+            with self.assertRaises(ValueError):
+                self.TestFunction(Array2, Array1)
+
+class Test_GetKendall(Test_GetSpearman):
+    """
+    Unit-test class implementing testing of the function GetKendall() from the
+    module statistics_lib.ordered_functions.
+
+    Implements tests: TEST-T-200, TEST-T-201, TEST-T-202 and TEST-T-2A0.
+    Covers the requirements REQ-FUN-201, REQ-FUN-2A0, REQ-AWM-200, REQ-AWM-201.
+    """
+    
+    @classmethod
+    def setUpClass(cls) -> None:
+        """
+        Preparation for the test cases, done only once.
+        """
+        super().setUpClass()
+        cls.TestFunction = staticmethod(test_module.GetKendall)
+    
+    def test_OkOperation(self) -> None:
+        """
+        Checks the normal operation mode of the function being tested.
+
+        Implements test TEST-T-200, TEST-T-2A0.
+        Covers the requirement REQ-FUN-201, REQ-FUN-2A0.
+        """
+        #no ties
+        DataX = [35, 23.0, MeasuredValue(47), 17, 10.0, 43, 9, 6.0, 28.0]
+        DataY = [30, 33.0, 45, MeasuredValue(23.0), 8.0, 49, 12.0, 4.0, 31.0]
+        TestResult = self.TestFunction(DataX, DataY)
+        CheckResult = 26 / 36
+        self.assertAlmostEqual(TestResult, CheckResult,
+                                                places = FLOAT_CHECK_PRECISION)
+        # single X-tie
+        DataX = [35, 23.0, MeasuredValue(47), 17, 10.0, 43, 9, 6.0, 28.0, 47]
+        DataY = [30, 33.0, 45, MeasuredValue(23.0), 8.0, 49, 12.0, 4.0, 31, 50]
+        TestResult = self.TestFunction(DataX, DataY)
+        CheckResult = 34 / math.sqrt(45 * 44)
+        self.assertAlmostEqual(TestResult, CheckResult,
+                                                places = FLOAT_CHECK_PRECISION)
+        # single Y-tie
+        DataX = [35, 23.0, MeasuredValue(47), 17, 10.0, 43, 9, 6.0, 28.0, 48]
+        DataY = [30, 33.0, 45, MeasuredValue(23.0), 8.0, 49, 12.0, 4.0, 31, 49]
+        TestResult = self.TestFunction(DataX, DataY)
+        CheckResult = 34 / math.sqrt(45 * 44)
+        self.assertAlmostEqual(TestResult, CheckResult,
+                                                places = FLOAT_CHECK_PRECISION)
+        # single XY-tie
+        DataX = [35, 23.0, MeasuredValue(47), 17, 10.0, 43, 9, 6.0, 28.0, 43]
+        DataY = [30, 33.0, 45, MeasuredValue(23.0), 8.0, 49, 12.0, 4.0, 31, 49]
+        TestResult = self.TestFunction(DataX, DataY)
+        CheckResult = 32 / 44
+        self.assertAlmostEqual(TestResult, CheckResult,
+                                                places = FLOAT_CHECK_PRECISION)
+        # single X-tie and single Y-tie
+        DataX = [35, 23.0, MeasuredValue(47), 17, 10.0, 43, 9, 6.0, 28.0, 47,
+                                                                            48]
+        DataY = [30, 33.0, 45, MeasuredValue(23.0), 8.0, 49, 12.0, 4.0, 31, 50,
+                                                                            49]
+        TestResult = self.TestFunction(DataX, DataY)
+        CheckResult = 41 / 54
+        self.assertAlmostEqual(TestResult, CheckResult,
+                                                places = FLOAT_CHECK_PRECISION)
+        # single X-tie, single Y-tie and single XY-tie
+        DataX = [35, 23.0, MeasuredValue(47), 17, 10.0, 43, 9, 6.0, 28.0, 47,
+                                                                        48, 35]
+        DataY = [30, 33.0, 45, MeasuredValue(23.0), 8.0, 49, 12.0, 4.0, 31, 50,
+                                                                        49, 30]
+        TestResult = self.TestFunction(DataX, DataY)
+        CheckResult = 47 / 64
+        self.assertAlmostEqual(TestResult, CheckResult,
+                                                places = FLOAT_CHECK_PRECISION)
+
 #+ test suites
 
 TestSuite1 = unittest.TestLoader().loadTestsFromTestCase(Test_GetMin)
@@ -720,9 +989,16 @@ TestSuite6 = unittest.TestLoader().loadTestsFromTestCase(Test_GetQuantile)
 
 TestSuite7 = unittest.TestLoader().loadTestsFromTestCase(Test_GetHistogram)
 
+TestSuite8 = unittest.TestLoader().loadTestsFromTestCase(Test_GetModes)
+
+TestSuite9 = unittest.TestLoader().loadTestsFromTestCase(Test_GetSpearman)
+
+TestSuite10 = unittest.TestLoader().loadTestsFromTestCase(Test_GetKendall)
+
 TestSuite = unittest.TestSuite()
 TestSuite.addTests([TestSuite1, TestSuite2, TestSuite3, TestSuite4, TestSuite5,
-                        TestSuite6, TestSuite7])
+                        TestSuite6, TestSuite7, TestSuite8, TestSuite9,
+                        TestSuite10])
 
 if __name__ == "__main__":
     sys.stdout.write(
