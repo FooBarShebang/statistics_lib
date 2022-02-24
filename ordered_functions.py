@@ -46,7 +46,7 @@ Functions:
 """
 
 __version__= '1.0.0.0'
-__date__ = '23-02-2022'
+__date__ = '24-02-2022'
 __status__ = 'Production'
 
 #imports
@@ -86,10 +86,8 @@ def _GetRanks(Data: TGenericSequence, *, SkipFrames: int = 1,
                                             DoCheck: bool = True) -> TRealList:
     """
     Calculates the fractional ranks of the elements of a mixed sequence of real
-    numbers and the measurements with uncertainty. Computation speed is
-    O(N*log(N)), unless the passed sequence is already sorted in ascending order
-    sequence of real numbers, which is indicated by the keyword argument
-    DoCheck = False, in which case the calculation speed is O(N).
+    numbers and the measurements with uncertainty. Computation speed is always
+    O(N*log(N)).
 
     Signature:
         seq(int OR float OR phyqus_lib.base_classes.MeasuredValue)/, *, int > 0,
@@ -102,14 +100,14 @@ def _GetRanks(Data: TGenericSequence, *, SkipFrames: int = 1,
             exception traceback, defaults to 1
         DoCheck: (keyword) bool; flag if to perform the input data sanity
             check, convert the mixed sequence into a list of only real numbers
-            and sort the values, and sort them
+            and sort the values
     
     Returns:
         list(int OR float): the calculated ranks, in the same order as the
             initial sequence
     
     Raises:
-        UT_TypeError: mandatory argument is not a sequence or real numbers or
+        UT_TypeError: mandatory argument is not a sequence of real numbers or
             measurements with uncertainty, OR any keyword argument is of
             improper type
         UT_ValueError: passed mandatory sequence is empty, OR any keyword
@@ -120,16 +118,20 @@ def _GetRanks(Data: TGenericSequence, *, SkipFrames: int = 1,
     _CheckPositiveInteger(SkipFrames)
     if DoCheck:
         _Data = _ExtractMeans(Data, SkipFrames = SkipFrames + 1)
-        _DataSorted = sorted(_Data)
     else:
         _Data = Data
-        _DataSorted = _Data
+    _DataSorted = sorted(_Data)
     dictFrequencies = dict()
     for Item in _DataSorted:
         dictFrequencies[Item] = dictFrequencies.get(Item, 0) + 1
     dictRanks = dict()
     Last = 0
-    for Key, Value in dictFrequencies.items():
+    if sys.version_info[0] >= 3 and sys.version_info[1] >= 7:
+        Keys = dictFrequencies.keys()
+    else:
+        Keys = sorted(dictFrequencies.keys())
+    for Key in Keys:
+        Value = dictFrequencies[Key]
         if Value == 1:
             dictRanks[Key] = Last + 1
         else:
@@ -162,13 +164,12 @@ def GetMin(Data: TGenericSequence, *, SkipFrames: int = 1,
             exception traceback, defaults to 1
         DoCheck: (keyword) bool; flag if to perform the input data sanity
             check, convert the mixed sequence into a list of only real numbers
-            and sort the values
     
     Returns:
         int OR float: the calculated min value
     
     Raises:
-        UT_TypeError: mandatory argument is not a sequence or real numbers or
+        UT_TypeError: mandatory argument is not a sequence of real numbers or
             measurements with uncertainty, OR any keyword argument is of
             improper type
         UT_ValueError: passed mandatory sequence is empty, OR any keyword
@@ -203,13 +204,12 @@ def GetMax(Data: TGenericSequence, *, SkipFrames: int = 1,
             exception traceback, defaults to 1
         DoCheck: (keyword) bool; flag if to perform the input data sanity
             check, convert the mixed sequence into a list of only real numbers
-            and sort the values
     
     Returns:
         int OR float: the calculated max value
     
     Raises:
-        UT_TypeError: mandatory argument is not a sequence or real numbers or
+        UT_TypeError: mandatory argument is not a sequence of real numbers or
             measurements with uncertainty, OR any keyword argument is of
             improper type
         UT_ValueError: passed mandatory sequence is empty, OR any keyword
@@ -250,7 +250,7 @@ def GetMedian(Data: TGenericSequence, *, SkipFrames: int = 1,
         int OR float: the calculated median value
     
     Raises:
-        UT_TypeError: mandatory argument is not a sequence or real numbers or
+        UT_TypeError: mandatory argument is not a sequence of real numbers or
             measurements with uncertainty, OR any keyword argument is of
             improper type
         UT_ValueError: passed mandatory sequence is empty, OR any keyword
@@ -300,11 +300,11 @@ def GetFirstQuartile(Data: TGenericSequence, *, SkipFrames: int = 1,
         int OR float: the calculated Q1 value
     
     Raises:
-        UT_TypeError: mandatory argument is not a sequence or real numbers or
+        UT_TypeError: mandatory argument is not a sequence of real numbers or
             measurements with uncertainty, OR any keyword argument is of
             improper type
-        UT_ValueError: passed mandatory sequence is empty, OR any keyword
-            argument is of the proper type but unacceptable value
+        UT_ValueError: passed mandatory sequence is shorter than 2 elements, OR
+            any keyword argument is of the proper type but unacceptable value
 
     Version 1.0.0.0
     """
@@ -349,11 +349,11 @@ def GetThirdQuartile(Data: TGenericSequence, *, SkipFrames: int = 1,
         int OR float: the calculated Q3 value
     
     Raises:
-        UT_TypeError: mandatory argument is not a sequence or real numbers or
+        UT_TypeError: mandatory argument is not a sequence of real numbers or
             measurements with uncertainty, OR any keyword argument is of
             improper type
-        UT_ValueError: passed mandatory sequence is empty, OR any keyword
-            argument is of the proper type but unacceptable value
+        UT_ValueError: passed mandatory sequence is shorter than 2 elements, OR
+            any keyword argument is of the proper type but unacceptable value
 
     Version 1.0.0.0
     """
@@ -400,15 +400,15 @@ def GetQuantile(Data: TGenericSequence, k: int, m: int, *, SkipFrames: int = 1,
         int OR float: the calculated Q3 value
     
     Raises:
-        UT_TypeError: mandatory argument is not a sequence or real numbers or
+        UT_TypeError: mandatory argument is not a sequence of real numbers or
             measurements with uncertainty, OR any keyword argument is of
             improper type, OR quantile index is not an integer, OR the total
             number of quantiles is not an integer
-        UT_ValueError: passed mandatory sequence is empty, OR any keyword
-            argument is of the proper type but unacceptable value, OR the total
-            number of quantilies is negative integer or zero, OR the quantile
-            index is negative integer or integer greater than the total number
-            of qunatiles
+        UT_ValueError: passed mandatory sequence is shorter than 2 elements, OR
+            any keyword argument is of the proper type but unacceptable value,
+            OR the total number of quantilies is negative integer or zero, OR
+            the quantile index is negative integer or integer greater than the
+            total number of qunatiles
 
     Version 1.0.0.0
     """
@@ -462,13 +462,12 @@ def GetHistogram(Data: TGenericSequence, *, NBins: Optional[int] = None,
             exception traceback, defaults to 1
         DoCheck: (keyword) bool; flag if to perform the input data sanity
             check, convert the mixed sequence into a list of only real numbers
-            and sort the values
     
     Returns:
         dict(int OR float -> int >= 0): the calculated histogram
     
     Raises:
-        UT_TypeError: mandatory argument is not a sequence or real numbers or
+        UT_TypeError: mandatory argument is not a sequence of real numbers or
             measurements with uncertainty, OR any keyword argument is of
             improper type
         UT_ValueError: passed mandatory sequence is empty, OR any keyword
@@ -542,13 +541,12 @@ def GetModes(Data: TGenericSequence, *, SkipFrames: int = 1,
             exception traceback, defaults to 1
         DoCheck: (keyword) bool; flag if to perform the input data sanity
             check, convert the mixed sequence into a list of only real numbers
-            and sort the values
     
     Returns:
         list(int OR float): the calculated modes
     
     Raises:
-        UT_TypeError: mandatory argument is not a sequence or real numbers or
+        UT_TypeError: mandatory argument is not a sequence of real numbers or
             measurements with uncertainty, OR any keyword argument is of
             improper type
         UT_ValueError: passed mandatory sequence is empty, OR any keyword
@@ -578,9 +576,7 @@ def GetSpearman(DataX: TGenericSequence, DataY: TGenericSequence, *,
     """
     Calculates the Spearman rank correlation coeffificent of the paired  mixed
     sequences of real numbers and the measurements with uncertainty. Computation
-    speed is O(N*log(N)), unless the passed sequences are already sorted in
-    ascending order sequences of real numbers, which is indicated by the keyword
-    argument DoCheck = False, in which case the calculation speed is O(N).
+    speed is always O(N*log(N)).
 
     Signature:
         seq(int OR float OR phyqus_lib.base_classes.MeasuredValue)/,
@@ -596,13 +592,13 @@ def GetSpearman(DataX: TGenericSequence, DataY: TGenericSequence, *,
             exception traceback, defaults to 1
         DoCheck: (keyword) bool; flag if to perform the input data sanity
             check and convert the mixed sequence into a list of only real
-            numbers, and sort the sequence(s)
+            numbers
     
     Returns:
         int OR float: the calculated rank correlation value
     
     Raises:
-        UT_TypeError: any of mandatory data arguments is not a sequence or real
+        UT_TypeError: any of mandatory data arguments is not a sequence of real
             numbers or measurements with uncertainty, OR any keyword argument is
             of improper type
         UT_ValueError: any of the passed mandatory sequence is empty, OR any
@@ -652,7 +648,7 @@ def GetKendall(DataX: TGenericSequence, DataY: TGenericSequence, *,
         int OR float: the calculated rank correlation value
     
     Raises:
-        UT_TypeError: any of mandatory data arguments is not a sequence or real
+        UT_TypeError: any of mandatory data arguments is not a sequence of real
             numbers or measurements with uncertainty, OR any keyword argument is
             of improper type
         UT_ValueError: any of the passed mandatory sequence is empty, OR any

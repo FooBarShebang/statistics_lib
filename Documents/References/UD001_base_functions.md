@@ -292,6 +292,8 @@ The second keyword-only argument *DoCheck* is used only for the optimization as 
 
 ### Functions
 
+All functions implemented in this module have calculation time complexity of O(N).
+
 **GetMean**(Data, *, SkipFrames = 1, DoCheck = True)
 
 *Signature*:
@@ -310,7 +312,7 @@ seq(int OR float OR phyqus_lib.base_classes.MeasuredValue)/, *, int > 0, bool/ -
 
 *Raises*:
 
-* **UT_TypeError**: mandatory argument is not a sequence or real numbers or measurements with uncertainty, OR any keyword argument is of improper type
+* **UT_TypeError**: mandatory argument is not a sequence of real numbers or measurements with uncertainty, OR any keyword argument is of improper type
 * **UT_ValueError**: passed mandatory sequence is empty, OR any keyword argument is of the proper type but unacceptable value
 
 *Description*:
@@ -335,7 +337,7 @@ seq(int OR float OR phyqus_lib.base_classes.MeasuredValue)/, *, int > 0, bool/ -
 
 *Raises*:
 
-* **UT_TypeError**: mandatory argument is not a sequence or real numbers or measurements with uncertainty, OR any keyword argument is of improper type
+* **UT_TypeError**: mandatory argument is not a sequence of real numbers or measurements with uncertainty, OR any keyword argument is of improper type
 * **UT_ValueError**: passed mandatory sequence is empty, OR any keyword argument is of the proper type but unacceptable value
 
 *Description*:
@@ -360,7 +362,7 @@ seq(int OR float OR phyqus_lib.base_classes.MeasuredValue)/, *, int > 0, bool/ -
 
 *Raises*:
 
-* **UT_TypeError**: mandatory argument is not a sequence or real numbers or measurements with uncertainty, OR any keyword argument is of improper type
+* **UT_TypeError**: mandatory argument is not a sequence of real numbers or measurements with uncertainty, OR any keyword argument is of improper type
 * **UT_ValueError**: passed mandatory sequence is empty, OR any keyword argument is of the proper type but unacceptable value
 
 *Description*:
@@ -385,7 +387,7 @@ seq(int OR float OR phyqus_lib.base_classes.MeasuredValue)/, *, int > 0, bool/ -
 
 *Raises*:
 
-* **UT_TypeError**: mandatory argument is not a sequence or real numbers or measurements with uncertainty, OR any keyword argument is of improper type
+* **UT_TypeError**: mandatory argument is not a sequence of real numbers or measurements with uncertainty, OR any keyword argument is of improper type
 * **UT_ValueError**: passed mandatory sequence is less then 2 elements long, OR any keyword argument is of the proper type but unacceptable value
 
 *Description*:
@@ -410,7 +412,7 @@ seq(int OR float OR phyqus_lib.base_classes.MeasuredValue)/, *, int > 0, bool/ -
 
 *Raises*:
 
-* **UT_TypeError**: mandatory argument is not a sequence or real numbers or measurements with uncertainty, OR any keyword argument is of improper type
+* **UT_TypeError**: mandatory argument is not a sequence of real numbers or measurements with uncertainty, OR any keyword argument is of improper type
 * **UT_ValueError**: passed mandatory sequence is less than 2 elements long, OR any keyword argument is of the proper type but unacceptable value
 
 *Description*:
@@ -435,7 +437,7 @@ seq(int OR float OR phyqus_lib.base_classes.MeasuredValue)/, *, int > 0, bool/ -
 
 *Raises*:
 
-* **UT_TypeError**: mandatory argument is not a sequence or real numbers or measurements with uncertainty, OR any keyword argument is of improper type
+* **UT_TypeError**: mandatory argument is not a sequence of real numbers or measurements with uncertainty, OR any keyword argument is of improper type
 * **UT_ValueError**: passed mandatory sequence is empty, OR any keyword argument is of the proper type but unacceptable value
 
 *Description*:
@@ -460,7 +462,7 @@ seq(int OR float OR phyqus_lib.base_classes.MeasuredValue)/, *, int > 0, bool/ -
 
 *Raises*:
 
-* **UT_TypeError**: mandatory argument is not a sequence or real numbers or measurements with uncertainty, OR any keyword argument is of improper type
+* **UT_TypeError**: mandatory argument is not a sequence of real numbers or measurements with uncertainty, OR any keyword argument is of improper type
 * **UT_ValueError**: passed mandatory sequence is empty, OR any keyword argument is of the proper type but unacceptable value
 
 *Description*:
@@ -485,7 +487,7 @@ seq(int OR float OR phyqus_lib.base_classes.MeasuredValue)/, *, int > 0, bool/ -
 
 *Raises*:
 
-* **UT_TypeError**: mandatory argument is not a sequence or real numbers or measurements with uncertainty, OR any keyword argument is of improper type
+* **UT_TypeError**: mandatory argument is not a sequence of real numbers or measurements with uncertainty, OR any keyword argument is of improper type
 * **UT_ValueError**: passed mandatory sequence is empty, OR any keyword argument is of the proper type but unacceptable value
 
 *Description*:
@@ -513,7 +515,7 @@ seq(int OR float OR phyqus_lib.base_classes.MeasuredValue), int > 0/, *, bool, b
 
 *Raises*:
 
-* **UT_TypeError**: mandatory argument is not a sequence or real numbers or measurements with uncertainty, OR the moment power is not an integer number, OR any keyword argument is of improper type
+* **UT_TypeError**: mandatory argument is not a sequence of real numbers or measurements with uncertainty, OR the moment power is not an integer number, OR any keyword argument is of improper type
 * **UT_ValueError**: passed mandatory sequence is empty, OR the moment power is zero or negative integer, OR any keyword argument is of the proper type but unacceptable value
 
 *Description*:
@@ -538,7 +540,7 @@ seq(int OR float OR phyqus_lib.base_classes.MeasuredValue)/, *, int > 0, bool/ -
 
 *Raises*:
 
-* **UT_TypeError**: mandatory argument is not a sequence or real numbers or measurements with uncertainty, OR any keyword argument is of improper type
+* **UT_TypeError**: mandatory argument is not a sequence of real numbers or measurements with uncertainty, OR any keyword argument is of improper type
 * **UT_ValueError**: passed mandatory sequence is empty, OR any keyword argument is of the proper type but unacceptable value
 
 *Description*:
@@ -563,7 +565,7 @@ seq(int OR float OR phyqus_lib.base_classes.MeasuredValue)/, *, int > 0, bool/ -
 
 *Raises*:
 
-* **UT_TypeError**: mandatory argument is not a sequence or real numbers or measurements with uncertainty, OR any keyword argument is of improper type
+* **UT_TypeError**: mandatory argument is not a sequence of real numbers or measurements with uncertainty, OR any keyword argument is of improper type
 * **UT_ValueError**: passed mandatory sequence is less than 3 elements long, OR any keyword argument is of the proper type but unacceptable value
 
 *Description*:
@@ -588,7 +590,7 @@ seq(int OR float OR phyqus_lib.base_classes.MeasuredValue)/, *, int > 0, bool/ -
 
 *Raises*:
 
-* **UT_TypeError**: mandatory argument is not a sequence or real numbers or measurements with uncertainty, OR any keyword argument is of improper type
+* **UT_TypeError**: mandatory argument is not a sequence of real numbers or measurements with uncertainty, OR any keyword argument is of improper type
 * **UT_ValueError**: passed mandatory sequence is empty, OR any keyword argument is of the proper type but unacceptable value
 
 *Description*:
@@ -613,7 +615,7 @@ seq(int OR float OR phyqus_lib.base_classes.MeasuredValue)/, *, int > 0, bool/ -
 
 *Raises*:
 
-* **UT_TypeError**: mandatory argument is not a sequence or real numbers or measurements with uncertainty, OR any keyword argument is of improper type
+* **UT_TypeError**: mandatory argument is not a sequence of real numbers or measurements with uncertainty, OR any keyword argument is of improper type
 * **UT_ValueError**: passed mandatory sequence is less than 4 elements long, OR any keyword argument is of the proper type but unacceptable value
 
 *Description*:
@@ -639,7 +641,7 @@ seq(int OR float OR phyqus_lib.base_classes.MeasuredValue), seq(int OR float OR 
 
 *Raises*:
 
-* **UT_TypeError**: any of mandatory data arguments is not a sequence or real numbers or measurements with uncertainty, OR any keyword argument is of improper type
+* **UT_TypeError**: any of mandatory data arguments is not a sequence of real numbers or measurements with uncertainty, OR any keyword argument is of improper type
 * **UT_ValueError**: any of the passed mandatory sequence is empty, OR any keyword argument is of the proper type but unacceptable value, OR the X and Y sequences are of different length
 
 *Description*:
@@ -669,7 +671,7 @@ seq(int OR float OR phyqus_lib.base_classes.MeasuredValue), seq(int OR float OR 
 
 *Raises*:
 
-* **UT_TypeError**: any of mandatory data arguments is not a sequence or real numbers or measurements with uncertainty OR any moment power is not an integer number, OR any keyword argument is of improper type
+* **UT_TypeError**: any of mandatory data arguments is not a sequence of real numbers or measurements with uncertainty OR any moment power is not an integer number, OR any keyword argument is of improper type
 * **UT_ValueError**: any of the passed mandatory sequence is empty, OR any moment power is zero or negative integer, OR any keyword argument is of the proper type but unacceptable value, OR the X and Y sequences are of different length
 
 *Description*:
@@ -695,7 +697,7 @@ seq(int OR float OR phyqus_lib.base_classes.MeasuredValue), seq(int OR float OR 
 
 *Raises*:
 
-* **UT_TypeError**: any of mandatory data arguments is not a sequence or real numbers or measurements with uncertainty, OR any keyword argument is of improper type
+* **UT_TypeError**: any of mandatory data arguments is not a sequence of real numbers or measurements with uncertainty, OR any keyword argument is of improper type
 * **UT_ValueError**: any of the passed mandatory sequence is empty, OR any keyword argument is of the proper type but unacceptable value, OR the X and Y sequences are of different length
 
 *Description*:

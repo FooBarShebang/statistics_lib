@@ -147,7 +147,7 @@ def _CheckInput(Data: Any, *, SkipFrames: int = 1) -> None:
             exception traceback
     
     Raises:
-        UT_TypeError: mandatory argument is not a sequence or real numbers or
+        UT_TypeError: mandatory argument is not a sequence of real numbers or
             measurements with uncertainty, OR any keyword argument is of
             improper type
         UT_ValueError: passed mandatory sequence is empty, OR any keyword
@@ -195,7 +195,7 @@ def _ExtractMeans(Data: TGenericSequence, *, SkipFrames: int = 1,
         list(int OR float): the extracted 'mean' values
 
     Raises:
-        UT_TypeError: mandatory argument is not a sequence or real numbers or
+        UT_TypeError: mandatory argument is not a sequence of real numbers or
             measurements with uncertainty, OR any keyword argument is of
             improper type
         UT_ValueError: passed mandatory sequence is empty, OR any keyword
@@ -237,7 +237,7 @@ def _ExtractErrors(Data: TGenericSequence, *, SkipFrames: int = 1,
         list(int OR float): the extracted 'error' values
     
     Raises:
-        UT_TypeError: mandatory argument is not a sequence or real numbers or
+        UT_TypeError: mandatory argument is not a sequence of real numbers or
             measurements with uncertainty, OR any keyword argument is of
             improper type
         UT_ValueError: passed mandatory sequence is empty, OR any keyword
@@ -283,7 +283,7 @@ def GetMean(Data: TGenericSequence, *, SkipFrames: int = 1,
         int OR float: the calculated mean value
     
     Raises:
-        UT_TypeError: mandatory argument is not a sequence or real numbers or
+        UT_TypeError: mandatory argument is not a sequence of real numbers or
             measurements with uncertainty, OR any keyword argument is of
             improper type
         UT_ValueError: passed mandatory sequence is empty, OR any keyword
@@ -324,7 +324,7 @@ def GetVarianceP(Data: TGenericSequence, *, SkipFrames: int = 1,
         int OR float: the calculated variance value
     
     Raises:
-        UT_TypeError: mandatory argument is not a sequence or real numbers or
+        UT_TypeError: mandatory argument is not a sequence of real numbers or
             measurements with uncertainty, OR any keyword argument is of
             improper type
         UT_ValueError: passed mandatory sequence is empty, OR any keyword
@@ -366,7 +366,7 @@ def GetStdevP(Data: TGenericSequence, *, SkipFrames: int = 1,
         int OR float: the calculated standard deviation value
     
     Raises:
-        UT_TypeError: mandatory argument is not a sequence or real numbers or
+        UT_TypeError: mandatory argument is not a sequence of real numbers or
             measurements with uncertainty, OR any keyword argument is of
             improper type
         UT_ValueError: passed mandatory sequence is empty, OR any keyword
@@ -406,7 +406,7 @@ def GetVarianceS(Data: TGenericSequence, *, SkipFrames: int = 1,
         int OR float: the calculated variance value
     
     Raises:
-        UT_TypeError: mandatory argument is not a sequence or real numbers or
+        UT_TypeError: mandatory argument is not a sequence of real numbers or
             measurements with uncertainty, OR any keyword argument is of
             improper type
         UT_ValueError: passed mandatory sequence is less than 2 elements long,
@@ -451,7 +451,7 @@ def GetStdevS(Data: TGenericSequence, *, SkipFrames: int = 1,
         int OR float: the calculated standard deviation value
     
     Raises:
-        UT_TypeError: mandatory argument is not a sequence or real numbers or
+        UT_TypeError: mandatory argument is not a sequence of real numbers or
             measurements with uncertainty, OR any keyword argument is of
             improper type
         UT_ValueError: passed mandatory sequence is less than 2 elements long,
@@ -491,7 +491,7 @@ def GetSE(Data: TGenericSequence, *, SkipFrames: int = 1,
         int OR float: the calculated standard error of the mean value
     
     Raises:
-        UT_TypeError: mandatory argument is not a sequence or real numbers or
+        UT_TypeError: mandatory argument is not a sequence of real numbers or
             measurements with uncertainty, OR any keyword argument is of
             improper type
         UT_ValueError: passed mandatory sequence is empty, OR any keyword
@@ -531,7 +531,7 @@ def GetMeanSqrSE(Data: TGenericSequence, *, SkipFrames: int = 1,
         int OR float: the calculated mean squared uncertainty value
     
     Raises:
-        UT_TypeError: mandatory argument is not a sequence or real numbers or
+        UT_TypeError: mandatory argument is not a sequence of real numbers or
             measurements with uncertainty, OR any keyword argument is of
             improper type
         UT_ValueError: passed mandatory sequence is empty, OR any keyword
@@ -569,7 +569,7 @@ def GetFullSE(Data: TGenericSequence, *, SkipFrames: int = 1,
         int OR float: the calculated full uncertainty of the mean value
     
     Raises:
-        UT_TypeError: mandatory argument is not a sequence or real numbers or
+        UT_TypeError: mandatory argument is not a sequence of real numbers or
             measurements with uncertainty, OR any keyword argument is of
             improper type
         UT_ValueError: passed mandatory sequence is empty, OR any keyword
@@ -614,7 +614,7 @@ def GetMoment(Data: TGenericSequence, Power: int, *, IsCentral: bool = False,
         int OR float: the calculated moment value
     
     Raises:
-        UT_TypeError: the mandatory data argument is not a sequence or real
+        UT_TypeError: the mandatory data argument is not a sequence of real
             numbers or measurements with uncertainty, OR the moment power is not
             an integer number, OR any keyword argument is of improper type
         UT_ValueError: passed mandatory sequence is empty, OR the moment power
@@ -677,7 +677,7 @@ def GetSkewnessP(Data: TGenericSequence, *, SkipFrames: int = 1,
         int OR float: the calculated skewness value
     
     Raises:
-        UT_TypeError: mandatory argument is not a sequence or real numbers or
+        UT_TypeError: mandatory argument is not a sequence of real numbers or
             measurements with uncertainty, OR any keyword argument is of
             improper type
         UT_ValueError: passed mandatory sequence is empty, OR any keyword
@@ -713,7 +713,7 @@ def GetSkewnessS(Data: TGenericSequence, *, SkipFrames: int = 1,
         int OR float: the calculated skewness value
     
     Raises:
-        UT_TypeError: mandatory argument is not a sequence or real numbers or
+        UT_TypeError: mandatory argument is not a sequence of real numbers or
             measurements with uncertainty, OR any keyword argument is of
             improper type
         UT_ValueError: passed mandatory sequence is less than 3 elements long,
@@ -757,7 +757,7 @@ def GetKurtosisP(Data: TGenericSequence, *, SkipFrames: int = 1,
         int OR float: the calculated excess kurtosis value
     
     Raises:
-        UT_TypeError: mandatory argument is not a sequence or real numbers or
+        UT_TypeError: mandatory argument is not a sequence of real numbers or
             measurements with uncertainty, OR any keyword argument is of
             improper type
         UT_ValueError: passed mandatory sequence is empty, OR any keyword
@@ -793,7 +793,7 @@ def GetKurtosisS(Data: TGenericSequence, *, SkipFrames: int = 1,
         int OR float: the calculated skewness value
     
     Raises:
-        UT_TypeError: mandatory argument is not a sequence or real numbers or
+        UT_TypeError: mandatory argument is not a sequence of real numbers or
             measurements with uncertainty, OR any keyword argument is of
             improper type
         UT_ValueError: passed mandatory sequence is less than 4 elements long,
@@ -843,7 +843,7 @@ def GetCovariance(DataX: TGenericSequence, DataY: TGenericSequence, *,
         int OR float: the calculated covariance value
     
     Raises:
-        UT_TypeError: any of mandatory data arguments is not a sequence or real
+        UT_TypeError: any of mandatory data arguments is not a sequence of real
             numbers or measurements with uncertainty, OR any keyword argument is
             of improper type
         UT_ValueError: any of the passed mandatory sequence is empty, OR any
@@ -907,7 +907,7 @@ def GetMoment2(DataX: TGenericSequence, DataY: TGenericSequence, PowerX: int,
         int OR float: the calculated moment value
     
     Raises:
-        UT_TypeError: any of mandatory data arguments is not a sequence or real
+        UT_TypeError: any of mandatory data arguments is not a sequence of real
             numbers or measurements with uncertainty, OR any moment power is
             not an integer number, OR any keyword argument is of improper type
         UT_ValueError: any of the passed mandatory sequence is empty, OR any
@@ -989,7 +989,7 @@ def GetPearsonR(DataX: TGenericSequence, DataY: TGenericSequence, *,
         int OR float: the correlation value
     
     Raises:
-        UT_TypeError: any of mandatory data arguments is not a sequence or real
+        UT_TypeError: any of mandatory data arguments is not a sequence of real
             numbers or measurements with uncertainty, OR any keyword argument is
             of improper type
         UT_ValueError: any of the passed mandatory sequence is empty, OR any
