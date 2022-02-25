@@ -2,5 +2,7 @@
 
 * Library requirements [tests](./TE000_library_test_report.md)
 * Module [base_functions](./TE001_base_functions.md)
+* Module [ordered_functions](./TE002_ordered_functions.md)
+* Module [base_classes](./TE003_base_classes.md)
 * Requirements and tests [traceability](./traceability.md)
 * Tested OSes [report](./tested_OS.md)

@@ -57,7 +57,7 @@ import sys
 import os
 import math
 
-from typing import Sequence, Union, List, Optional, Dict
+from typing import Optional, Dict
 
 #+ custom modules
 
@@ -71,8 +71,6 @@ if not (ROOT_FOLDER in sys.path):
 #++ actual import
 
 from introspection_lib.base_exceptions import UT_TypeError, UT_ValueError
-
-from phyqus_lib.base_classes import MeasuredValue
 
 from statistics_lib.base_functions import TGenericSequence, TReal, TRealList
 from statistics_lib.base_functions import GetMean, GetPearsonR

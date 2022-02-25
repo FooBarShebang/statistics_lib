@@ -5,6 +5,7 @@
 * global requirements - 00x
 * module **base_functions** - 10x
 * module **ordered_functions** - 2xy
+* module **data_classes** - 3xy
 
 ## Requirements vs Tests Traceability
 
@@ -39,6 +40,20 @@
 | REQ-FUN-2A0        | TEST-T-2A0             | YES                      |
 | REQ-AWM-200        | TEST-T-201             | YES                      |
 | REQ-AWM-201        | TEST-T-202             | YES                      |
+| REQ-FUN-300        | TEST-A-300             | NO                       |
+| REQ-FUN-310        | TEST-T-316             | NO                       |
+| REQ-FUN-311        | TEST-T-316             | NO                       |
+| REQ-FUN-312        | TEST-T-317             | NO                       |
+| REQ-FUN-313        | TEST-T-317             | NO                       |
+| REQ-FUN-320        | TEST-T-323             | NO                       |
+| REQ-FUN-321        | TEST-T-323             | NO                       |
+| REQ-FUN-322        | TEST-T-324             | NO                       |
+| REQ-AWM-300        | TEST-T-310, TEST-T-320 | NO                       |
+| REQ-AWM-301        | TEST-T-311, TEST-T-321 | NO                       |
+| REQ-AWM-302        | TEST-T-312, TEST-T-322 | NO                       |
+| REQ-AWM-310        | TEST-T-313             | NO                       |
+| REQ-AWM-311        | TEST-T-314             | NO                       |
+| REQ-AWM-312        | TEST-T-315             | NO                       |
 
 | **Software ready for production \[YES/NO\]** | **Rationale**                 |
 | :------------------------------------------: | :---------------------------- |

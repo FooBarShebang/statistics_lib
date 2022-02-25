@@ -54,7 +54,7 @@ ___
 
 * a real number - integer of floating point - for the functions returning a single scalar value
 * list of real numbers - for the function calculating mode(s) of the distribution
-* a list of 2-element tuples of a real numbers for the functions calculating ranks or histograms
+* a list of 2-element tuples of a real numbers or a dictionary (real -> int >= 0) for the function calculating a histogram
 
 **Verification Method:** T
 
@@ -180,8 +180,8 @@ ___
 **Description:** The **TypeError** or its sub-class should be raised in response to the unacceptable input (argument(s) data type(s)) in the following situations:
 
 * A 1D data set (or one of the sub-sets of the 2D data set) is not a flat sequence of real numbers of 'real life measurements' with the associated uncertainties, which means:
-* The respective argument is not a sequence, OR
-* The respective argument is a sequence, but, at least, one element of it is neither integer, or floating point number, or an instance of a measurement with the associated uncertainty data type class
+  * The respective argument is not a sequence, OR
+  * The respective argument is a sequence, but, at least, one element of it is neither integer, or floating point number, or an instance of a measurement with the associated uncertainty data type class
 * The required quantile index or total number of quantiles argument is not an integer number
 * The requested number of bins (in histogram) is not an integer number
 * The requested bin size (in histogram) is not a real number

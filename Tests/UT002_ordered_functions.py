@@ -2,8 +2,8 @@
 """
 Module statistics_lib.Tests.UT002_ordered_functions
 
-Set of unit tests on the module stastics_lib.base_functions. See the test plan /
-report TE002_ordered_functions.md
+Set of unit tests on the module stastics_lib.ordered_functions. See the test
+plan / report TE002_ordered_functions.md
 """
 
 
@@ -15,7 +15,6 @@ __status__ = 'Testing'
 
 #+ standard library
 
-import enum
 import sys
 import os
 import unittest

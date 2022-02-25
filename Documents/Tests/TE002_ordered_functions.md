@@ -78,7 +78,7 @@ The functions return the expected data types:
 
 * a real number - integer of floating point - for the functions returning a single scalar value
 * list of real numbers - for the function calculating mode(s) of the distribution
-* a list of 2-element tuples of a real numbers for the functions calculating ranks or histograms
+* a list of 2-element tuples of a real numbers or a dictionary (real -> int >= 0) for the function calculating a histogram
 
 **Test steps:** Preparation
 
