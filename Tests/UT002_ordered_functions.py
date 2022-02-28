@@ -389,7 +389,7 @@ class Test_GetQuantile(Test_GetFirstQuartile):
                     if self.ExtraCheck:
                         TestCheck = self.CheckFunction(BaseInput, n = m,
                                                     method = 'inclusive')[k-1]
-                    self.assertAlmostEqual(TestResult, TestCheck, 
+                        self.assertAlmostEqual(TestResult, TestCheck, 
                                                 places = FLOAT_CHECK_PRECISION)
                     TestResult = self.TestFunction(tuple(TestInput), k, m)
                     self.assertIsInstance(TestResult, (int, float))
