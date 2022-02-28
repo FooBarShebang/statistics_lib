@@ -89,6 +89,31 @@ class Test_Statistics1D(unittest.TestCase):
                 cls.TotalErr.append(Item.SE)
         cls.BadCases = [1, 2.0, 'asd', [1, '1'], ('b', 2.0), int, float, list,
                         tuple, {1:1, 2:2}, dict]
+    
+    def test_InitTypeError(self):
+        """
+        Checks that sub-class of TypeError exception is raised with improper
+        argument of the initialization method.
+        
+        Tests ID: TEST-T-310
+        Requirements ID: REQ-AWM-300
+        """
+        for Item in self.BadCases:
+            with self.assertRaises(TypeError):
+                self.TestClass(Item)
+    
+    def test_InitValueError(self):
+        """
+        Checks that sub-class of ValueError exception is raised if the class is
+        instantiated with an empty sequence
+        
+        Tests ID: TEST-T-311
+        Requirements ID: REQ-AWM-301
+        """
+        with self.assertRaises(ValueError):
+                self.TestClass([])
+        with self.assertRaises(ValueError):
+                self.TestClass(tuple())
 
 class Test_Statistics2D(unittest.TestCase):
     """
@@ -160,6 +185,42 @@ class Test_Statistics2D(unittest.TestCase):
                 cls.TotalErrY.append(cls.MixedErrY[Index].SE)
         cls.BadCases = [1, 2.0, 'asd', [1, '1'], ('b', 2.0), int, float, list,
                         tuple, {1:1, 2:2}, dict]
+        
+    def test_InitTypeError(self):
+        """
+        Checks that sub-class of TypeError exception is raised with improper
+        argument of the initialization method.
+        
+        Tests ID: TEST-T-320
+        Requirements ID: REQ-AWM-300
+        """
+        for Item in self.BadCases:
+            with self.assertRaises(TypeError):
+                self.TestClass(Item, [1, 1, 1])
+            with self.assertRaises(TypeError):
+                self.TestClass([1, 1, 1], Item)
+            with self.assertRaises(TypeError):
+                self.TestClass(Item, Item)
+    
+    def test_InitValueError(self):
+        """
+        Checks that sub-class of ValueError exception is raised if the class is
+        instantiated with two sequences of unequal length, including one being
+        empty, or both sequences being empty
+        
+        Tests ID: TEST-T-311
+        Requirements ID: REQ-AWM-301
+        """
+        with self.assertRaises(ValueError):
+                self.TestClass([], tuple())
+        with self.assertRaises(ValueError):
+                self.TestClass(tuple(), [1, 2, 3])
+        with self.assertRaises(ValueError):
+                self.TestClass([1, 2, 3], list())
+        with self.assertRaises(ValueError):
+                self.TestClass([1, 2, 3], (1, 2))
+        with self.assertRaises(ValueError):
+                self.TestClass((1, 2, 3), [1, 2, 3, 4, 5])
 
 #+ test suites
 
