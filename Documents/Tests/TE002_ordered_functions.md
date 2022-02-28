@@ -243,6 +243,7 @@ ___
 **Expected result:** With a random sequence of the mix of integer, floating point numbers and instances of the measurements with uncertainty class passed into the function (length >= 2), it returns the k-th of m-quartile value of all 'mean' values using the linear interpolation between the values of the adjacent elements in the sorted sample. Using Python v3.8 or later it should return the same value as the (k-1)th element (indexing from 0) of the list returned by the Standard Library function *statistics.quantiles*() with n=m, providing 0 < k < m. The 0-th quantile is the first element of the sorted in ascending order sequence of the 'mean' values, whereas the m-th quantile is the last element of that sequence.
 
 **Test steps:** Prepare the test sequences same way as described in the TEST-T-200. For each of the test sequences do the following:
+
 * Sort the base real numbers only sequence.
 * Select m from [4, 10, 25, 33, 100]
 * For each 0 < k < m:

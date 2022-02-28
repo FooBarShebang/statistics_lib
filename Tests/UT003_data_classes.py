@@ -8,7 +8,7 @@ report TE003_data_classes.md
 
 
 __version__= '1.0.0.0'
-__date__ = '25-02-2022'
+__date__ = '28-02-2022'
 __status__ = 'Testing'
 
 #imports
@@ -78,12 +78,15 @@ class Test_Statistics1D(unittest.TestCase):
         cls.MixedErr = [MeasuredValue(Value, cls.Errors[i])
                                         for i, Value in enumerate(cls.Mixed)]
         cls.TotalMixed = list()
+        cls.TotalErr = list()
         for Item in cls.MixedErr:
             Temp = random.random()
             if Temp >= 0.6:
                 cls.TotalMixed.append(Item)
+                cls.TotalErr.append(0)
             else:
                 cls.TotalMixed.append(Item.Value)
+                cls.TotalErr.append(Item.SE)
         cls.BadCases = [1, 2.0, 'asd', [1, '1'], ('b', 2.0), int, float, list,
                         tuple, {1:1, 2:2}, dict]
 
@@ -102,6 +105,61 @@ class Test_Statistics2D(unittest.TestCase):
         Preparation for the test cases, done only once.
         """
         cls.TestClass = test_module.Statistics2D
+        Length = random.randrange(5, 100)
+        cls.AllIntX = [random.randint(-100, 100) for _ in range(Length)]
+        cls.AllIntY = [random.randint(-100, 100) for _ in range(Length)]
+        Length = random.randrange(5, 100)
+        cls.AllFloatX = [random.uniform(-10.0, 10.0) for _ in range(Length)]
+        cls.AllFloatY = [random.uniform(-10.0, 10.0) for _ in range(Length)]
+        cls.MixedX = list()
+        cls.MixedY = list()
+        for _ in range(random.randrange(10, 100)):
+            Temp = random.random()
+            if Temp >= 0.5:
+                cls.MixedX.append(random.uniform(-10.0, 10.0))
+            else:
+                cls.MixedX.append(random.randint(-100, 100))
+            Temp = random.random()
+            if Temp >= 0.5:
+                cls.MixedY.append(random.uniform(-10.0, 10.0))
+            else:
+                cls.MixedY.append(random.randint(-100, 100))
+        MaxLength = max(len(cls.AllIntX), len(cls.AllFloatX), len(cls.MixedX))
+        cls.ErrorsX = [random.uniform(0.0, 3.0) for _ in range(MaxLength)]
+        cls.ErrorsY = [random.uniform(0.0, 3.0) for _ in range(MaxLength)]
+        cls.IntErrX = [MeasuredValue(Value, cls.ErrorsX[i])
+                                        for i, Value in enumerate(cls.AllIntX)]
+        cls.FloatErrX = [MeasuredValue(Value, cls.ErrorsX[i])
+                                    for i, Value in enumerate(cls.AllFloatX)]
+        cls.MixedErrX = [MeasuredValue(Value, cls.ErrorsX[i])
+                                        for i, Value in enumerate(cls.MixedX)]
+        cls.IntErrY = [MeasuredValue(Value, cls.ErrorsX[i])
+                                        for i, Value in enumerate(cls.AllIntX)]
+        cls.FloatErrY = [MeasuredValue(Value, cls.ErrorsX[i])
+                                    for i, Value in enumerate(cls.AllFloatX)]
+        cls.MixedErrY = [MeasuredValue(Value, cls.ErrorsX[i])
+                                        for i, Value in enumerate(cls.MixedX)]
+        cls.TotalMixedX = list()
+        cls.TotalMixedY = list()
+        cls.TotalErrX = list()
+        cls.TotalErrY = list()
+        for Index, Item in enumerate(cls.MixedErrX):
+            Temp = random.random()
+            if Temp >= 0.6:
+                cls.TotalMixedX.append(Item)
+                cls.TotalErrX.append(0)
+            else:
+                cls.TotalMixedX.append(Item.Value)
+                cls.TotalErrX.append(Item.SE)
+            Temp = random.random()
+            if Temp >= 0.6:
+                cls.TotalMixedY.append(cls.MixedErrY[Index])
+                cls.TotalErrY.append(0)
+            else:
+                cls.TotalMixedY.append(cls.MixedErrY[Index].Value)
+                cls.TotalErrY.append(cls.MixedErrY[Index].SE)
+        cls.BadCases = [1, 2.0, 'asd', [1, '1'], ('b', 2.0), int, float, list,
+                        tuple, {1:1, 2:2}, dict]
 
 #+ test suites
 

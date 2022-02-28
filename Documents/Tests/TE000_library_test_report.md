@@ -75,7 +75,7 @@ The verification method for a requirement is given by a single letter according 
 
 **Expected result:** The library provides functions / class methods implementing all required functionality. All required functionality as well as the additional functions / class methods operate properly: they generate the proper response to the proper input data, and raise expected exceptions in response to an improper data input.
 
-**Test steps:** Check / review the source code. Run all unit-test suits defined for the individual modules; specifically [UT001_base_functions](../../Tests/UT001_base_functions.py), [UT002_ordered_functions](../../Tests/UT002_ordered_functions.py).
+**Test steps:** Check / review the source code. Run all unit-test suits defined for the individual modules; specifically [UT001_base_functions](../../Tests/UT001_base_functions.py), [UT002_ordered_functions](../../Tests/UT002_ordered_functions.py), [UT003_data_classes](../../Tests/UT003_data_classes.py).
 
 **Test result:** PASS / FAIL
 
