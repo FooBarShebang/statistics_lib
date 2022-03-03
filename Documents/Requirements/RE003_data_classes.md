@@ -101,6 +101,39 @@ The Bessel correction should not be applied, the data sample should be treated a
 
 ___
 
+**Requirement ID:** REQ-FUN-314
+
+**Title:** 1D statistics class - (optional) name of the data set
+
+**Description:** The 1D statistics class should provide a getter + setter (full access) property *Name* to set and read-out an arbitrary string identificator (name) of the data set, with the default value being **None**.
+
+**Verification Method:** T
+
+___
+
+**Requirement ID:** REQ-FUN-315
+
+**Title:** 1D statistics class - full summary on the statistical properties of the distribution.
+
+**Description:** The 1D statistics class should provide a read-only property *Summary* returning the following data as a multi-line string with TSV format tabulated report, with each line constructed in the form '{name of property}: TAB {value of property}'. The properties to be included into the report are:
+
+* Name (unless **None**, in which case not to be included)
+* Mean
+* Median
+* Q1
+* Q2
+* Min
+* Max
+* Var
+* FullVar
+* Skew
+* Kurt
+
+The report may be encapsulated into visual separator lines (the first and the last).
+
+**Verification Method:** D
+
+___
 
 **Requirement ID:** REQ-FUN-320
 
@@ -137,6 +170,36 @@ ___
 The measurement uncertainties should not be taken into account
 
 **Verification Method:** T
+
+___
+
+**Requirement ID:** REQ-FUN-323
+
+**Title:** 2D statistics class - (optional) name of the data set
+
+**Description:** The 2D statistics class should provide a getter + setter (full access) property *Name* to set and read-out an arbitrary string identificator (name) of the data set, with the default value being **None**.
+
+**Verification Method:** T
+
+___
+
+**Requirement ID:** REQ-FUN-324
+
+**Title:** 2D statistics class - full summary on the statistical properties of the distribution.
+
+**Description:** The 2D statistics class should provide a read-only property *Summary* returning the following data as a multi-line string with TSV format tabulated report, with each line constructed in the form '{name of property}: TAB {value of property}'. The properties to be included into the report are:
+
+* Name (unless **None**, in which case not to be included)
+* Cov
+* Pearson
+* Spearman
+* Kendall
+
+These lines should be followed by the respective reports on 1D sub-sets with a clear indication on which a *X* and *Y* set.
+
+The report may be encapsulated into visual separator lines (the first and the last).
+
+**Verification Method:** D
 
 ## Alarms, warnings and operator messages
 

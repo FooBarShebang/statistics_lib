@@ -280,6 +280,22 @@ Check that the method *getHistogram*() returns a tuple of 2-element tuples with 
 
 ___
 
+**Test Identifier:** TEST-T-318
+
+**Requirement ID(s)**: REQ-FUN-314
+
+**Verification method:** T
+
+**Test goal:** Check assignment and read-out of the data set name.
+
+**Expected result:** An arbitrary string name can be assigned to 2D data set, and it can be read-out. Until set, the name is set to **None**.
+
+**Test steps:** Instantiate 2D statistics class with arbitrary but proper data. Check that it has attribute *Name*, and its value is **None**. Assign (in turn) arbitrary string, integer, floating point number, boolean value and **None** to this attribute, and check that the value of the attribute is the passed value converted into string.
+
+**Test result:** PASS / FAIL
+
+___
+
 **Test Identifier:** TEST-T-320
 
 **Requirement ID(s)**: REQ-AWM-300
@@ -408,6 +424,40 @@ ___
 
 **Test result:** PASS / FAIL
 
+___
+
+**Test Identifier:** TEST-T-325
+
+**Requirement ID(s)**: REQ-FUN-323
+
+**Verification method:** T
+
+**Test goal:** Check assignment and read-out of the data set name.
+
+**Expected result:** An arbitrary string name can be assigned to 2D data set, and it can be read-out. Until set, the name is set to **None**.
+
+**Test steps:** Instantiate 2D statistics class with arbitrary but proper data. Check that it has attribute *Name*, and its value is **None**. Assign (in turn) arbitrary string, integer, floating point number, boolean value and **None** to this attribute, and check that the value of the attribute is the passed value converted into string.
+
+**Test result:** PASS / FAIL
+
+## Tests definition (Demonstration)
+
+**Test Identifier:** TEST-D-300
+
+**Requirement ID(s)**: REQ-FUN-315, REQ-FUN-324
+
+**Verification method:** D
+
+**Test goal:** Generation of the statistical properties report
+
+**Expected result:** The textual, human readable report is generated in the expected form, and contains the proper values.
+
+**Test steps:** Instantiate 1D statistics class with arbitrary data. Print-out the value of its property *Summary*. Check that it contains all lines defined in the REQ-FUN-315, but it has no *Name* line. Print-out the values of the corresponding properties directly and visually compare with the report. Set an arbitrary string as *Name*. Print the report again. Check that the only change is that the respective line is added.
+
+Instantiate 2D statistics class with arbitrary data. Print-out the value of its property *Summary*. Check that it contains all lines defined in the REQ-FUN-324, but it has no *Name* line, and the *X* and *Y* sub-sets reports are present as well. Print-out the values of the corresponding properties (2D) directly and visually compare with the report. Print-out the values of the corresponding properties of *X* and *Y* sub-sets directly and visually compare with the report. Set some name in *X* sub-set. Check that it appears in the report. Set *Y* sub-set's name and the 2D set name. Check that they appear in the report.
+
+**Test result:** PASS / FAIL
+
 ## Traceability
 
 For traceability the relation between tests and requirements is summarized in the table below:
@@ -419,9 +469,13 @@ For traceability the relation between tests and requirements is summarized in th
 | REQ-FUN-311        | TEST-T-316             | NO                       |
 | REQ-FUN-312        | TEST-T-317             | NO                       |
 | REQ-FUN-313        | TEST-T-317             | NO                       |
+| REQ-FUN-314        | TEST-T-318             | NO                       |
+| REQ-FUN-315        | TEST-D-300             | NO                       |
 | REQ-FUN-320        | TEST-T-323             | NO                       |
 | REQ-FUN-321        | TEST-T-323             | NO                       |
 | REQ-FUN-322        | TEST-T-324             | NO                       |
+| REQ-FUN-323        | TEST-T-325             | NO                       |
+| REQ-FUN-324        | TEST-D-300             | NO                       |
 | REQ-AWM-300        | TEST-T-310, TEST-T-320 | NO                       |
 | REQ-AWM-301        | TEST-T-311, TEST-T-321 | NO                       |
 | REQ-AWM-302        | TEST-T-312, TEST-T-322 | NO                       |
