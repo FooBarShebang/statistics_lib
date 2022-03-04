@@ -20,6 +20,8 @@ import os
 import unittest
 import random
 
+import collections.abc as c_abc
+
 #+ custom modules
 
 MODULE_PATH = os.path.realpath(__file__)
@@ -50,12 +52,16 @@ class Test_Statistics1D(unittest.TestCase):
 
     Implements tests: 
     Covers the requirements:
+
+    Version 1.0.0.0
     """
     
     @classmethod
     def setUpClass(cls) -> None:
         """
         Preparation for the test cases, done only once.
+
+        Version 1.0.0.0
         """
         cls.TestClass = test_module.Statistics1D
         cls.AllInt = [random.randint(-100, 100)
@@ -83,12 +89,24 @@ class Test_Statistics1D(unittest.TestCase):
             Temp = random.random()
             if Temp >= 0.6:
                 cls.TotalMixed.append(Item)
-                cls.TotalErr.append(0)
+                cls.TotalErr.append(Item.SE)
             else:
                 cls.TotalMixed.append(Item.Value)
-                cls.TotalErr.append(Item.SE)
+                cls.TotalErr.append(0)
         cls.BadCases = [1, 2.0, 'asd', [1, '1'], ('b', 2.0), int, float, list,
                         tuple, {1:1, 2:2}, dict]
+        cls.Properties = (('N', int), ('Mean', (int, float)),
+                                ('Min', (int, float)), ('Max', (int, float)),
+                                ('Median', (int, float)), ('Q1', (int, float)),
+                                ('Q3', (int, float)), ('Var', (int, float)),
+                                ('Sigma', (int, float)), ('SE', (int, float)),
+                                ('FullVar', (int, float)),
+                                ('FullSigma', (int, float)),
+                                ('FullSE', (int, float)),
+                                ('Skew', (int, float)), ('Kurt', (int, float)),
+                                ('Summary', str), ('Sorted', c_abc.Sequence),
+                                ('Values', c_abc.Sequence),
+                                ('Errors', c_abc.Sequence))
     
     def test_InitTypeError(self):
         """
@@ -97,6 +115,8 @@ class Test_Statistics1D(unittest.TestCase):
         
         Tests ID: TEST-T-310
         Requirements ID: REQ-AWM-300
+
+        Version 1.0.0.0
         """
         for Item in self.BadCases:
             with self.assertRaises(TypeError):
@@ -109,11 +129,96 @@ class Test_Statistics1D(unittest.TestCase):
         
         Tests ID: TEST-T-311
         Requirements ID: REQ-AWM-301
+
+        Version 1.0.0.0
         """
         with self.assertRaises(ValueError):
                 self.TestClass([])
         with self.assertRaises(ValueError):
                 self.TestClass(tuple())
+    
+    def test_HasAttributes(self):
+        """
+        Checks that the class has all required attributes (properties and
+        methods), and the (read) properties are of the expected type.
+
+        Tests ID: TEST-T-317
+        Requirements ID: REQ-FUN-312, REQ-FUN-313
+
+        Version 1.0.0.0
+        """
+        for Input in [self.AllInt, self.AllFloat, self.Mixed, self.IntErr,
+                                self.FloatErr, self.MixedErr, self.TotalMixed]:
+            objTest = self.TestClass(Input)
+            for Attr, DataType in self.Properties:
+                self.assertTrue(hasattr(objTest, Attr))
+                self.assertIsInstance(getattr(objTest, Attr), DataType)
+            self.assertTrue(hasattr(objTest, 'getQuantile'))
+            self.assertTrue(hasattr(objTest, 'getHistogram'))
+            self.assertTrue(hasattr(objTest, 'Name'))
+            del objTest
+    
+    def test_AttributeError(self):
+        """
+        Checks that it is not possible to delete properties or methods, or to
+        assign to read-only properties
+
+        Tests ID: TEST-T-312
+        Requirements ID: REQ-AWM-302
+
+        Version 1.0.0.0
+        """
+        for Input in [self.AllInt, self.AllFloat, self.Mixed, self.IntErr,
+                                self.FloatErr, self.MixedErr, self.TotalMixed]:
+            objTest = self.TestClass(Input)
+            for Attr, _ in self.Properties:
+                with self.assertRaises(AttributeError):
+                    setattr(objTest, Attr, 1)
+                with self.assertRaises(AttributeError):
+                    delattr(objTest, Attr)
+            with self.assertRaises(AttributeError):
+                del objTest.getQuantile
+            with self.assertRaises(AttributeError):
+                del objTest.getHistogram
+            with self.assertRaises(AttributeError):
+                del objTest.Name
+            with self.assertRaises(AttributeError):
+                delattr(objTest, 'getQuantile')
+            with self.assertRaises(AttributeError):
+                delattr(objTest, 'getHistogram')
+            with self.assertRaises(AttributeError):
+                delattr(objTest, 'Name')
+    
+    def test_DataAccess(self):
+        """
+        Checks that it the input data is properly coverted into two sequences
+        of real numbers (means and errors).
+
+        Tests ID: TEST-T-316
+        Requirements ID: REQ-FUN-310, REQ-FUN-311
+
+        Version 1.0.0.0
+        """
+        for Input in [self.AllInt, self.AllFloat, self.Mixed]:
+            Length = len(Input)
+            Errors = [0 for _ in range(Length)]
+            objTest = self.TestClass(Input)
+            self.assertSequenceEqual(objTest.Values, Input)
+            self.assertSequenceEqual(objTest.Errors, Errors)
+            del objTest
+        for Input, Check in [(self.IntErr, self.AllInt),
+                                (self.FloatErr, self.AllFloat),
+                                (self.MixedErr, self.Mixed)]:
+            Length = len(Input)
+            Errors = self.Errors[:Length]
+            objTest = self.TestClass(Input)
+            self.assertSequenceEqual(objTest.Values, Check)
+            self.assertSequenceEqual(objTest.Errors, Errors)
+            del objTest
+        objTest = self.TestClass(self.TotalMixed)
+        self.assertSequenceEqual(objTest.Values, self.Mixed)
+        self.assertSequenceEqual(objTest.Errors, self.TotalErr)
+        del objTest
 
 class Test_Statistics2D(unittest.TestCase):
     """
@@ -122,6 +227,8 @@ class Test_Statistics2D(unittest.TestCase):
 
     Implements tests: 
     Covers the requirements:
+
+    Version 1.0.0.0
     """
     
     @classmethod
@@ -172,19 +279,26 @@ class Test_Statistics2D(unittest.TestCase):
             Temp = random.random()
             if Temp >= 0.6:
                 cls.TotalMixedX.append(Item)
-                cls.TotalErrX.append(0)
+                cls.TotalErrX.append(Item.SE)
             else:
                 cls.TotalMixedX.append(Item.Value)
-                cls.TotalErrX.append(Item.SE)
+                cls.TotalErrX.append(0)
             Temp = random.random()
             if Temp >= 0.6:
                 cls.TotalMixedY.append(cls.MixedErrY[Index])
-                cls.TotalErrY.append(0)
+                cls.TotalErrY.append(cls.MixedErrY[Index].SE)
             else:
                 cls.TotalMixedY.append(cls.MixedErrY[Index].Value)
-                cls.TotalErrY.append(cls.MixedErrY[Index].SE)
+                cls.TotalErrY.append(0)
         cls.BadCases = [1, 2.0, 'asd', [1, '1'], ('b', 2.0), int, float, list,
                         tuple, {1:1, 2:2}, dict]
+        cls.Properties = (('N', int), ('Cov', (int, float)),
+                                ('Pearson', (int, float)),
+                                ('Spearman', (int, float)),
+                                ('Kendall', (int, float)),
+                                ('Summary', str),
+                                ('X', test_module.Statistics1D),
+                                ('Y', test_module.Statistics1D))
         
     def test_InitTypeError(self):
         """
@@ -193,6 +307,8 @@ class Test_Statistics2D(unittest.TestCase):
         
         Tests ID: TEST-T-320
         Requirements ID: REQ-AWM-300
+
+        Version 1.0.0.0
         """
         for Item in self.BadCases:
             with self.assertRaises(TypeError):
@@ -210,6 +326,8 @@ class Test_Statistics2D(unittest.TestCase):
         
         Tests ID: TEST-T-311
         Requirements ID: REQ-AWM-301
+
+        Version 1.0.0.0
         """
         with self.assertRaises(ValueError):
                 self.TestClass([], tuple())
@@ -221,6 +339,58 @@ class Test_Statistics2D(unittest.TestCase):
                 self.TestClass([1, 2, 3], (1, 2))
         with self.assertRaises(ValueError):
                 self.TestClass((1, 2, 3), [1, 2, 3, 4, 5])
+    
+    def test_HasAttributes(self):
+        """
+        Checks that the class has all required attributes (properties and
+        methods), and the (read) properties are of the expected type.
+
+        Tests ID: TEST-T-317
+        Requirements ID: REQ-FUN-312, REQ-FUN-313
+
+        Version 1.0.0.0
+        """
+        for DataX, DataY in [(self.AllIntX, self.AllIntY),
+                                (self.AllFloatX, self.AllFloatY),
+                                (self.MixedX, self.MixedY),
+                                (self.IntErrX, self.IntErrY),
+                                (self.FloatErrX, self.FloatErrY),
+                                (self.MixedErrX, self.MixedErrY),
+                                (self.TotalMixedX, self.TotalMixedY)]:
+            objTest = self.TestClass(DataX, DataY)
+            for Attr, DataType in self.Properties:
+                self.assertTrue(hasattr(objTest, Attr))
+                self.assertIsInstance(getattr(objTest, Attr), DataType)
+            self.assertTrue(hasattr(objTest, 'Name'))
+            del objTest
+    
+    def test_AttributeError(self):
+        """
+        Checks that it is not possible to delete properties or methods, or to
+        assign to read-only properties
+
+        Tests ID: TEST-T-322
+        Requirements ID: REQ-AWM-302
+
+        Version 1.0.0.0
+        """
+        for DataX, DataY in [(self.AllIntX, self.AllIntY),
+                                (self.AllFloatX, self.AllFloatY),
+                                (self.MixedX, self.MixedY),
+                                (self.IntErrX, self.IntErrY),
+                                (self.FloatErrX, self.FloatErrY),
+                                (self.MixedErrX, self.MixedErrY),
+                                (self.TotalMixedX, self.TotalMixedY)]:
+            objTest = self.TestClass(DataX, DataY)
+            for Attr, _ in self.Properties:
+                with self.assertRaises(AttributeError):
+                    setattr(objTest, Attr, 1)
+                with self.assertRaises(AttributeError):
+                    delattr(objTest, Attr)
+            with self.assertRaises(AttributeError):
+                del objTest.Name
+            with self.assertRaises(AttributeError):
+                delattr(objTest, 'Name')
 
 #+ test suites
 

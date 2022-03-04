@@ -64,7 +64,7 @@ The verification method for a requirement is given by a single letter according 
 
 **Test steps:** Try to instantiate the class with the different data types, which are not a proper sequence (str is not a proper sequence) as well as a sequence containing, at least, one element, which is not a real number of measurement with uncertainty. Check that the expected error is raised each time.
 
-**Test result:** PASS / FAIL
+**Test result:** PASS
 
 ___
 
@@ -80,7 +80,7 @@ ___
 
 **Test steps:** Try to instantiate the class as described above. Check that the expected exception is raised.
 
-**Test result:** PASS / FAIL
+**Test result:** PASS
 
 ___
 
@@ -113,7 +113,7 @@ ___
 
 **Test steps:** Instantiate a class with an arbitrary data set. Try to delete each of the listed attributes of the instance. Try to assign any value to each of the listed attributes. Check that the expected exception is raised in each of the attempts.
 
-**Test result:** PASS / FAIL
+**Test result:** PASS
 
 ___
 
@@ -315,7 +315,7 @@ Repeat the test with the arguments being swapped. Check that the expected error 
 
 Repeat the test with the both arguments being of improper type. Check that the expected error is raised each time.
 
-**Test result:** PASS / FAIL
+**Test result:** PASS
 
 ___
 
@@ -337,7 +337,7 @@ Try to instantiate the class with the both arguments being empty sequences. Chec
 
 Try to instantiate the classe with the both arguments being proper non-empty sequences of real numbers, but of unequal length. Check that the expected exception si raised.
 
-**Test result:** PASS / FAIL
+**Test result:** PASS
 
 ___
 
@@ -361,7 +361,7 @@ ___
 
 **Test steps:** Instantiate a class with two arbitrary data sets of the same length. Try to delete each of the listed attributes of the instance. Try to assign any value to each of the listed attributes. Check that the expected exception is raised in each of the attempts.
 
-**Test result:** PASS / FAIL
+**Test result:** PASS
 
 ___
 
@@ -476,9 +476,9 @@ For traceability the relation between tests and requirements is summarized in th
 | REQ-FUN-322        | TEST-T-324             | NO                       |
 | REQ-FUN-323        | TEST-T-325             | NO                       |
 | REQ-FUN-324        | TEST-D-300             | NO                       |
-| REQ-AWM-300        | TEST-T-310, TEST-T-320 | NO                       |
-| REQ-AWM-301        | TEST-T-311, TEST-T-321 | NO                       |
-| REQ-AWM-302        | TEST-T-312, TEST-T-322 | NO                       |
+| REQ-AWM-300        | TEST-T-310, TEST-T-320 | YES                      |
+| REQ-AWM-301        | TEST-T-311, TEST-T-321 | YES                      |
+| REQ-AWM-302        | TEST-T-312, TEST-T-322 | YES                      |
 | REQ-AWM-310        | TEST-T-313             | NO                       |
 | REQ-AWM-311        | TEST-T-314             | NO                       |
 | REQ-AWM-312        | TEST-T-315             | NO                       |

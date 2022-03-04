@@ -78,8 +78,8 @@ The Bessel correction should not be applied, the data sample should be treated a
 
 In addition, the following methods should be implemented:
 
-* *getQuartile*(k, m) - 0<= int k <= int m -> int OR float, generic k-th of m-quantile (m > 0)
-* *getHistogram*(*, NBins = None, BinSize = None) - /int > 0 OR None, int > 0 OR float > 0 OR None/ -> tuple(tuple(int OR float, int >= 0))
+* *getQuantile*(k, m) - 0<= int k <= int m -> int OR float, generic k-th of m-quantile (m > 0)
+* *getHistogram*(*, NBins = None, BinSize = None) - /*, int > 0 OR None, int > 0 OR float > 0 OR None/ -> tuple(tuple(int OR float, int >= 0))
 
 **Verification Method:** T
 
@@ -118,6 +118,7 @@ ___
 **Description:** The 1D statistics class should provide a read-only property *Summary* returning the following data as a multi-line string with TSV format tabulated report, with each line constructed in the form '{name of property}: TAB {value of property}'. The properties to be included into the report are:
 
 * Name (unless **None**, in which case not to be included)
+* N
 * Mean
 * Median
 * Q1

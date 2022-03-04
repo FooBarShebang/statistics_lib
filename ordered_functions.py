@@ -395,7 +395,7 @@ def GetQuantile(Data: TGenericSequence, k: int, m: int, *, SkipFrames: int = 1,
             and sort the values
     
     Returns:
-        int OR float: the calculated Q3 value
+        int OR float: the calculated quantile value
     
     Raises:
         UT_TypeError: mandatory argument is not a sequence of real numbers or
