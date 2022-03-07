@@ -131,7 +131,7 @@ ___
 
 Repeat the process with the property *Errors*.
 
-**Test result:** PASS / FAIL
+**Test result:** PASS
 
 ___
 
@@ -210,7 +210,7 @@ Instantiate the class with each of the prepared lists in turn. Check that no exc
 
 Repeat the test with each prepared list converted into a tuple before passing into the instantiation methods.
 
-**Test result:** PASS / FAIL
+**Test result:** PASS
 
 ___
 
@@ -292,7 +292,7 @@ ___
 
 **Test steps:** Instantiate 2D statistics class with arbitrary but proper data. Check that it has attribute *Name*, and its value is **None**. Assign (in turn) arbitrary string, integer, floating point number, boolean value and **None** to this attribute, and check that the value of the attribute is the passed value converted into string.
 
-**Test result:** PASS / FAIL
+**Test result:** PASS
 
 ___
 
@@ -394,7 +394,7 @@ Instantiate the class with each of the prepared lists pairs in turn. Check that 
 
 Repeat the test with each prepared list converted into a tuple before passing into the instantiation methods.
 
-**Test result:** PASS / FAIL
+**Test result:** PASS
 
 ___
 
@@ -465,21 +465,21 @@ For traceability the relation between tests and requirements is summarized in th
 | **Requirement ID** | **Covered in test(s)** | **Verified \[YES/NO\]**) |
 | :----------------- | :--------------------- | :----------------------- |
 | REQ-FUN-300        | TEST-A-300             | NO                       |
-| REQ-FUN-310        | TEST-T-316             | NO                       |
-| REQ-FUN-311        | TEST-T-316             | NO                       |
+| REQ-FUN-310        | TEST-T-316             | YES                      |
+| REQ-FUN-311        | TEST-T-316             | YES                      |
 | REQ-FUN-312        | TEST-T-317             | NO                       |
 | REQ-FUN-313        | TEST-T-317             | NO                       |
-| REQ-FUN-314        | TEST-T-318             | NO                       |
+| REQ-FUN-314        | TEST-T-318             | YES                      |
 | REQ-FUN-315        | TEST-D-300             | NO                       |
-| REQ-FUN-320        | TEST-T-323             | NO                       |
-| REQ-FUN-321        | TEST-T-323             | NO                       |
+| REQ-FUN-320        | TEST-T-323             | YES                      |
+| REQ-FUN-321        | TEST-T-323             | YES                      |
 | REQ-FUN-322        | TEST-T-324             | NO                       |
-| REQ-FUN-323        | TEST-T-325             | NO                       |
+| REQ-FUN-323        | TEST-T-325             | YES                      |
 | REQ-FUN-324        | TEST-D-300             | NO                       |
 | REQ-AWM-300        | TEST-T-310, TEST-T-320 | YES                      |
 | REQ-AWM-301        | TEST-T-311, TEST-T-321 | YES                      |
 | REQ-AWM-302        | TEST-T-312, TEST-T-322 | YES                      |
-| REQ-AWM-310        | TEST-T-313             | NO                       |
+| REQ-AWM-310        | TEST-T-313             | YES                      |
 | REQ-AWM-311        | TEST-T-314             | NO                       |
 | REQ-AWM-312        | TEST-T-315             | NO                       |
 

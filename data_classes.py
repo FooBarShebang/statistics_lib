@@ -15,7 +15,7 @@ Classes:
 
 __version__= '1.0.0.0'
 __date__ = '25-02-2022'
-__status__ = 'Development'
+__status__ = 'Testing'
 
 #imports
 
