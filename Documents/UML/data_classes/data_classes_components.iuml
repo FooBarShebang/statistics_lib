@@ -1,0 +1,13 @@
+!$DATA_CLASSES = "v2"
+
+!if %not(%variable_exists("$COMPONENTS"))
+    !include ../Templates/Components2.cuml
+!endif
+
+$module(data_classes) {
+    $class(Statistics1D)
+    
+    $class(Statistics2D)
+    
+    Statistics1D "2" -o "1" Statistics2D
+}

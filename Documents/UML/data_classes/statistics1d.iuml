@@ -1,0 +1,39 @@
+!$STATISTICS1D = "v2"
+
+!if %not(%variable_exists("$CLASSES"))
+    !include ../Templates/Classes2.cuml
+!endif
+
+class Statistics1D {
+    ..private fields..
+    - {field} _Data: dict(str -> tuple(int OR float))
+    - {field} _Properties: dict(str -> type A)
+    ..getter / setter properties..
+    + Name: str OR None
+    ..read-only properties..
+    # {field} Values: tuple(int OR float)
+    # {field} Errors: tuple(int OR float)
+    # {field} Sorted: tuple(int OR float)
+    # N : int >= 1
+    # Mean : int OR float
+    # Median : int OR float
+    # Q1 : int OR float
+    # Q3 : int OR float
+    # Min : int OR float
+    # Max : int OR float
+    # Var : int OR float
+    # Sigma : int OR float
+    # SE : int OR float
+    # FullVar : int OR float
+    # FillSigma : int OR float
+    # FullSE : int OR float
+    # Skew : int OR float
+    # Kurt : int OR float
+    # Summary : str
+    ___
+    # __init__(Data): seq(int OR float OR MeasuredValue) -> None
+    + getQuantile(k, m): int >= 0, int > 0 -> int OR float
+    + getHistogram(*, NBins = None, BinSize = None):
+    /*, int > 0 OR None, int > 0 OR float > 0 OR None/ ->
+    tuple(tuple(int OR float, int >= 0))
+}

@@ -15,7 +15,7 @@ Classes:
 
 __version__= '1.0.0.0'
 __date__ = '08-03-2022'
-__status__ = 'Testing'
+__status__ = 'Production'
 
 #imports
 
@@ -122,7 +122,7 @@ class Statistics1D:
 
         Args:
             Data: seq(int OR float OR phyqus_lib.base_classes.MeasuredValue);
-                generic sequence of the measurements data to be sored
+                generic sequence of the measurements data to be stored
 
         Raises:
             UT_TypeError: argument is not a sequence of real numbers or
@@ -140,6 +140,31 @@ class Statistics1D:
                                     'Q3', 'Min', 'Max', 'Var', 'Sigma', 'SE',
                                         'Skew', 'Kurt', 'FullVar', 'FullSigma',
                                                             'FullSE', 'Name']}
+    
+    def __str__(self) -> str:
+        """
+        'Magic' method returning the string representaton of the instance as
+        the string '{class name}({value of Name property})'.
+        
+        Signature:
+            None -> str
+        
+        Version 1.0.0.0
+        """
+        return '{}({})'.format(self.__class__.__name__, self.Name)
+    
+    def __repr__(self) -> str:
+        """
+        'Magic' method returning the string representaton of the instance as
+        the string '<{class name}({value of Name property}) at {id}>'.
+        
+        Signature:
+            None -> str
+        
+        Version 1.0.0.0
+        """
+        return '<{}({}) at {}>'.format(self.__class__.__name__, self.Name,
+                                                                hex(id(self)))
     
     #public API
 
@@ -482,7 +507,8 @@ class Statistics1D:
                 number of quantiles is not an integer
             UT_ValueError: the total number of quantilies is negative integer or
                 zero, OR the quantile index is negative integer or integer
-                greater than the total number of qunatiles
+                greater than the total number of quantiles, OR the stored
+                sequence is of length 1
 
         Version 1.0.0.0
         """
@@ -611,6 +637,31 @@ class Statistics2D:
                                                                 SkipFrames = 1)
         self._Properties = {Key : None for Key in ['Cov', 'Pearson', 'Spearman',
                                                             'Kendall', 'Name']}
+    
+    def __str__(self) -> str:
+        """
+        'Magic' method returning the string representaton of the instance as
+        the string '{class name}({value of Name property})'.
+        
+        Signature:
+            None -> str
+        
+        Version 1.0.0.0
+        """
+        return '{}({})'.format(self.__class__.__name__, self.Name)
+    
+    def __repr__(self) -> str:
+        """
+        'Magic' method returning the string representaton of the instance as
+        the string '<{class name}({value of Name property}) at {id}>'.
+        
+        Signature:
+            None -> str
+        
+        Version 1.0.0.0
+        """
+        return '<{}({}) at {}>'.format(self.__class__.__name__, self.Name,
+                                                                hex(id(self)))
     
     #public API
 
@@ -764,15 +815,3 @@ class Statistics2D:
                             'X data sub-set', self.X.Summary,
                                 'Y data sub-set', self.Y.Summary, Separator])
         return Result
-
-if __name__ == '__main__':
-    try:
-        objTest = Statistics2D([5, 2, 4, 3, 1, 2], [5, 6, 4, 3, 8, 2])
-    except Exception as err:
-        print(err.__class__.__name__, ':', err)
-        print(err.Traceback.CallChain)
-        print(err.Traceback.Info)
-    objTest.Name = 'test data'
-    objTest.X.Name = 'IQ'
-    objTest.Y.Name = 'Salary'
-    print(objTest.Summary)

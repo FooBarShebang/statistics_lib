@@ -15,6 +15,7 @@ This module provides functions for calculation of:
   * Generic k-th of m-quantiles - *GetQuantile*()
   * Histogram of the sample's distribution - *GetHistogram*()
   * Mode(s) of the sample's distribution - *GetModes*()
+* 2D statistics
   * Spearman rank correlation coefficient $\rho$ - *GetSpearman*()
   * Kendall rank correlation coefficient $\tau$-*b* - *GetKendall*()
 

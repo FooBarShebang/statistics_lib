@@ -1,0 +1,21 @@
+@startuml statistics_lib_components
+
+!if %not(%variable_exists("$COMPONENTS"))
+    !include ./Templates/Components2.cuml
+!endif
+
+title Components Diagram of the Library statistics_lib. $generated()
+
+$module(base_functions)
+
+$module(ordered_functions)
+
+!if $is_not_defined("$DATA_CLASSES")
+    !include ./data_classes/data_classes_components.iuml
+!endif
+
+base_functions <-- data_classes : uses
+
+ordered_functions <-- data_classes : uses
+
+@enduml

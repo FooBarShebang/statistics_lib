@@ -1,0 +1,26 @@
+!$STATISTICS2D = "v2"
+
+!if %not(%variable_exists("$CLASSES"))
+    !include ../Templates/Classes2.cuml
+!endif
+
+class Statistics2D {
+    ..private fields..
+    - {field} _Data: dict(str -> Statistics1D)
+    - {field} _Properties: dict(str -> type A)
+    ..getter / setter properties..
+    + Name: str OR None
+    ..read-only properties..
+    # {field} X: Statistics1D
+    # {field} Y: Statistics1D
+    # N : int >= 1
+    # Cov : int OR float
+    # Pearson : int OR float
+    # Spearman : int OR float
+    # Kendall : int OR float
+    # Summary : str
+    ___
+    # __init__(DataX, DataY):
+    seq(int OR float OR MeasuredValue),
+    seq(int OR float OR MeasuredValue) -> None
+}
