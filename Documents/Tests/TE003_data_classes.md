@@ -43,9 +43,9 @@ The verification method for a requirement is given by a single letter according 
 
 **Expected result:** The classes implenting 1D and 2D statistics on encapsulated data are present and function as expected, i.e. all TEST-T-3xy tests defined in this document are passed.
 
-**Test steps:** Analyze the source code of the module [data\_classes](../../data_classes.py) as well as of the unit-test module [/Tests/UT003\_data\_classes](../../Tests/UT003_data_classes.py). Execute the mentioned unit-test module.
+**Test steps:** Analyze the source code of the module [data\_classes](../../data_classes.py) as well as of the unit-test module [/Tests/UT003\_data\_classes](../../Tests/UT003_data_classes.py). Execute the mentioned unit-test module. Also perform the demonstration test defined in the module [/Test/DT003\_data\_classes](../../Tests/DT003_data_classes.py).
 
-**Test result:** PASS / FAIL
+**Test result:** PASS
 
 ## Tests definition (Test)
 
@@ -154,7 +154,7 @@ ___
 
 **Test steps:** Instantiate the class with an arbitrary proper data set. Try to call the mentioned methods with the first, the second and both arguments being of improper data type. Check that the expected exception is raised. Repeat the test with the different improper data types.
 
-**Test result:** PASS / FAIL
+**Test result:** PASS
 
 ___
 
@@ -171,13 +171,14 @@ ___
 * *getQuantile*():
   * Total number of quantiles is an integer number, but not positive
   * Requested quantile index is an integer number, but either negative or greater than the total number of quantiles
+  * Length of the stored data sequence is less than 2
 * *getHistogram*():
   * Number of bins requested is an integer number, but not positive
   * Number of bins is not requested (OR None) and the requested bin size is integer or floating point number, but not positive
 
-**Test steps:** Instantiate the class with an arbitrary proper data set. Try to call the mentioned methods with the first, the second and both arguments being of improper value. Check that the expected exception is raised. Repeat the test with the different improper values.
+**Test steps:** Instantiate the class with an arbitrary proper data set. Try to call the mentioned methods with the first, the second and both arguments being of improper value. Check that the expected exception is raised. Repeat the test with the different improper values. Repeat the test with the stored data length of 1 element - only for *getQuantile*().
 
-**Test result:** PASS / FAIL
+**Test result:** PASS
 
 ___
 
@@ -276,7 +277,7 @@ Check that the method *getQuartile*() returns the same value as the function *or
 
 Check that the method *getHistogram*() returns a tuple of 2-element tuples with the same values as the key : value pairs in the dictionary returned by the function *ordered\_functions.GetHistogram*() with the same data and bin size / number of bin requested. Check all three options - requesting specific number of bins, requesting specific bin size and using the default behaviour.
 
-**Test result:** PASS / FAIL
+**Test result:** PASS
 
 ___
 
@@ -422,7 +423,7 @@ ___
 * Property *Spearman* returns the same value as the function *ordered_functions.GetSpearman*() with the same arguments as the instantition method
 * Property *Kendall* returns the same value as the function *ordered_functions.GetKendall*() with the same arguments as the instantition method
 
-**Test result:** PASS / FAIL
+**Test result:** PASS
 
 ___
 
@@ -438,7 +439,7 @@ ___
 
 **Test steps:** Instantiate 2D statistics class with arbitrary but proper data. Check that it has attribute *Name*, and its value is **None**. Assign (in turn) arbitrary string, integer, floating point number, boolean value and **None** to this attribute, and check that the value of the attribute is the passed value converted into string.
 
-**Test result:** PASS / FAIL
+**Test result:** PASS
 
 ## Tests definition (Demonstration)
 
@@ -456,7 +457,7 @@ ___
 
 Instantiate 2D statistics class with arbitrary data. Print-out the value of its property *Summary*. Check that it contains all lines defined in the REQ-FUN-324, but it has no *Name* line, and the *X* and *Y* sub-sets reports are present as well. Print-out the values of the corresponding properties (2D) directly and visually compare with the report. Print-out the values of the corresponding properties of *X* and *Y* sub-sets directly and visually compare with the report. Set some name in *X* sub-set. Check that it appears in the report. Set *Y* sub-set's name and the 2D set name. Check that they appear in the report.
 
-**Test result:** PASS / FAIL
+**Test result:** PASS
 
 ## Traceability
 
@@ -464,24 +465,24 @@ For traceability the relation between tests and requirements is summarized in th
 
 | **Requirement ID** | **Covered in test(s)** | **Verified \[YES/NO\]**) |
 | :----------------- | :--------------------- | :----------------------- |
-| REQ-FUN-300        | TEST-A-300             | NO                       |
+| REQ-FUN-300        | TEST-A-300             | YES                      |
 | REQ-FUN-310        | TEST-T-316             | YES                      |
 | REQ-FUN-311        | TEST-T-316             | YES                      |
-| REQ-FUN-312        | TEST-T-317             | NO                       |
-| REQ-FUN-313        | TEST-T-317             | NO                       |
+| REQ-FUN-312        | TEST-T-317             | YES                      |
+| REQ-FUN-313        | TEST-T-317             | YES                      |
 | REQ-FUN-314        | TEST-T-318             | YES                      |
-| REQ-FUN-315        | TEST-D-300             | NO                       |
+| REQ-FUN-315        | TEST-D-300             | YES                      |
 | REQ-FUN-320        | TEST-T-323             | YES                      |
 | REQ-FUN-321        | TEST-T-323             | YES                      |
-| REQ-FUN-322        | TEST-T-324             | NO                       |
+| REQ-FUN-322        | TEST-T-324             | YES                      |
 | REQ-FUN-323        | TEST-T-325             | YES                      |
-| REQ-FUN-324        | TEST-D-300             | NO                       |
+| REQ-FUN-324        | TEST-D-300             | YES                      |
 | REQ-AWM-300        | TEST-T-310, TEST-T-320 | YES                      |
 | REQ-AWM-301        | TEST-T-311, TEST-T-321 | YES                      |
 | REQ-AWM-302        | TEST-T-312, TEST-T-322 | YES                      |
 | REQ-AWM-310        | TEST-T-313             | YES                      |
-| REQ-AWM-311        | TEST-T-314             | NO                       |
-| REQ-AWM-312        | TEST-T-315             | NO                       |
+| REQ-AWM-311        | TEST-T-314             | YES                      |
+| REQ-AWM-312        | TEST-T-315             | YES                      |
 
 | **Software ready for production \[YES/NO\]** | **Rationale**        |
 | :------------------------------------------: | :------------------- |

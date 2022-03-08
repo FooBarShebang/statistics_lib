@@ -8,7 +8,7 @@ report TE003_data_classes.md
 
 
 __version__= '1.0.0.0'
-__date__ = '07-03-2022'
+__date__ = '08-03-2022'
 __status__ = 'Testing'
 
 #imports
@@ -319,6 +319,7 @@ class Test_Statistics1D(unittest.TestCase):
             self.assertAlmostEqual(TestResult, Check,
                                                 places = FLOAT_CHECK_PRECISION)
             #check the repetitive call!
+            TestResult = objTest.Mean
             self.assertIsInstance(TestResult, (int, float))
             self.assertAlmostEqual(TestResult, Check,
                                                 places = FLOAT_CHECK_PRECISION)
@@ -342,6 +343,7 @@ class Test_Statistics1D(unittest.TestCase):
             self.assertAlmostEqual(TestResult, Check,
                                                 places = FLOAT_CHECK_PRECISION)
             #check the repetitive call!
+            TestResult = objTest.Var
             self.assertIsInstance(TestResult, (int, float))
             self.assertAlmostEqual(TestResult, Check,
                                                 places = FLOAT_CHECK_PRECISION)
@@ -360,13 +362,13 @@ class Test_Statistics1D(unittest.TestCase):
         for Input in [self.AllInt, self.AllFloat, self.Mixed, self.IntErr,
                                 self.FloatErr, self.MixedErr, self.TotalMixed]:
             objTest = self.TestClass(Input)
-            Check = bf.GetVarianceP(Input) + bf.GetMeanSqrSE(
-                                                    bf._ExtractErrors(Input))
+            Check = bf.GetVarianceP(Input) + bf.GetMeanSqrSE(Input)
             TestResult = objTest.FullVar
             self.assertIsInstance(TestResult, (int, float))
             self.assertAlmostEqual(TestResult, Check,
                                                 places = FLOAT_CHECK_PRECISION)
             #check the repetitive call!
+            TestResult = objTest.FullVar
             self.assertIsInstance(TestResult, (int, float))
             self.assertAlmostEqual(TestResult, Check,
                                                 places = FLOAT_CHECK_PRECISION)
@@ -391,6 +393,7 @@ class Test_Statistics1D(unittest.TestCase):
             self.assertAlmostEqual(TestResult, Check,
                                                 places = FLOAT_CHECK_PRECISION)
             #check the repetitive call!
+            TestResult = objTest.Sigma
             self.assertIsInstance(TestResult, (int, float))
             self.assertAlmostEqual(TestResult, Check,
                                                 places = FLOAT_CHECK_PRECISION)
@@ -409,13 +412,13 @@ class Test_Statistics1D(unittest.TestCase):
         for Input in [self.AllInt, self.AllFloat, self.Mixed, self.IntErr,
                                 self.FloatErr, self.MixedErr, self.TotalMixed]:
             objTest = self.TestClass(Input)
-            Check = math.sqrt(bf.GetVarianceP(Input) + bf.GetMeanSqrSE(
-                                                    bf._ExtractErrors(Input)))
+            Check = math.sqrt(bf.GetVarianceP(Input) + bf.GetMeanSqrSE(Input))
             TestResult = objTest.FullSigma
             self.assertIsInstance(TestResult, (int, float))
             self.assertAlmostEqual(TestResult, Check,
                                                 places = FLOAT_CHECK_PRECISION)
             #check the repetitive call!
+            TestResult = objTest.FullSigma
             self.assertIsInstance(TestResult, (int, float))
             self.assertAlmostEqual(TestResult, Check,
                                                 places = FLOAT_CHECK_PRECISION)
@@ -440,6 +443,7 @@ class Test_Statistics1D(unittest.TestCase):
             self.assertAlmostEqual(TestResult, Check,
                                                 places = FLOAT_CHECK_PRECISION)
             #check the repetitive call!
+            TestResult = objTest.SE
             self.assertIsInstance(TestResult, (int, float))
             self.assertAlmostEqual(TestResult, Check,
                                                 places = FLOAT_CHECK_PRECISION)
@@ -458,13 +462,13 @@ class Test_Statistics1D(unittest.TestCase):
         for Input in [self.AllInt, self.AllFloat, self.Mixed, self.IntErr,
                                 self.FloatErr, self.MixedErr, self.TotalMixed]:
             objTest = self.TestClass(Input)
-            Check = math.sqrt(objTest.FullVar / objTest.N)
-            #note - some rounding-up errors when compared with bs.GetFullSE()
+            Check = bf.GetFullSE(Input)
             TestResult = objTest.FullSE
             self.assertIsInstance(TestResult, (int, float))
             self.assertAlmostEqual(TestResult, Check,
                                                 places = FLOAT_CHECK_PRECISION)
             #check the repetitive call!
+            TestResult = objTest.FullSE
             self.assertIsInstance(TestResult, (int, float))
             self.assertAlmostEqual(TestResult, Check,
                                                 places = FLOAT_CHECK_PRECISION)
@@ -488,6 +492,7 @@ class Test_Statistics1D(unittest.TestCase):
             self.assertAlmostEqual(TestResult, Check,
                                                 places = FLOAT_CHECK_PRECISION)
             #check the repetitive call!
+            TestResult = objTest.Skew
             self.assertIsInstance(TestResult, (int, float))
             self.assertAlmostEqual(TestResult, Check,
                                                 places = FLOAT_CHECK_PRECISION)
@@ -512,6 +517,7 @@ class Test_Statistics1D(unittest.TestCase):
             self.assertAlmostEqual(TestResult, Check,
                                                 places = FLOAT_CHECK_PRECISION)
             #check the repetitive call!
+            TestResult = objTest.Kurt
             self.assertIsInstance(TestResult, (int, float))
             self.assertAlmostEqual(TestResult, Check,
                                                 places = FLOAT_CHECK_PRECISION)
@@ -536,6 +542,7 @@ class Test_Statistics1D(unittest.TestCase):
             self.assertAlmostEqual(TestResult, Check,
                                                 places = FLOAT_CHECK_PRECISION)
             #check the repetitive call!
+            TestResult = objTest.Min
             self.assertIsInstance(TestResult, (int, float))
             self.assertAlmostEqual(TestResult, Check,
                                                 places = FLOAT_CHECK_PRECISION)
@@ -560,6 +567,7 @@ class Test_Statistics1D(unittest.TestCase):
             self.assertAlmostEqual(TestResult, Check,
                                                 places = FLOAT_CHECK_PRECISION)
             #check the repetitive call!
+            TestResult = objTest.Max
             self.assertIsInstance(TestResult, (int, float))
             self.assertAlmostEqual(TestResult, Check,
                                                 places = FLOAT_CHECK_PRECISION)
@@ -584,6 +592,7 @@ class Test_Statistics1D(unittest.TestCase):
             self.assertAlmostEqual(TestResult, Check,
                                                 places = FLOAT_CHECK_PRECISION)
             #check the repetitive call!
+            TestResult = objTest.Median
             self.assertIsInstance(TestResult, (int, float))
             self.assertAlmostEqual(TestResult, Check,
                                                 places = FLOAT_CHECK_PRECISION)
@@ -608,6 +617,7 @@ class Test_Statistics1D(unittest.TestCase):
             self.assertAlmostEqual(TestResult, Check,
                                                 places = FLOAT_CHECK_PRECISION)
             #check the repetitive call!
+            TestResult = objTest.Q1
             self.assertIsInstance(TestResult, (int, float))
             self.assertAlmostEqual(TestResult, Check,
                                                 places = FLOAT_CHECK_PRECISION)
@@ -632,10 +642,193 @@ class Test_Statistics1D(unittest.TestCase):
             self.assertAlmostEqual(TestResult, Check,
                                                 places = FLOAT_CHECK_PRECISION)
             #check the repetitive call!
+            TestResult = objTest.Q3
             self.assertIsInstance(TestResult, (int, float))
             self.assertAlmostEqual(TestResult, Check,
                                                 places = FLOAT_CHECK_PRECISION)
             del objTest
+    
+    def test_getQuantile(self):
+        """
+        Checks that the generic quantile of the stored data set is returned
+        properly.
+        
+        Tests ID: TEST-T-317
+        Requirements ID: REQ-FUN-313
+
+        Version 1.0.0.0
+        """
+        for Input in [self.AllInt, self.AllFloat, self.Mixed, self.IntErr,
+                                self.FloatErr, self.MixedErr, self.TotalMixed]:
+            objTest = self.TestClass(Input)
+            for _ in range(100):
+                m = random.randint(1, 100)
+                k = random.randint(0, m)
+                Check = of.GetQuantile(Input, k, m)
+                TestResult = objTest.getQuantile(k, m)
+                self.assertIsInstance(TestResult, (int, float))
+                self.assertAlmostEqual(TestResult, Check,
+                                                places = FLOAT_CHECK_PRECISION)
+                #check the repetitive call!
+                TestResult = objTest.getQuantile(k, m)
+                self.assertIsInstance(TestResult, (int, float))
+                self.assertAlmostEqual(TestResult, Check,
+                                                places = FLOAT_CHECK_PRECISION)
+            del objTest
+    
+    def test_getQuantile_TypeError(self):
+        """
+        Checks that the tested method raises TypeError sub-class exception with
+        the impoper type of the passed argument(s).
+        
+        Tests ID: TEST-T-314
+        Requirements ID: REQ-AWM-311
+
+        Version 1.0.0.0
+        """
+        objTest = self.TestClass(self.TotalMixed)
+        for Temp in [1.0, '1', int, float, [1], (1, 2), None]:
+            with self.assertRaises(TypeError):
+                objTest.getQuantile(Temp, 1)
+            with self.assertRaises(TypeError):
+                objTest.getQuantile(Temp, Temp)
+            with self.assertRaises(TypeError):
+                objTest.getQuantile(0, Temp)
+        del objTest
+    
+    def test_getQuantile_ValueError(self):
+        """
+        Checks that the tested method raises ValueError sub-class exception with
+        the impoper value of the passed argument(s), or if the stored sequence
+        is only 1 element long.
+        
+        Tests ID: TEST-T-315
+        Requirements ID: REQ-AWM-312
+
+        Version 1.0.0.0
+        """
+        objTest = self.TestClass(self.TotalMixed)
+        for _ in range(10):
+            Temp = -random.randint(1, 10)
+            with self.assertRaises(ValueError):
+                objTest.getQuantile(Temp, 1) #negative quantile
+            with self.assertRaises(ValueError):
+                objTest.getQuantile(Temp, Temp) #negative both
+            with self.assertRaises(ValueError):
+                objTest.getQuantile(0, Temp) #negative number of quantiles
+            with self.assertRaises(ValueError):
+                objTest.getQuantile(- Temp, 0) #zero number of quantiles
+            with self.assertRaises(ValueError):
+                objTest.getQuantile(- Temp + 4, 4) #k > m quantile
+        del objTest
+        #special case - too short sequence
+        objTest = self.TestClass([1])
+        with self.assertRaises(ValueError):
+            objTest.getQuantile(2, 4)
+        del objTest
+    
+    def test_getHistogram(self):
+        """
+        Checks that the histogram of the distribution of the stored data set is
+        returned properly.
+        
+        Tests ID: TEST-T-317
+        Requirements ID: REQ-FUN-313
+
+        Version 1.0.0.0
+        """
+        for Input in [self.AllInt, self.AllFloat, self.Mixed, self.IntErr,
+                                self.FloatErr, self.MixedErr, self.TotalMixed]:
+            objTest = self.TestClass(Input)
+            #default - no keywords
+            Temp = of.GetHistogram(Input)
+            Check = tuple((Key, Temp[Key]) for Key in sorted(Temp.keys()))
+            TestResult = objTest.getHistogram()
+            self.assertTupleEqual(TestResult, Check)
+            self.assertEqual(len(TestResult), 20)
+            #specific number of bins requested
+            for N in [1, 10, 20, 50, 100]:
+                Temp = of.GetHistogram(Input, NBins = N)
+                Check = tuple((Key, Temp[Key]) for Key in sorted(Temp.keys()))
+                TestResult = objTest.getHistogram(NBins = N)
+                self.assertTupleEqual(TestResult, Check)
+                self.assertEqual(len(TestResult), N)
+            #specific number of bins requested, bin size is passed as well,
+            #+ which should be ignored
+            for N in [1, 10, 20, 50, 100]:
+                BinSize = random.random() + 0.001
+                Temp = of.GetHistogram(Input, NBins = N, BinSize = BinSize)
+                Check = tuple((Key, Temp[Key]) for Key in sorted(Temp.keys()))
+                TestResult = objTest.getHistogram(NBins = N, BinSize = BinSize)
+                self.assertTupleEqual(TestResult, Check)
+                self.assertEqual(len(TestResult), N)
+            #specific bin width is requested
+            Min = objTest.Min
+            Max = objTest.Max
+            Range = Max - Min
+            for N in [10, 20, 50, 100]:
+                BinSize = Range / (N - 1) #should result in exactly N bins
+                Temp = of.GetHistogram(Input, BinSize = BinSize)
+                Check = tuple((Key, Temp[Key]) for Key in sorted(Temp.keys()))
+                TestResult = objTest.getHistogram(BinSize = BinSize)
+                self.assertTupleEqual(TestResult, Check)
+                self.assertEqual(len(TestResult), N)
+            #special case - too broad bin width
+            Mean = objTest.Mean
+            BinSize = 2.1 * max(Max - Mean, Mean - Min)
+            TestResult = objTest.getHistogram(BinSize = BinSize)
+            Check = ((Mean, objTest.N), )
+            self.assertTupleEqual(TestResult, Check)
+            del objTest
+    
+    def test_getHistogram_TypeError(self):
+        """
+        Checks that the tested method raises TypeError sub-class exception with
+        the impoper type of the passed argument(s).
+        
+        Tests ID: TEST-T-314
+        Requirements ID: REQ-AWM-311
+
+        Version 1.0.0.0
+        """
+        objTest = self.TestClass(self.TotalMixed)
+        for Temp in [1.0, '1', int, float, [1], (1, 2)]:
+            with self.assertRaises(TypeError):
+                objTest.getHistogram(NBins = Temp)
+            if not isinstance(Temp, float):
+                with self.assertRaises(TypeError):
+                    objTest.getHistogram(BinSize = Temp)
+        del objTest
+    
+    def test_getHistogram_ValueError(self):
+        """
+        Checks that the tested method raises ValueError sub-class exception with
+        the impoper value of the passed argument(s), or if the stored sequence
+        is only 1 element long.
+        
+        Tests ID: TEST-T-315
+        Requirements ID: REQ-AWM-312
+
+        Version 1.0.0.0
+        """
+        objTest = self.TestClass(self.TotalMixed)
+        for _ in range(10):
+            Temp = - random.randint(1, 10)
+            with self.assertRaises(ValueError):
+                objTest.getHistogram(NBins = Temp) #negative number of bins
+            with self.assertRaises(ValueError):
+                objTest.getHistogram(BinSize = Temp) #negative bin width
+            Temp += random.random()
+            with self.assertRaises(ValueError):
+                objTest.getHistogram(BinSize = Temp) #negative bin width
+        #special cases - zero bins number of zero bin width
+        with self.assertRaises(ValueError):
+            objTest.getHistogram(NBins = 0)
+        with self.assertRaises(ValueError):
+            objTest.getHistogram(BinSize = 0)
+        with self.assertRaises(ValueError):
+            objTest.getHistogram(BinSize = 0.0)
+        del objTest
 
 class Test_Statistics2D(unittest.TestCase):
     """
@@ -905,6 +1098,117 @@ class Test_Statistics2D(unittest.TestCase):
             #check the repetitive call!
             self.assertIsInstance(objTest.N, int)
             self.assertEqual(objTest.N, len(DataX))
+            del objTest
+    
+    def test_Cov(self):
+        """
+        Checks that the covariance of the stored data set is returned properly.
+        
+        Tests ID: TEST-T-324
+        Requirements ID: REQ-FUN-322
+
+        Version 1.0.0.0
+        """
+        for DataX, DataY in [(self.AllIntX, self.AllIntY),
+                                (self.AllFloatX, self.AllFloatY),
+                                (self.MixedX, self.MixedY),
+                                (self.IntErrX, self.IntErrY),
+                                (self.FloatErrX, self.FloatErrY),
+                                (self.MixedErrX, self.MixedErrY),
+                                (self.TotalMixedX, self.TotalMixedY)]:
+            objTest = self.TestClass(DataX, DataY)
+            TestResult = objTest.Cov
+            Check = bf.GetCovariance(DataX, DataY)
+            self.assertIsInstance(TestResult, (int, float))
+            self.assertEqual(TestResult, Check)
+            #check the repetitive call!
+            TestResult = objTest.Cov
+            self.assertIsInstance(TestResult, (int, float))
+            self.assertEqual(TestResult, Check)
+            del objTest
+    
+    def test_Pearson(self):
+        """
+        Checks that the Pearson's correlation coefficient of the stored data set
+        is returned properly.
+        
+        Tests ID: TEST-T-324
+        Requirements ID: REQ-FUN-322
+
+        Version 1.0.0.0
+        """
+        for DataX, DataY in [(self.AllIntX, self.AllIntY),
+                                (self.AllFloatX, self.AllFloatY),
+                                (self.MixedX, self.MixedY),
+                                (self.IntErrX, self.IntErrY),
+                                (self.FloatErrX, self.FloatErrY),
+                                (self.MixedErrX, self.MixedErrY),
+                                (self.TotalMixedX, self.TotalMixedY)]:
+            objTest = self.TestClass(DataX, DataY)
+            TestResult = objTest.Pearson
+            Check = bf.GetPearsonR(DataX, DataY)
+            self.assertIsInstance(TestResult, (int, float))
+            self.assertEqual(TestResult, Check)
+            #check the repetitive call!
+            TestResult = objTest.Pearson
+            self.assertIsInstance(TestResult, (int, float))
+            self.assertEqual(TestResult, Check)
+            del objTest
+    
+    def test_Spearman(self):
+        """
+        Checks that the Spearman rank correlation coefficient of the stored data
+        set is returned properly.
+        
+        Tests ID: TEST-T-324
+        Requirements ID: REQ-FUN-322
+
+        Version 1.0.0.0
+        """
+        for DataX, DataY in [(self.AllIntX, self.AllIntY),
+                                (self.AllFloatX, self.AllFloatY),
+                                (self.MixedX, self.MixedY),
+                                (self.IntErrX, self.IntErrY),
+                                (self.FloatErrX, self.FloatErrY),
+                                (self.MixedErrX, self.MixedErrY),
+                                (self.TotalMixedX, self.TotalMixedY)]:
+            objTest = self.TestClass(DataX, DataY)
+            TestResult = objTest.Spearman
+            Check = of.GetSpearman(DataX, DataY)
+            self.assertIsInstance(TestResult, (int, float))
+            self.assertEqual(TestResult, Check)
+            #check the repetitive call!
+            TestResult = objTest.Spearman
+            self.assertIsInstance(TestResult, (int, float))
+            self.assertEqual(TestResult, Check)
+            del objTest
+    
+    def test_Kendall(self):
+        """
+        Checks that the Kendall rank correlation coefficient of the stored data
+        set is returned properly.
+        
+        Tests ID: TEST-T-324
+        Requirements ID: REQ-FUN-322
+
+        Version 1.0.0.0
+        """
+        for DataX, DataY in [(self.AllIntX, self.AllIntY),
+                                (self.AllFloatX, self.AllFloatY),
+                                (self.MixedX, self.MixedY),
+                                (self.IntErrX, self.IntErrY),
+                                (self.FloatErrX, self.FloatErrY),
+                                (self.MixedErrX, self.MixedErrY),
+                                (self.TotalMixedX, self.TotalMixedY)]:
+            objTest = self.TestClass(DataX, DataY)
+            TestResult = objTest.Kendall
+            Check = of.GetKendall(DataX, DataY)
+            self.assertIsInstance(TestResult, (int, float))
+            self.assertEqual(TestResult, Check)
+            #check the repetitive call!
+            TestResult = objTest.Kendall
+            self.assertIsInstance(TestResult, (int, float))
+            self.assertEqual(TestResult, Check)
             del objTest
 
 #+ test suites

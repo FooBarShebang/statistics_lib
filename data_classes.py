@@ -14,7 +14,7 @@ Classes:
 """
 
 __version__= '1.0.0.0'
-__date__ = '25-02-2022'
+__date__ = '08-03-2022'
 __status__ = 'Testing'
 
 #imports
@@ -371,8 +371,8 @@ class Statistics1D:
         Version 1.0.0.0
         """
         if self._Properties['FullVar'] is None:
-            self._Properties['FullVar']= self.Var + bf.GetMeanSqrSE(self.Errors,
-                                                                DoCheck = False)
+            MSSE = sum(pow(Item, 2) for Item in self.Errors) / self.N
+            self._Properties['FullVar']= self.Var + MSSE
         return self._Properties['FullVar']
     
     @property
@@ -523,7 +523,7 @@ class Statistics1D:
         """
         dictTemp = of.GetHistogram(self.Values, NBins = NBins, BinSize= BinSize,
                                                 SkipFrames = 2, DoCheck = False)
-        Result = ((Key, Item) for Key, Item in dictTemp.values())
+        Result = tuple((Key, Item) for Key, Item in dictTemp.items())
         return Result
 
 class Statistics2D:

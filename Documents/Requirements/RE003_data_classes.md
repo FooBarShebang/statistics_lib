@@ -285,6 +285,7 @@ ___
 * *getQuantile*() method:
   * Total number of quantiles is an integer number, but not positive
   * Requested quantile index is an integer number, but either negative or greater than the total number of quantiles
+  * Length of the stored data sequence is less than 2
 * *getHistogram*() method:
   * Number of bins requested is an integer number, but not positive
   * Number of bins is not requested (OR None) and the requested bin size is integer or floating point number, but not positive
