@@ -14,3 +14,9 @@ TODO:
 * [Pure python](https://stackoverflow.com/questions/42381244/pure-python-inverse-error-function)
 * [Scipy1](https://github.com/scipy/scipy/blob/main/scipy/special/cephes/ndtri.c)
 * [Scipy2](https://github.com/jeremybarnes/cephes/blob/master/cprob/polevl.c)
+
+### Beta function
+
+### Incomplete beta functions
+
+### Incomplete gamma functions
