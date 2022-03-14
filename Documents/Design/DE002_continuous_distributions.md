@@ -2,7 +2,7 @@
 
 ## Scope
 
-This document describes the design of classes implementing continuous distributions, i.e. which methods and properties they must provide, relation between properties and methods for a specific distribution and special mathematical functions required to implement those distributions.
+This document describes the design of classes implementing continuous distributions (and some discrete), i.e. which methods and properties they must provide, relation between properties and methods for a specific distribution and special mathematical functions required to implement those distributions.
 
 ## Background information
 
@@ -407,7 +407,7 @@ $$
 C_n^k = \binom{n}{k} = \frac{n!}{k! (n-k)!}
 $$
 
-is a *binomial coefficient*.
+is a *binomial coefficient*, which is implemented as a function in the Standard Python Library for version >= 3.8.
 
 The following statistical properties are defined:
 
@@ -426,6 +426,23 @@ The *geometric distribution* is either of two discrete probability distributions
 * the number *X* of Bernoulli trials (indendent draws with replacement and two possible outcomes) needed to get one success - supported on the $k \in \mathbb{N}$
 * the number *Y = X -1* of failures before the first success - supported on the $k \geq 0, \; k \in \mathbb{Z}$
 
+Its PMF and CDF are defined as:
+
+$$
+p(x) = (1-p)^{k-1} p\newline
+F(x) = 1 - (1-p)^k
+$$
+
+where the first definition of the distribution is used. The following statistical properties are defined:
+
+* Mean is $\frac{1}{p}$
+* Variance is $\frac{1-p}{p^2}$
+* Skewness is $\frac{2 - p}{\sqrt{1-p}}$
+* Excess kurtosis is $6 + \frac{p^2}{1-p}$
+* Median is $\lceil \frac{-1}{\mathtt{log}_2 (1-p)} \rceil$
+
+All quantiles, including quartiles must be calculated from CDF using numerical methods.
+
 ## Hypergeometric distribution
 
 The *hypergeometric distribution* is a discrete probability distribution describing the probability of *k* successes in *n* draws without replacement from a finite population of size *N* containing exactly *K* required objects, i.e. a success is the drawing of a required object.
@@ -436,4 +453,107 @@ Basically, it is defined by three parameters:
 * Number of 'success' objects $0 \leq K \leq N, \; K \in \mathbb{Z}$
 * Number of draws $0 \leq n \leq N, \; n \in \mathbb{Z}$
 
-It supports $0 \leq k \leq \mathtt{min}(n, K), \; k \in \mathbb{Z}$
+It supports $0 \leq k \leq \mathtt{min}(n, K), \; k \in \mathbb{Z}$. Its PMF and CDF are defined as:
+
+$$
+p(x) = \frac{C_K^k C_{N-K}^{n-k}}{C_N^n}\newline
+F(x) = 1 - \frac{C_n^{k+1} C_{N-n}^{K-k-1}}{C_N^K} \times {}_3 F_2 \left[ 1, k+1-K, k+1-n; k+2, N+K+2-K-n; 1 \right]
+$$
+
+where
+
+$$
+{}_p F_q[a_1, ..., a_p; b_1, ..., b_q;z] = \sum_{n=0}^{\infin} {\frac{\prod_{k=0}^{n - 1} {(a_1 + k)} \times ... \times \prod_{k=0}^{n - 1} {(a_p + k)}}{\prod_{k=0}^{n - 1} {(b_1 + k)} \times ... \times \prod_{k=0}^{n - 1} {(b_q + k)}} \frac{z^m}{n!}}
+$$
+
+is the generalized *hypergeometric function*, which is not implemented in the Standard Python Library. Since the hypergeometric distrion is not only discrete but also finite, it is easier to calculate CDF by direct summation of PDF, instead of implementating finite polynomial approximation of infinite series.
+
+The following statistical properties are defined:
+
+* Mean is $n \frac{K}{N}$
+* Variance is $n \frac{K}{N} \frac{N-K}{N} \frac{N-n}{N-1}$
+* Skewness is $\frac{(N-2K) (N-1)^{1/2} (N - 2n)}{\lfloor nK(N-K)(N-n) \rfloor^{1/2} (N-2)}$
+* Excess kurtosis is $\frac{(N-1)N^2(N(N+1)-6K(N-K)-6n(N-n))+6nK(N-k)(N-n)(5N-6))}{nK(N-k)(N-n)(N-2)(N-3)}$
+
+All quantiles, including quartiles and median must be calculated from CDF using numerical methods.
+
+## General design patterns
+
+Both types of the random distributions: discrete and continuous - can be implemented as classes with the identical API, compatible with the 1D and 2D statistics classes, with the following conventions:
+
+* The parameters of a distribution are passes as arguments of the initialization method, i.e. during the class instantiation
+* The same parameters can be accessed (read-out) and modified (write access) at any time via **getter + setter properties** - with an exception of Z-distribution, which has fixed parameters, coinciding with the statistical properties, therefore - they must be accessible only for reading-out, but not for modification
+* An instance of such class provides the following **read-only properties** to access the respective statistical properties of the distribution - with exception for the generic Gaussian distribution, in which case *Mean* and *Sigma* are also parameters of the distribution, and they must be **getter + setter properties**:
+  * Mean (arithmetic mean)
+  * Var (variance)
+  * Sigma (standard deviation)
+  * Skew (skewness)
+  * Kurt (excess kurtosis)
+  * Median (median value of the distribution)
+  * Q1 (the first quartile of the distribution)
+  * Q3 (the third quartile of the distribution)
+  * Min
+  * Max
+* If these properties have fixed values or can be easily calculated from the parameters of the distribution, such calculations can be performed each time; however, if intensive calculations are requried - the respective values should be cached and re-used
+* The positive infinity value (for Max) should be represented as *math.inf* constant, the negative infinity value (for Min) - as *-math.inf*, and the open zero interval (for Min) as *sys.float_info.epsilon*
+* All classes should provide the following methods:
+  * pdf(Value: int OR float), which must return the value of:
+    * PDF for a continuous distribution with the following special cases
+      * with accepted range Value > 0 the convention is pdf(Value $\leq$ 0) = 0
+      * for the accepted range Value $\geq$ 0 the convention is pdf(Value < 0) = 0
+    * PMF for a discrete distribution if the value is integer and within the accepted range, otherwise - strict zero
+  * cdf(Value: int or float), which must return CDF, which is
+    * a continuous function for the continuous distributions with the return values in
+      * the open interval (0, 1) for a distribution w/o minimum accepted value
+      * the semi-open interval [0, 1) for a distribution with minimum accepted value, where cdf(Value $\leq$ Min) = 0
+    * a step-function, which is 0 for Value < Min, and is constant cdf($\lfloor Value \geq Min \rfloor$) in the semi-open interval $[\lfloor Value \rfloor, \lfloor Value \rfloor + 1)$, with the return values belonging to
+      * the semi-open interval [0, 1) for the infinite discrete distribution
+      * the closed interval [0, 1] for the finite distribution, where cdf(Value $\geq$ Max) = 1
+  * qf(Probability: 0 < float < 1), which must return ICDF / QF; for the discrete distributions the return value is, in principle, a floating point number Value, such that $cdf(\lfloor Value \rfloor) \leq Probability < cdf(\lfloor Value \rfloor + 1)$
+  * getQuantile(k: int > 0, m: int > 0), where k < m is a *short-hand* for qf(k/m)
+  * getHistogram(min: int OR float, max: int OR float, NBins: int > 1), where max > min; the calculations should be performed in the following manner
+    * bin size S is defined as (max - min) / (NBins - 1)
+    * for the k-th bin (indexing from 0 to NBins - 1)
+      * the left boundary is Left = min + (k - 0.5) * S
+      * the right boundary is Right = min + (k + 0.5) * S
+      * the central value is Center = min + k * S
+      * the binned frequency if F = cdf(Right) - cdf(Left)
+    * the return value is a tuple of length NBins with each element being a 2-tuple of (Center, F) pairs
+  * random(), which returns:
+    * a floating point number R = qf(r), where r is uniformly distributed random value in the range (0,1) in the case of continuous distributions
+    * an integer number $R = \lceil qf(r) \rceil$, where r is uniformly distributed random value in the range (0,1) in the case of discrete distributions
+
+## Modified bi-section method for calculating ICDF / QF
+
+The function f(x) is monotonically increasing if for a < x < b the function's values are related as f(a) < f(x) < f(b), in which case the solution of the equation f(x) = y can be found numerically using the following iterative procedure:
+
+* Find the *intial guesses* a and b such that f(a) < y < f(b)
+* Calculate f((a+b)/2). If it is
+  * greater than y, then adjust the upper boundary of the range, b -> (a+b) / 2
+  * less than y, then adjust the lower boundary of the range, a -> (a+b) / 2
+  * equal to y - the solution is found, which is (a+b) / 2
+* Iteratevely apply the following step, untill the required precision is achieved, i.e. $b - a \leq \delta$ or $| f(\frac{a+b}{2}) - y | \leq \varepsilon$
+
+In the case of *discrete distributions* the boundaries *a* and *b* are integer numbers, thus the new (lower or upper) boundary is defined as $\lfloor \frac{a+b}{2} \rfloor$, and the iterative narrowing of the range is terminated as soon as a + 1 = b. Furthermore, if at any step f(a) = y or f(b) = y the corresponding boundary value is returned as the result. Otherwise, as soon as a + 1 = b situation is reached the return value x is calculated as
+
+$$
+x = a + \frac{y - f(a)}{f(a+1) - f(a)}
+$$
+
+Naturally, f(x) is the CDF, where y is the specified cummulative propability *p*.
+
+Furthermore, for the discrete distributions $\{ x_1, x_2, ...\}$ or $\{ x_1, x_2, ..., x_N\}$ an additional check must be performed, if $cdf(x_1) > p$, in which case $a = x_1 - 1$ and $b = a + 1 = x_1$ are immediately the terminal bounds.
+
+Also, for the finite discrete distributions $\{ x_1, x_2, ..., x_N\}$ it should be checked if $cdf(x_{n-1}) > p$, in which case  $a = x_{N-1}$ and $b = a + 1 = x_N$ are immediately the terminal bounds.
+
+Then, the following procedure should be used for the selection of the *initial guesses*:
+
+* Calculate cdf(Mean) and compare it with the passed *p* value:
+  * cdf(Mean) = p - the solution is found, which is Mean
+  * cdf(Mean) < p
+    * the distribution is discrete - chose a = Min and b = Mean
+    * the distribution is continuous and defined only for x > 0 or x $\geq$ 0 - chose a = 0 and b = Mean
+    * the distribution is continuous and defined on $(- \infin, + \infin)$ - find such $k \in \mathbb{N}$ that $cdf(Mean - k \times Sigma) \leq p < cdf(Mean - (k-1) \times Sigma)$, and select $a=Mean - k \times Sigma$ and $b=Mean - (k-1) \times Sigma$
+  * cdf(Mean) > p
+    * the distribution is finite discrete - chose a = Mean and b = Max
+    * the distribution is infinite discrete or continous - find such $k \in \mathbb{N}$ that $cdf(Mean + (k-1) \times Sigma) \leq p < cdf(Mean + k \times Sigma)$, and select $a=Mean + (k-1) \times Sigma$ and $b=Mean + k \times Sigma$
