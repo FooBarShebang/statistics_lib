@@ -6,6 +6,8 @@
 * module **base_functions** - 10x
 * module **ordered_functions** - 2xy
 * module **data_classes** - 3xy
+* module **distribution_classes** - 40x
+* module **special_functions** - 5xy
 
 ## Requirements vs Tests Traceability
 
