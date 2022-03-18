@@ -61,8 +61,8 @@
 | REQ-AWM-311        | TEST-T-314             | YES                      |
 | REQ-AWM-312        | TEST-T-315             | YES                      |
 | REQ-FUN-500        | TEST-A-500             | NO                       |
-| REQ-FUN-510        | TEST-T-510             | NO                       |
-| REQ-FUN-520        | TEST-T-520             | NO                       |
+| REQ-FUN-510        | TEST-T-510             | YES                      |
+| REQ-FUN-520        | TEST-T-520             | YES                      |
 | REQ-FUN-530        | TEST-T-530             | NO                       |
 | REQ-FUN-540        | TEST-T-540             | NO                       |
 | REQ-FUN-550        | TEST-T-550             | NO                       |

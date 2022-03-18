@@ -7,7 +7,7 @@ plan / report TE005_special_functions.md
 
 
 __version__= '1.0.0.0'
-__date__ = '16-03-2022'
+__date__ = '18-03-2022'
 __status__ = 'Testing'
 
 #imports
@@ -48,6 +48,8 @@ class Test_factorial(unittest.TestCase):
     Sanity check - basically, not required, since the Standard Python Library
     is supposed to be properly tested. Just to make sure that the conventions
     are not changed.
+
+    Version 1.0.0.0
     """
     
     @classmethod
@@ -62,6 +64,8 @@ class Test_factorial(unittest.TestCase):
         Checks that the function returns positive integer value with the non-
         negative integer input, which is of the expected value. The test
         values are calculated manually.
+
+        Version 1.0.0.0
         """
         for Input, Output in ( (0, 1), (1, 1), (2, 2), (3, 6), (4, 24),
                                 (5, 120), (6, 720), (7, 5040), (8, 40320),
@@ -84,6 +88,8 @@ class Test_gamma(unittest.TestCase):
     Sanity check - basically, not required, since the Standard Python Library
     is supposed to be properly tested. Just to make sure that the conventions
     are not changed.
+
+    Version 1.0.0.0
     """
     
     @classmethod
@@ -105,6 +111,8 @@ class Test_gamma(unittest.TestCase):
         Reliability Engineering, First Ed. Kailash C. Kapur. Published by
         John Wiley & Sons, Inc. (2014).
         https://onlinelibrary.wiley.com/doi/pdf/10.1002/9781118841716.app2
+
+        Version 1.0.0.0
         """
         for Input, Output in ((1, 1.00000), (1.0, 1.00000),
                                 (2, 1.00000), (2.0, 1.00000),
@@ -138,6 +146,8 @@ class Test_erf(unittest.TestCase):
     Sanity check - basically, not required, since the Standard Python Library
     is supposed to be properly tested. Just to make sure that the conventions
     are not changed.
+
+    Version 1.0.0.0
     """
     
     @classmethod
@@ -160,6 +170,8 @@ class Test_erf(unittest.TestCase):
         Groundwater Transport: Handbook of Mathematical Models.
         Published by John Wiley & Sons, Inc. (2013).
         https://agupubs.onlinelibrary.wiley.com/doi/pdf/10.1002/9781118665473.app7
+
+        Version 1.0.0.0
         """
         for Input, Output in ((0, 0.00000), (0.0, 0.00000),
                                 (0.02, 0.022564), (0.04, 0.04511),
@@ -178,14 +190,164 @@ class Test_erf(unittest.TestCase):
             self.assertAlmostEqual(TestResult, - Output,
                                                 places = FLOAT_CHECK_PRECISION)
 
+class Test_permutation(unittest.TestCase):
+    """
+    Checks the implementation of the function special_functions.permutation().
+
+    Implements tests: TEST-T-500, TEST-T-501 and TEST-T-510.
+    Covers requirements: REQ-FUN-510, REQ-AWM-500 and REQ-AWM-501.
+
+    Version 1.0.0.0
+    """
+    
+    @classmethod
+    def setUpClass(cls) -> None:
+        """
+        Preparation for the test cases, done only once.
+        """
+        cls.TestFunction = staticmethod(test_module.permutation)
+    
+    def test_TypeError(self):
+        """
+        Checks that sub-class TypeError is raised with non-integer argument.
+
+        Test ID: TEST-T-500
+        Requirement(s): REQ-AWM-500
+
+        Version 1.0.0.0
+        """
+        for Value in [1.0, int, float, [1, 2], '1', (1, 1), {1 : 1}, bool]:
+            with self.assertRaises(TypeError):
+                self.TestFunction(Value, 1)
+            with self.assertRaises(TypeError):
+                self.TestFunction(1, Value)
+            with self.assertRaises(TypeError):
+                self.TestFunction(Value, Value)
+    
+    def test_ValueError(self):
+        """
+        Checks that sub-class TypeError is raised with non-integer argument.
+
+        Test ID: TEST-T-501
+        Requirement(s): REQ-AWM-501
+
+        Version 1.0.0.0
+        """
+        for _ in range(100):
+            Value = - random.randint(1, 100)
+            with self.assertRaises(ValueError):
+                self.TestFunction(Value, 1)
+            with self.assertRaises(ValueError):
+                self.TestFunction(1, Value)
+            with self.assertRaises(ValueError):
+                self.TestFunction(Value, Value)
+            n = random.randint(1, 100)
+            k = n + random.randint(1, 100)
+            with self.assertRaises(ValueError):
+                self.TestFunction(n, k)
+    
+    def test_OK(self):
+        """
+        Checks that the k-permutations are calculated properly. The pre-defined
+        values are calculated manually.
+
+        Test ID: TEST-T-510
+        Requirement(s): REQ-FUN-510.
+
+        Version 1.0.0.0
+        """
+        for n, k, p in ((0, 0, 1), (1, 0, 1), (1, 1, 1), (2, 0, 1), (2, 1, 2),
+                            (2, 2, 2), (3, 0, 1), (3, 1, 3), (3, 2, 6),
+                            (3, 3, 6), (4, 0, 1), (4, 1, 4), (4, 2, 12),
+                            (4, 3, 24), (4, 4, 24), (5, 0, 1), (5, 1, 5),
+                            (5, 2, 20), (5, 3, 60), (5, 4, 120), (5, 5, 120)):
+            TestResult = self.TestFunction(n, k)
+            self.assertIsInstance(TestResult, int)
+            self.assertEqual(TestResult, p)
+        for _ in range(100):
+            n = random.randint(6, 1000)
+            TestResult = self.TestFunction(n, 0)
+            self.assertIsInstance(TestResult, int)
+            self.assertEqual(TestResult, 1)
+            TestResult = self.TestFunction(n, 1)
+            self.assertIsInstance(TestResult, int)
+            self.assertEqual(TestResult, n)
+            TestResult = self.TestFunction(n, n-1)
+            self.assertIsInstance(TestResult, int)
+            self.assertEqual(TestResult, math.factorial(n))
+            TestResult = self.TestFunction(n, n)
+            self.assertIsInstance(TestResult, int)
+            self.assertEqual(TestResult, math.factorial(n))
+            k = random.randint(2, n-1)
+            TestResult = self.TestFunction(n, k)
+            self.assertIsInstance(TestResult, int)
+            self.assertEqual(TestResult, math.factorial(n)//math.factorial(n-k))
+
+class Test_combination(unittest.TestCase):
+    """
+    Checks the implementation of the function special_functions.combination().
+
+    Implements tests: TEST-T-500, TEST-T-501 and TEST-T-520.
+    Covers requirements: REQ-FUN-520, REQ-AWM-500 and REQ-AWM-501.
+
+    Version 1.0.0.0
+    """
+    
+    @classmethod
+    def setUpClass(cls) -> None:
+        """
+        Preparation for the test cases, done only once.
+        """
+        cls.TestFunction = staticmethod(test_module.combination)
+    
+    def test_OK(self):
+        """
+        Checks that the binomial coefficients are calculated properly. The
+        pre-defined values are calculated manually.
+
+        Test ID: TEST-T-510
+        Requirement(s): REQ-FUN-510.
+
+        Version 1.0.0.0
+        """
+        for n, k, p in ((0, 0, 1), (1, 0, 1), (1, 1, 1), (2, 0, 1), (2, 1, 2),
+                            (2, 2, 1), (3, 0, 1), (3, 1, 3), (3, 2, 3),
+                            (3, 3, 1), (4, 0, 1), (4, 1, 4), (4, 2, 6),
+                            (4, 3, 4), (4, 4, 1), (5, 0, 1), (5, 1, 5),
+                            (5, 2, 10), (5, 3, 10), (5, 4, 5), (5, 5, 1)):
+            TestResult = self.TestFunction(n, k)
+            self.assertIsInstance(TestResult, int)
+            self.assertEqual(TestResult, p)
+        for _ in range(100):
+            n = random.randint(6, 1000)
+            TestResult = self.TestFunction(n, 0)
+            self.assertIsInstance(TestResult, int)
+            self.assertEqual(TestResult, 1)
+            TestResult = self.TestFunction(n, 1)
+            self.assertIsInstance(TestResult, int)
+            self.assertEqual(TestResult, n)
+            TestResult = self.TestFunction(n, n-1)
+            self.assertIsInstance(TestResult, int)
+            self.assertEqual(TestResult, n)
+            TestResult = self.TestFunction(n, n)
+            self.assertIsInstance(TestResult, int)
+            self.assertEqual(TestResult, 1)
+            k = random.randint(2, n-1)
+            TestResult = self.TestFunction(n, k)
+            self.assertIsInstance(TestResult, int)
+            Check = math.factorial(n)//(math.factorial(n-k) * math.factorial(k))
+            self.assertEqual(TestResult, Check)
+
 #+ test suites
 
 TestSuite1 = unittest.TestLoader().loadTestsFromTestCase(Test_factorial)
 TestSuite2 = unittest.TestLoader().loadTestsFromTestCase(Test_gamma)
 TestSuite3 = unittest.TestLoader().loadTestsFromTestCase(Test_erf)
+TestSuite4 = unittest.TestLoader().loadTestsFromTestCase(Test_permutation)
+TestSuite5 = unittest.TestLoader().loadTestsFromTestCase(Test_combination)
 
 TestSuite = unittest.TestSuite()
-TestSuite.addTests([TestSuite1, TestSuite2, TestSuite3])
+TestSuite.addTests([TestSuite1, TestSuite2, TestSuite3, TestSuite4, TestSuite5])
 
 if __name__ == "__main__":
     sys.stdout.write(

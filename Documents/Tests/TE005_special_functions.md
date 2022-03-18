@@ -105,7 +105,7 @@ ___
 
 **Test steps:** This test is implemented as method *test_Ok*() of the unit-test class **Test_permutation**. Call the function being tested with a number of combination of values of the arguments, for which the expected result is known (manually calculated in advance). Compare the returned values with the expected ones. Also call the same function with a number of random values of arguments within the acceptable range, and check that the function returns a positive **int** number, which value is the same as calculated using *math.factorial*() function calls.
 
-**Test result:** PASS / FAIL
+**Test result:** PASS
 
 ___
 
@@ -121,7 +121,7 @@ ___
 
 **Test steps:** This test is implemented as method *test_Ok*() of the unit-test class **Test_combination**. Call the function being tested with a number of combination of values of the arguments, for which the expected result is known (manually calculated in advance). Compare the returned values with the expected ones. Also call the same function with a number of random values of arguments within the acceptable range, and check that the function returns a positive **int** number, which value is the same as calculated using *math.factorial*() function calls.
 
-**Test result:** PASS / FAIL
+**Test result:** PASS
 
 ___
 
@@ -196,8 +196,8 @@ For traceability the relation between tests and requirements is summarized in th
 | **Requirement ID** | **Covered in test(s)** | **Verified \[YES/NO\]**) |
 | :----------------- | :--------------------- | :----------------------- |
 | REQ-FUN-500        | TEST-A-500             | NO                       |
-| REQ-FUN-510        | TEST-T-510             | NO                       |
-| REQ-FUN-520        | TEST-T-520             | NO                       |
+| REQ-FUN-510        | TEST-T-510             | YES                      |
+| REQ-FUN-520        | TEST-T-520             | YES                      |
 | REQ-FUN-530        | TEST-T-530             | NO                       |
 | REQ-FUN-540        | TEST-T-540             | NO                       |
 | REQ-FUN-550        | TEST-T-550             | NO                       |
