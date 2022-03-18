@@ -10,10 +10,14 @@ Functions:
         int >= 0, int >= 0 -> int > 0
     combination(n, k)
         int >= 0, int >= 0 -> int > 0
+    log_beta(x, y)
+        int > 0 OR float > 0, int > 0 OR float > 0 -> float
+    beta(x, y)
+        int > 0 OR float > 0, int > 0 OR float > 0 -> float > 0
 """
 
 __version__= '1.0.0.0'
-__date__ = '24-02-2022'
+__date__ = '18-03-2022'
 __status__ = 'Development'
 
 #imports
@@ -23,6 +27,10 @@ __status__ = 'Development'
 import sys
 import os
 import math
+
+from typing import Union
+
+from statistics_lib.base_functions import TReal
 
 #+ custom modules
 
@@ -39,7 +47,11 @@ from introspection_lib.base_exceptions import UT_TypeError, UT_ValueError
 
 #globals
 
-##helper constants
+#+ types
+
+TReal = Union[int, float]
+
+#+ helper constants
 
 PYTHON_MAJOR = sys.version_info[0]
 
@@ -49,9 +61,9 @@ IS_V3_8_PLUS = (PYTHON_MAJOR >= 3) and (PYTHON_MINOR >= 8)
 
 #functions
 
-## helper functions
+#+ helper functions
 
-## main set of functions
+#+ main set of functions
 
 def permutation(n: int, k: int) -> int:
     """
@@ -130,3 +142,59 @@ def combination(n: int, k: int) -> int:
         else:
             Result = permutation(n, k) // math.factorial(k)
     return Result
+
+def log_beta(x: TReal, y: TReal) -> float:
+    """
+    The value of the natural logarithm of beta function ln(B(x, y)).
+
+    Signature:
+        int > 0 OR float > 0, int > 0 OR float > 0 -> float
+    
+    Args:
+        x: int >0 OR float > 0; any real number first argument
+        y: int >0 OR float > 0; any real number second argument
+    
+    Raises:
+        UT_TypeError: either of the arguments is not integer or float
+        UT_ValueError: either of the arguments is not positive
+    
+    Version 1.0.0.0
+    """
+    if not isinstance(x, (int, float)):
+        raise UT_TypeError(x, (int, float), SkipFrames = 1)
+    if not isinstance(y, (int, float)):
+        raise UT_TypeError(y, (int, float), SkipFrames = 1)
+    if x <= 0:
+        raise UT_ValueError(x, '> 0, x argument', SkipFrames = 1)
+    if y <= 0:
+        raise UT_ValueError(y, '> 0, y argument', SkipFrames = 1)
+    Result = math.lgamma(x) + math.lgamma(y) - math.lgamma(x + y)
+    return Result
+
+def beta(x: TReal, y: TReal) -> float:
+    """
+    The value of beta function B(x, y).
+
+    Signature:
+        int > 0 OR float > 0, int > 0 OR float > 0 -> float > 0
+    
+    Args:
+        x: int >0 OR float > 0; any real number first argument
+        y: int >0 OR float > 0; any real number second argument
+    
+    Raises:
+        UT_TypeError: either of the arguments is not integer or float
+        UT_ValueError: either of the arguments is not positive
+    
+    Version 1.0.0.0
+    """
+    if not isinstance(x, (int, float)):
+        raise UT_TypeError(x, (int, float), SkipFrames = 1)
+    if not isinstance(y, (int, float)):
+        raise UT_TypeError(y, (int, float), SkipFrames = 1)
+    if x <= 0:
+        raise UT_ValueError(x, '> 0, x argument', SkipFrames = 1)
+    if y <= 0:
+        raise UT_ValueError(y, '> 0, y argument', SkipFrames = 1)
+    Result = math.lgamma(x) + math.lgamma(y) - math.lgamma(x + y)
+    return math.exp(Result)

@@ -226,7 +226,7 @@ class Test_permutation(unittest.TestCase):
     
     def test_ValueError(self):
         """
-        Checks that sub-class TypeError is raised with non-integer argument.
+        Checks that sub-class ValueError is raised with wrong value argument.
 
         Test ID: TEST-T-501
         Requirement(s): REQ-AWM-501
@@ -283,7 +283,7 @@ class Test_permutation(unittest.TestCase):
             self.assertIsInstance(TestResult, int)
             self.assertEqual(TestResult, math.factorial(n)//math.factorial(n-k))
 
-class Test_combination(unittest.TestCase):
+class Test_combination(Test_permutation):
     """
     Checks the implementation of the function special_functions.combination().
 
@@ -338,6 +338,166 @@ class Test_combination(unittest.TestCase):
             Check = math.factorial(n)//(math.factorial(n-k) * math.factorial(k))
             self.assertEqual(TestResult, Check)
 
+class Test_beta(unittest.TestCase):
+    """
+    Checks the implementation of the function special_functions.beta().
+
+    Implements tests: TEST-T-500, TEST-T-501 and TEST-T-540.
+    Covers requirements: REQ-FUN-540, REQ-AWM-500 and REQ-AWM-501.
+
+    Version 1.0.0.0
+    """
+    
+    @classmethod
+    def setUpClass(cls) -> None:
+        """
+        Preparation for the test cases, done only once.
+        """
+        cls.TestFunction = staticmethod(test_module.beta)
+    
+    def test_TypeError(self):
+        """
+        Checks that sub-class TypeError is raised with non-integer argument.
+
+        Test ID: TEST-T-500
+        Requirement(s): REQ-AWM-500
+
+        Version 1.0.0.0
+        """
+        for Value in [int, float, [1, 2], '1', (1, 1), {1 : 1}, bool]:
+            with self.assertRaises(TypeError):
+                self.TestFunction(Value, 1)
+            with self.assertRaises(TypeError):
+                self.TestFunction(1, Value)
+            with self.assertRaises(TypeError):
+                self.TestFunction(Value, Value)
+    
+    def test_ValueError(self):
+        """
+        Checks that sub-class ValueError is raised with wrong value argument.
+
+        Test ID: TEST-T-501
+        Requirement(s): REQ-AWM-501
+
+        Version 1.0.0.0
+        """
+        for _ in range(100):
+            Value = - random.randint(1, 100)
+            with self.assertRaises(ValueError):
+                self.TestFunction(Value, 1)
+            with self.assertRaises(ValueError):
+                self.TestFunction(1, Value)
+            with self.assertRaises(ValueError):
+                self.TestFunction(Value, Value)
+            with self.assertRaises(ValueError):
+                self.TestFunction(-Value, 0)
+            with self.assertRaises(ValueError):
+                self.TestFunction(0, -Value)
+            with self.assertRaises(ValueError):
+                self.TestFunction(0, 0)
+            Value += random.random()
+            with self.assertRaises(ValueError):
+                self.TestFunction(Value, 1)
+            with self.assertRaises(ValueError):
+                self.TestFunction(1, Value)
+            with self.assertRaises(ValueError):
+                self.TestFunction(Value, Value)
+            with self.assertRaises(ValueError):
+                self.TestFunction(-Value, 0)
+            with self.assertRaises(ValueError):
+                self.TestFunction(0, -Value)
+    
+    def test_OK(self):
+        """
+        Checks that the values are calculated properly. The pre-defined values
+        are obtained with help of:
+
+        https://www.allmath.com/beta-function.php
+
+        Test ID: TEST-T-540
+        Requirement(s): REQ-FUN-540.
+
+        Version 1.0.0.0
+        """
+        for x, y, b in ((0.25, 0.25, 7.41630), (0.25, 0.5, 5.24412),
+                            (0.25, 0.75, 4.44288), (0.25, 1.25, 3.70815),
+                            (0.25, 1.5, 3.49608), (0.25, 2.5, 2.99664),
+                            (0.5, 0.125, 9.30874), (0.5, 0.5, 3.14159),
+                            (0.5, 0.75, 2.39628), (0.5, 1.25, 1.74804),
+                            (0.5, 1.5, 1.57080), (0.5, 2.5, 1.17810),
+                            (5, 2, 0.03333), (5, 3, 0.00952), (5, 4, 0.00357),
+                            (5, 5, 0.0015873)):
+            TestResult = self.TestFunction(x, y)
+            self.assertIsInstance(TestResult, float)
+            self.assertAlmostEqual(TestResult, b, FLOAT_CHECK_PRECISION)
+            TestResult = self.TestFunction(y, x)
+            self.assertIsInstance(TestResult, float)
+            self.assertAlmostEqual(TestResult, b, FLOAT_CHECK_PRECISION)
+            #known edge cases!
+            TestResult = self.TestFunction(1, y)
+            self.assertIsInstance(TestResult, float)
+            self.assertAlmostEqual(TestResult, 1/y, FLOAT_CHECK_PRECISION)
+            TestResult = self.TestFunction(x, 1)
+            self.assertIsInstance(TestResult, float)
+            self.assertAlmostEqual(TestResult, 1/x, FLOAT_CHECK_PRECISION)
+
+class Test_log_beta(Test_beta):
+    """
+    Checks the implementation of the function special_functions.log_beta().
+
+    Implements tests: TEST-T-500, TEST-T-501 and TEST-T-540.
+    Covers requirements: REQ-FUN-540, REQ-AWM-500 and REQ-AWM-501.
+
+    Version 1.0.0.0
+    """
+    
+    @classmethod
+    def setUpClass(cls) -> None:
+        """
+        Preparation for the test cases, done only once.
+        """
+        cls.TestFunction = staticmethod(test_module.log_beta)
+    
+    def test_OK(self):
+        """
+        Checks that the values are calculated properly. The pre-defined values
+        are obtained with help of:
+
+        https://www.allmath.com/beta-function.php
+
+        Test ID: TEST-T-540
+        Requirement(s): REQ-FUN-540.
+
+        Version 1.0.0.0
+        """
+        for x, y, b in ((0.25, 0.25, 7.41630), (0.25, 0.5, 5.24412),
+                            (0.25, 0.75, 4.44288), (0.25, 1.25, 3.70815),
+                            (0.25, 1.5, 3.49608), (0.25, 2.5, 2.99664),
+                            (0.5, 0.125, 9.30874), (0.5, 0.5, 3.14159),
+                            (0.5, 0.75, 2.39628), (0.5, 1.25, 1.74804),
+                            (0.5, 1.5, 1.57080), (0.5, 2.5, 1.17810),
+                            (5, 2, 0.03333), (5, 3, 0.00952), (5, 4, 0.00357),
+                            (5, 5, 0.0015873)):
+            TestResult = self.TestFunction(x, y)
+            Check = math.log(b)
+            #note the lost of precision. In fact, log vesion is more precise,
+            #+ but the online calculator has a finite precision and gives
+            #+ very limited number of digits
+            self.assertIsInstance(TestResult, float)
+            self.assertAlmostEqual(TestResult, Check, FLOAT_CHECK_PRECISION - 2)
+            TestResult = self.TestFunction(y, x)
+            self.assertIsInstance(TestResult, float)
+            self.assertAlmostEqual(TestResult, Check, FLOAT_CHECK_PRECISION - 2)
+            #known edge cases!
+            TestResult = self.TestFunction(1, y)
+            self.assertIsInstance(TestResult, float)
+            self.assertAlmostEqual(TestResult, -math.log(y),
+                                                    FLOAT_CHECK_PRECISION)
+            TestResult = self.TestFunction(x, 1)
+            self.assertIsInstance(TestResult, float)
+            self.assertAlmostEqual(TestResult, -math.log(x),
+                                                    FLOAT_CHECK_PRECISION)
+
 #+ test suites
 
 TestSuite1 = unittest.TestLoader().loadTestsFromTestCase(Test_factorial)
@@ -345,9 +505,12 @@ TestSuite2 = unittest.TestLoader().loadTestsFromTestCase(Test_gamma)
 TestSuite3 = unittest.TestLoader().loadTestsFromTestCase(Test_erf)
 TestSuite4 = unittest.TestLoader().loadTestsFromTestCase(Test_permutation)
 TestSuite5 = unittest.TestLoader().loadTestsFromTestCase(Test_combination)
+TestSuite6 = unittest.TestLoader().loadTestsFromTestCase(Test_beta)
+TestSuite7 = unittest.TestLoader().loadTestsFromTestCase(Test_log_beta)
 
 TestSuite = unittest.TestSuite()
-TestSuite.addTests([TestSuite1, TestSuite2, TestSuite3, TestSuite4, TestSuite5])
+TestSuite.addTests([TestSuite1, TestSuite2, TestSuite3, TestSuite4, TestSuite5,
+                        TestSuite6, TestSuite7])
 
 if __name__ == "__main__":
     sys.stdout.write(
