@@ -115,10 +115,19 @@ $$
 B(z;x,y) = \int_0^z {t^{x-1} (1-t)^{y-1} dt}
 $$
 
-for z > 0; and its *regularized* version is
+for 1 > z > 0; and its *regularized* version is
 
 $$
 I_z(x,y) = \frac{B(z;x,y)}{B(x,y)}
+$$
+
+with the eadge cases:
+
+$$
+I_0(x > 0, y>0) = 0 \newline
+B(0; x > 0, y >0) = 0 \newline
+I_1(x > 0, y>0) = 1 \newline
+B(1; x>0, y>0) = B(x,y)
 $$
 
 ## Incomplete gamma functions
@@ -137,7 +146,14 @@ Q(x,y) = \frac{\Gamma(x,y)}{\Gamma(x)} \newline
 P(x,y) + Q(x,y) = 1
 $$
 
-Note that they are defined for x > 0 and y > 0.
+Note that they are defined for x > 0 and y > 0, with the edge cases:
+
+$$
+P(x > 0 , 0) = 0 \newline
+\gamma(x > 0, 0) = 0 \newline
+Q(x > 0, 0) = 1 \newline
+\Gamma (x > 0, 0) = \Gamma(x) 
+$$
 
 ## References / implementation
 

@@ -92,7 +92,7 @@ ___
 
 **Title:** Probability density / mass function
 
-**Description:** All classes should have instance method *pdf*(), which returns the value of the probability density function for a continuous distribution and of the probability mass function for a discrete distribution if the passed argument is an integer or floating point number (real) and of the value for which the distribution is defined. In the case of the real number argument with the value outside the acceptable range - zero value (0) should be returned instead of rising an exception.
+**Description:** All classes should have instance method *pdf*(), which returns the value of the probability density function for a continuous distribution and of the probability mass function for a discrete distribution if the passed argument is an integer or floating point number (real) and of the value for which the distribution is defined. In the case of the real number argument with the value outside the acceptable range - zero value (0) should be returned instead of rising an exception, which includes not integer (floating point) number argument for a discrete distribution.
 
 **Verification Method:** T
 
@@ -148,7 +148,24 @@ ___
 
 **Title:** Improper type of an agrument
 
-**Description:** The **TypeError** or its sub-class should be raised if an improper data type argument is passed into any parametric method of any class, including the initialization / instantiation method, and assigment to a setter property.
+**Description:** The **TypeError** or its sub-class should be raised if an improper data type argument is passed into any parametric method of any class, including the initialization / instantiation method, and assigment to a setter property. Specifically,
+
+* Instantiation of the classes and changing the distribution parameters via setter properties
+  * Gaussian - mean or sigma are not **int** or **float**
+  * Student's - degrees of freedom is not **int** or **float**
+  * Chi-square - degrees of freedom is not **int**
+  * F - either of the degress of freedom is not **int** or **float**
+  * Exponential - rate is not **int** or **float**
+  * Gamma - either shape or rate are not **int** or **float**
+  * Erlang - shape is not **int** or rate is not **int** or **float**
+  * Poisson - rate is not **int** or **float**
+  * Binomial - probability is not **int** or **float**, or the number of trials is not **int**
+  * Geometrical - probability is not **int** or **float**
+  * Hypergeometrical - either of the parameters is not **int**
+* pdf() and cdf() - the argument is not **int** or **float**
+* qf() - the argument is not **float**
+* getQuantile(k, m) - either of the arguments is not **int**
+* getHistogram(min, max, NBins) - either min or max is not **int** or **float**, or NBins is not **int**
 
 **Verification Method:** T
 
@@ -158,6 +175,22 @@ ___
 
 **Title:** Improper value of an agrument
 
-**Description:** The **ValueError** or its sub-class should be raised if an argument of a proper data type, but of unacceptable value is passed into any parametric method of any class, including the initialization / instantiation method, and assigment to a setter property.
+**Description:** The **ValueError** or its sub-class should be raised if an argument of a proper data type, but of unacceptable value is passed into any parametric method of any class, including the initialization / instantiation method, and assigment to a setter property. Specifically,
+
+* Instantiation of the classes and changing the distribution parameters via setter properties
+  * Gaussian - sigma is <= 0
+  * Student's - degrees of freedom is <= 0
+  * Chi-square - degrees of freedom is <= 0
+  * F - either of the degress of freedom is <= 0
+  * Exponential - rate is <= 0
+  * Gamma - either shape or rate is <= 0
+  * Erlang - shape or rate is <= 0
+  * Poisson - rate is <= 0
+  * Binomial - probability is not in the interval [0, 1], or number of trials is < 0
+  * Geometrical - probability is not in the interval [0, 1]
+  * Hypergeometrical - either of the parameters is not < 0, or number of 'succeess' objects or trials is > than total number of objects
+* qf() - the argument is not within (0, 1) range
+* getQuantile(k, m) - either of the arguments is <= 0, or k >= m
+* getHistogram(min, max, NBins) - min >= max , or NBins is <= 1
 
 **Verification Method:** T

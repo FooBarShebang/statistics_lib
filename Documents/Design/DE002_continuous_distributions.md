@@ -374,8 +374,8 @@ The *Poisson distribution* is a discrete probability distribution describing the
 It supports $k \geq 0, \; k \in \mathbb{Z}$. Its PMF and CDF are defined as:
 
 $$
-p(x) = \frac{\lambda^k e^{- \lambda}}{k!} \newline
-F(x) = \frac{\Gamma(k+1, \lambda)}{k!} = Q(k+1, \lambda)
+p(k) = \frac{\lambda^k e^{- \lambda}}{k!} \newline
+F(k) = \frac{\Gamma(k+1, \lambda)}{k!} = Q(k+1, \lambda)
 $$
 
 where $\Gamma$(x, y) is *upper incomplete gamma function* and *Q*(x, y) is *regularized upper incomplete gamma function*.
@@ -397,8 +397,8 @@ The *binomial distribution* is a discrete probability distribution describing th
 It supports $0 \leq k \leq n, \; k \in \mathbb{Z}$. Its PMF and CDF are defined as:
 
 $$
-p(x) = C_n^k p^k (1-p)^{n-k}\newline
-F(x) = I_{1-p}(n-k, 1 + k)
+p(k) = C_n^k p^k (1-p)^{n-k}\newline
+F(k) = I_{1-p}(n-k, 1 + k)
 $$
 
 where
@@ -429,8 +429,8 @@ The *geometric distribution* is either of two discrete probability distributions
 Its PMF and CDF are defined as:
 
 $$
-p(x) = (1-p)^{k-1} p\newline
-F(x) = 1 - (1-p)^k
+p(k) = (1-p)^{k-1} p\newline
+F(k) = 1 - (1-p)^k
 $$
 
 where the first definition of the distribution is used. The following statistical properties are defined:
@@ -456,8 +456,8 @@ Basically, it is defined by three parameters:
 It supports $0 \leq k \leq \mathtt{min}(n, K), \; k \in \mathbb{Z}$. Its PMF and CDF are defined as:
 
 $$
-p(x) = \frac{C_K^k C_{N-K}^{n-k}}{C_N^n}\newline
-F(x) = 1 - \frac{C_n^{k+1} C_{N-n}^{K-k-1}}{C_N^K} \times {}_3 F_2 \left[ 1, k+1-K, k+1-n; k+2, N+K+2-K-n; 1 \right]
+p(k) = \frac{C_K^k C_{N-K}^{n-k}}{C_N^n}\newline
+F(k) = 1 - \frac{C_n^{k+1} C_{N-n}^{K-k-1}}{C_N^K} \times {}_3 F_2 \left[ 1, k+1-K, k+1-n; k+2, N+K+2-K-n; 1 \right]
 $$
 
 where
