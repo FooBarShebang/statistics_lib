@@ -6,11 +6,7 @@ This document provides details on the implementation of the special functions re
 
 The concerned special functions can be implemented as polynomial or rational functions approximations or constructed from other special functions, implemented in this library or in the Standard Python Library.
 
-The proposed implementation is either inspired by or translated into Python from:
-
-[1] William H. Press, Saul A. Teukolsky, William T. Vetterling and Brian P. Flannery. **Numerical Recipes in C: The Art of Scientific Computing**. 2nd Ed. Cambridge University Press (1992). ISBN: 0-521-43108-5
-
-further on referred to as *Numerical Recipes*.
+The proposed implementation is either inspired by or translated into Python from [Ref 1][^Ref1], further on referred to as *Numerical Recipes*.
 
 ## Background - combinatorics functions
 
@@ -155,7 +151,7 @@ Q(x > 0, 0) = 1 \newline
 \Gamma (x > 0, 0) = \Gamma(x) 
 $$
 
-## References / implementation
+## References
 
 TODO:
 
@@ -163,5 +159,6 @@ TODO:
 * [Scipy1](https://github.com/scipy/scipy/blob/main/scipy/special/cephes/ndtri.c)
 * [Scipy2](https://github.com/jeremybarnes/cephes/blob/master/cprob/polevl.c)
 
+[^Ref1]: Ref 1: William H. Press, Saul A. Teukolsky, William T. Vetterling and Brian P. Flannery. **Numerical Recipes in C: The Art of Scientific Computing**. 2nd Ed. Cambridge University Press (1992). ISBN: 0-521-43108-5
 [^1]: Numerical Recipes. p 214.
 [^2]: Numerical Recipes. p 215.

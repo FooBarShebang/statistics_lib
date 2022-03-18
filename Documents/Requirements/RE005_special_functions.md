@@ -99,7 +99,7 @@ ___
 
 **Description:** The function *lower_gamma*(x > 0, y >= 0) should return the value of the lower incomplete gammma function $\gamma(x, y)$, which is a non-negative floating point number. The function *log_lower_gamma*(x > 0, y > 0) should return the value of ln(lower_gamma(x, y)). The function *lower_gamma_reg*(x > 0, y >= 0) should return the value of regularized lower incomplete gamma function $P(x, y) = \gamma(x,y) / \Gamma(x)$, which is a floating point number in the range [0, 1).
 
-The function *upper_gamma*(x > 0, y >= 0) should return the value of the upper incomplete gammma function $\Gamma(x, y)$, which is a positive floating point number. The function *log_upper_gamma*(x > 0, y > 0) should return the value of ln(upper_gamma(x, y)). The function *lower_gamma_reg*(x > 0, y >= 0) should return the value of the regularized upper incomplete gamma function $Q(x, y) = \Gamma(x,y) / \Gamma(x)$, which is a floating point number in the range (0, 1].
+The function *upper_gamma*(x > 0, y >= 0) should return the value of the upper incomplete gammma function $\Gamma(x, y)$, which is a positive floating point number. The function *log_upper_gamma*(x > 0, y > 0) should return the value of ln(upper_gamma(x, y)). The function *upper_gamma_reg*(x > 0, y >= 0) should return the value of the regularized upper incomplete gamma function $Q(x, y) = \Gamma(x,y) / \Gamma(x)$, which is a floating point number in the range (0, 1].
 
 **Verification Method:** T
 
