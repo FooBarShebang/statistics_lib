@@ -424,5 +424,3 @@ def inv_erf(x: TReal) -> float:
         if x < 0:
             Result = - Result
     return Result / math.sqrt(2)
-
-print(inv_erf(0.428392))
