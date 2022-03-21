@@ -7,7 +7,7 @@ plan / report TE005_special_functions.md
 
 
 __version__= '1.0.0.0'
-__date__ = '18-03-2022'
+__date__ = '21-03-2022'
 __status__ = 'Testing'
 
 #imports
@@ -498,6 +498,105 @@ class Test_log_beta(Test_beta):
             self.assertAlmostEqual(TestResult, -math.log(x),
                                                     FLOAT_CHECK_PRECISION)
 
+class Test_inv_erf(unittest.TestCase):
+    """
+    Checks the implementation of the function special_functions.inv_erf().
+
+    Implements tests: TEST-T-500, TEST-T-501 and TEST-T-530.
+    Covers requirements: REQ-FUN-530, REQ-AWM-500 and REQ-AWM-501.
+
+    Version 1.0.0.0
+    """
+    
+    @classmethod
+    def setUpClass(cls) -> None:
+        """
+        Preparation for the test cases, done only once.
+        """
+        cls.TestFunction = staticmethod(test_module.inv_erf)
+    
+    def test_TypeError(self):
+        """
+        Checks that sub-class TypeError is raised with non-integer argument.
+
+        Test ID: TEST-T-500
+        Requirement(s): REQ-AWM-500
+
+        Version 1.0.0.0
+        """
+        for Value in [int, float, [1, 2], '1', (1, 1), {1 : 1}, bool]:
+            with self.assertRaises(TypeError):
+                self.TestFunction(Value)
+    
+    def test_ValueError(self):
+        """
+        Checks that sub-class ValueError is raised with wrong value argument.
+
+        Test ID: TEST-T-501
+        Requirement(s): REQ-AWM-501
+
+        Version 1.0.0.0
+        """
+        for _ in range(100):
+            Value = random.randint(1, 10)
+            with self.assertRaises(ValueError):
+                self.TestFunction(Value)
+            with self.assertRaises(ValueError):
+                self.TestFunction(-Value)
+            Value += random.random()
+            with self.assertRaises(ValueError):
+                self.TestFunction(Value)
+            with self.assertRaises(ValueError):
+                self.TestFunction(-Value)
+    
+    def test_OK(self):
+        """
+        Checks that the values are calculated properly. The pre-defined values
+        are obtained with help of a table given in:
+
+        Iraj Javandel, Christine Doughty, Chin-Fu Tsang
+        Groundwater Transport: Handbook of Mathematical Models.
+        Published by John Wiley & Sons, Inc. (2013).
+        https://agupubs.onlinelibrary.wiley.com/doi/pdf/10.1002/9781118665473.app7
+        
+        with adjustments for the precision of the table itself and of the
+        used inv_erf algorithm.
+
+        Test ID: TEST-T-530
+        Requirement(s): REQ-FUN-530.
+
+        Version 1.0.0.0
+        """
+        for Output, Input in ((0, 0.00000), (0.0, 0.00000),
+                                (0.02, 0.022564), (0.04, 0.04511),
+                                (0.1, 0.11246), (0.2, 0.22270),
+                                (0.3, 0.328626), (0.4, 0.428392),
+                                (0.5, 0.520500), (0.8, 0.74210),
+                                (1, 0.84270), (1.50004, 0.96611),
+                                (1.99989, 0.99532), (2.49861, 0.99959),
+                                (3.01573, 0.99998), (3.45891, 0.999999)):
+            TestResult = self.TestFunction(Input)
+            self.assertIsInstance(TestResult, float)
+            self.assertAlmostEqual(TestResult, Output,
+                                                places = FLOAT_CHECK_PRECISION)
+            TestResult = self.TestFunction(- Input)
+            self.assertIsInstance(TestResult, float)
+            self.assertAlmostEqual(TestResult, - Output,
+                                                places = FLOAT_CHECK_PRECISION)
+        #just random numbers checks - inversivility with 7 digits precision
+        #+ with respect to the Standard Library math.erf() implementation
+        for _ in range(100):
+            Input = 2 * random.random() - 1
+            if Input > -1:
+                TestResult = self.TestFunction(Input)
+                self.assertIsInstance(TestResult, float)
+                self.assertAlmostEqual(math.erf(TestResult), Input)
+        for _ in range(100):
+            Input = random.random() * random.randint(0, 4)
+            TestResult = self.TestFunction(math.erf(Input))
+            self.assertIsInstance(TestResult, float)
+            self.assertAlmostEqual(TestResult, Input)
+
 #+ test suites
 
 TestSuite1 = unittest.TestLoader().loadTestsFromTestCase(Test_factorial)
@@ -507,10 +606,11 @@ TestSuite4 = unittest.TestLoader().loadTestsFromTestCase(Test_permutation)
 TestSuite5 = unittest.TestLoader().loadTestsFromTestCase(Test_combination)
 TestSuite6 = unittest.TestLoader().loadTestsFromTestCase(Test_beta)
 TestSuite7 = unittest.TestLoader().loadTestsFromTestCase(Test_log_beta)
+TestSuite8 = unittest.TestLoader().loadTestsFromTestCase(Test_inv_erf)
 
 TestSuite = unittest.TestSuite()
 TestSuite.addTests([TestSuite1, TestSuite2, TestSuite3, TestSuite4, TestSuite5,
-                        TestSuite6, TestSuite7])
+                        TestSuite6, TestSuite7, TestSuite8])
 
 if __name__ == "__main__":
     sys.stdout.write(

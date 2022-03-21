@@ -135,9 +135,9 @@ ___
 
 **Expected result:** The function *inv_erf*(p) accepts a floating point number in the range (0, 1) and returns a floating point value $x \in (- \infin, + \infin)$ such that  erf(x)= p, which is equivalent to $x = \mathtt{erf}^{-1}(p)$.
 
-**Test steps:** This test is implemented as method *test_Ok*() of the unit-test class **Test_inv_erf**. Call the function being tested with a number of combination of values of the arguments, for which the expected result is known (either using published tables or on-line calculators, the source should be indicated in the unit-test method description). Compare the returned values with the expected ones. Also call the same function with a number of random values of arguments within the acceptable range, and check that the function returns a **float** number within the expected range.
+**Test steps:** This test is implemented as method *test_Ok*() of the unit-test class **Test_inv_erf**. Call the function being tested with a number of combination of values of the arguments, for which the expected result is known (either using published tables or on-line calculators, the source should be indicated in the unit-test method description). Compare the returned values with the expected ones. Also call the same function with a number of random values of arguments within the acceptable range, and check that the function returns a **float** number, and that the tested function is indeed inverse to the *math.efr*() implementation with the default (7 places) floating point precision.
 
-**Test result:** PASS / FAIL
+**Test result:** PASS
 
 ___
 
@@ -153,7 +153,7 @@ ___
 
 **Test steps:** This test is implemented as method *test_Ok*() of the unit-test classes **Test_beta** and **Test_log_beta**. Call the function being tested with a number of combination of values of the arguments, for which the expected result is known (either using published tables or on-line calculators, the source should be indicated in the unit-test method description). Compare the returned values with the expected ones. Also call the same function with a number of random values of arguments within the acceptable range, and check that the function returns a **float** number within the expected range.
 
-**Test result:** PASS / FAIL
+**Test result:** PASS
 
 ___
 
@@ -198,7 +198,7 @@ For traceability the relation between tests and requirements is summarized in th
 | REQ-FUN-500        | TEST-A-500             | NO                       |
 | REQ-FUN-510        | TEST-T-510             | YES                      |
 | REQ-FUN-520        | TEST-T-520             | YES                      |
-| REQ-FUN-530        | TEST-T-530             | NO                       |
+| REQ-FUN-530        | TEST-T-530             | YES                      |
 | REQ-FUN-540        | TEST-T-540             | YES                      |
 | REQ-FUN-550        | TEST-T-550             | NO                       |
 | REQ-FUN-560        | TEST-T-560             | NO                       |

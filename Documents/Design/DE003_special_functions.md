@@ -73,6 +73,40 @@ $$
 
 This function is defined on the range (-1, 1); it is monotonically growing, and it yields values in the range $(- \infin, + \infin)$.
 
+Even though the inverse error function cannot be represented in terms of simple analytical functions, it can be represented as an infinite power series[^3]
+
+$$
+\mathtt{erf}^{-1}(x) = \sum_{k=0}^{\infin}{\frac{c_k}{2k+1} \left( \frac{\sqrt{\pi}}{2} x \right)^{2k+1}} = \newline
+= \frac{\sqrt{\pi}}{2} \left(x + \frac{\pi}{12} x^3 + \frac{7 \pi^2}{480} x^5 + \frac{127 \pi^3}{40320} x^7 + ... \right)
+$$
+
+However, this series converges slowly, especially with the argument approaching $\pm 1$. Instead, a *rational function* approximation is used for the calculation of the inverse error function. A rational function is a ratio of two finite polynomials:
+
+$$
+R_{n,m}(x) = \frac{P_n(x)}{Q_m(x)} = \frac{p_0 + p_1 * x + p_2 * x^2 + ... + p_n * x^n}{q_0 + q_1 * x + q_2 * x^2 + ... + q_m * x^m}
+$$
+
+Specifically concerning the inverse error function algorithm AS241[^Ref2] can be used, wich defines 3 distict rational functions of 7th-7th power for each of the regions: central / core $\mathtt{abs}(x) \leq 0.85$, tails $0.85 < \mathtt{abs}(x) \leq 1 - 2.77759 \times {10}^{-11}$ and far tails $1 - 2.77759 \times {10}^{-11} < \mathtt{abs}(x) < 1$. This algorith was proposed in 1988 for the double precision floating point calculations.
+
+Note, that the actual algorithm defines the quantile function of Z-distribution (see [DE002](./DE002_continuous_distributions.md) document)
+
+$$
+\Phi^{-1}(p) = \sqrt{2} \mathtt{erf}^{-1}(2p -1)
+$$
+
+where 0 < p < 1, so the tranformation of the algorithm is trivial
+
+$$
+\mathtt{erf}^{-1}(x) = \Phi^{-1}(\frac{x}{2} + 0.5) / \sqrt{2}
+$$
+
+where -1 < x < 1. Furthermore, the polynomials should be calculated using itterative procedure instead of the direct implementation of the formula[^4], i.e.:
+
+$$
+P_n(x) = p_0 + p_1 * x + p_2 * x^2 + ... + p_n * x^n = \newline
+= p_0 + x * (p_1 + x * (p_2 + x * (...(p_{n-1} + x * p_n) )))
+$$
+
 ## Beta function
 
 The *beta function* is defined as:
@@ -148,17 +182,20 @@ $$
 P(x > 0 , 0) = 0 \newline
 \gamma(x > 0, 0) = 0 \newline
 Q(x > 0, 0) = 1 \newline
-\Gamma (x > 0, 0) = \Gamma(x) 
+\Gamma (x > 0, 0) = \Gamma(x)
 $$
 
 ## References
 
-TODO:
+[^Ref1]: \[Ref 1\]: William H. Press, Saul A. Teukolsky, William T. Vetterling and Brian P. Flannery. **Numerical Recipes in C: The Art of Scientific Computing**. 2nd Ed. Cambridge University Press (1992). ISBN: 0-521-43108-5
 
-* [Pure python](https://stackoverflow.com/questions/42381244/pure-python-inverse-error-function)
-* [Scipy1](https://github.com/scipy/scipy/blob/main/scipy/special/cephes/ndtri.c)
-* [Scipy2](https://github.com/jeremybarnes/cephes/blob/master/cprob/polevl.c)
+[^Ref2]: \[Ref 2\]: Michael J. Wichura. *Algorithm AS241: The Percentage Points of the Normal Distribution*. Journal of Royal Statistical Society. Series C (Applied
+    Statistics), Vol. 37, No. 3 (**1988**), pp. 477-484
 
-[^Ref1]: Ref 1: William H. Press, Saul A. Teukolsky, William T. Vetterling and Brian P. Flannery. **Numerical Recipes in C: The Art of Scientific Computing**. 2nd Ed. Cambridge University Press (1992). ISBN: 0-521-43108-5
 [^1]: Numerical Recipes. p 214.
+
 [^2]: Numerical Recipes. p 215.
+
+[^3]: [Wikipedia - error function](https://en.wikipedia.org/wiki/Error_function)
+
+[^4]: Numerical Recipes. p ???.

@@ -77,7 +77,7 @@ ___
 
 **Title:** Beta function
 
-**Description:** The function *beta*(x, y) accepts two positive floating point or integer numbers x > 0 and y > 0 and returns the value of the *beta* functions, which is a positive floating point number, i.e. gamma(x) * gamma(y) / gamma(x+y), where *gamma*() is the complete gamma function. The function *log_beta*(x,y) returns the natural logarithm of the same value, i.e. ln(beta(x,y)).
+**Description:** The function *beta*(x, y) accepts two positive floating point or integer numbers x > 0 and y > 0 and returns the value of the *beta* functions, which is a positive floating point number, i.e. gamma(x) \* gamma(y) / gamma(x+y), where *gamma*() is the complete gamma function. The function *log_beta*(x,y) returns the natural logarithm of the same value, i.e. ln(beta(x,y)).
 
 **Verification Method:** T
 
