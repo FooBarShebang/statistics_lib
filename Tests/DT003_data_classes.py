@@ -6,7 +6,6 @@ Implements the demonstration test TEST-D-300, verifying the requirements
 REQ-FUN-315 and REQ-FUN-324.
 """
 
-
 __version__= '1.0.0.0'
 __date__ = '08-03-2022'
 __status__ = 'Testing'

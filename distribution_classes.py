@@ -636,6 +636,7 @@ class Z_Distribution(ContinuousDistributionABC):
         """
         z = (x - self.Mean) / self.Sigma
         Result = 0.5 * (1 + math.erf(z / math.sqrt(2)))
+        return Result
     
     def _qf(self, p: float) -> sf.TReal:
         """

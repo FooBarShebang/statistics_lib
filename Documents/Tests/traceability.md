@@ -60,6 +60,17 @@
 | REQ-AWM-310        | TEST-T-313             | YES                      |
 | REQ-AWM-311        | TEST-T-314             | YES                      |
 | REQ-AWM-312        | TEST-T-315             | YES                      |
+| REQ-FUN-400        | TEST-A-400             | NO                       |
+| REQ-FUN-401        | TEST-T-400, TEST-T-401 | NO                       |
+| REQ-FUN-402        | TEST-T-402             | NO                       |
+| REQ-FUN-403        | TEST-T-403             | NO                       |
+| REQ-FUN-404        | TEST-T-404             | NO                       |
+| REQ-FUN-405        | TEST-T-405             | NO                       |
+| REQ-FUN-406        | TEST-T-406             | NO                       |
+| REQ-FUN-407        | TEST-D-400             | NO                       |
+| REQ-FUN-408        | TEST-D-400             | NO                       |
+| REQ-AWM-400        | TEST-T-407             | NO                       |
+| REQ-AWM-401        | TEST-T-408             | NO                       |
 | REQ-FUN-500        | TEST-A-500             | NO                       |
 | REQ-FUN-510        | TEST-T-510             | YES                      |
 | REQ-FUN-520        | TEST-T-520             | YES                      |
@@ -69,7 +80,6 @@
 | REQ-FUN-560        | TEST-T-560             | NO                       |
 | REQ-AWM-500        | TEST-T-500             | NO                       |
 | REQ-AWM-501        | TEST-T-501             | NO                       |
-
 
 | **Software ready for production \[YES/NO\]** | **Rationale**                 |
 | :------------------------------------------: | :---------------------------- |

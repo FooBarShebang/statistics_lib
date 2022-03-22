@@ -517,7 +517,7 @@ Both types of the random distributions: discrete and continuous - can be impleme
       * the left boundary is Left = min + (k - 0.5) * S
       * the right boundary is Right = min + (k + 0.5) * S
       * the central value is Center = min + k * S
-      * the binned frequency if F = cdf(Right) - cdf(Left)
+      * the binned frequency is F = cdf(Right) - cdf(Left)
     * the return value is a tuple of length NBins with each element being a 2-tuple of (Center, F) pairs
   * random(), which returns:
     * a floating point number R = qf(r), where r is uniformly distributed random value in the range (0,1) in the case of continuous distributions
