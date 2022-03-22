@@ -33,6 +33,8 @@ if not (ROOT_FOLDER in sys.path):
 
 import statistics_lib.distribution_classes as test_module
 
+import statistics_lib.special_functions as sf
+
 #globals
 
 FLOAT_CHECK_PRECISION = 5 #digits after comma, mostly due to precision of
@@ -376,6 +378,87 @@ class Test_Z_Distribution(Test_ContinuousDistributionABC):
             with self.assertRaises(ValueError):
                 objTest.getHistogram(Value + random.random() +0.0001, Value, 20)
         del objTest
+    
+    def test_pdf(self) -> None:
+        """
+        Checks the implementation of the pdf() method.
+        
+        Test ID: TEST-T-404
+        Requirements ID: REQ-FUN-404
+        """
+        objTest = self.TestClass()
+        for _ in range(100):
+            Value = random.randint(-10, 10)
+            if random.random() > 0.5:
+                Value += random.random()
+            TestResult = objTest.pdf(Value)
+            self.assertIsInstance(TestResult, float)
+            self.assertGreater(TestResult, 0)
+            CheckValue = math.exp(-0.5 * Value * Value) / math.sqrt(2 * math.pi)
+            self.assertAlmostEqual(TestResult, CheckValue,
+                                                places = FLOAT_CHECK_PRECISION)
+        del objTest
+    
+    def test_cdf(self) -> None:
+        """
+        Checks the implementation of the cdf() method.
+        
+        Test ID: TEST-T-405
+        Requirements ID: REQ-FUN-405
+        """
+        objTest = self.TestClass()
+        for _ in range(100):
+            Value = random.randint(-10, 10)
+            if random.random() > 0.5:
+                Value += random.random()
+            TestResult = objTest.cdf(Value)
+            self.assertIsInstance(TestResult, float)
+            self.assertGreaterEqual(TestResult, 0)
+            CheckValue = 0.5 * (1 + math.erf(Value / math.sqrt(2)))
+            self.assertAlmostEqual(TestResult, CheckValue,
+                                                places = FLOAT_CHECK_PRECISION)
+        del objTest
+    
+    def test_qf(self) -> None:
+        """
+        Checks the implementation of the qf() method.
+        
+        Test ID: TEST-T-406
+        Requirements ID: REQ-FUN-406
+        """
+        objTest = self.TestClass()
+        for _ in range(100):
+            Value = random.random()
+            if Value < 1.0E-11:
+                Value = 1.0E-11
+            TestResult = objTest.qf(Value)
+            self.assertIsInstance(TestResult, float)
+            self.assertGreater(TestResult, objTest.Min)
+            self.assertLess(TestResult, objTest.Max)
+            CheckValue = math.sqrt(2) * sf.inv_erf(2 * Value - 1)
+            self.assertAlmostEqual(TestResult, CheckValue,
+                                                places = FLOAT_CHECK_PRECISION)
+        del objTest
+    
+    def test_getQuantile(self) -> None:
+        """
+        Checks the implementation of the getQuantile() method.
+        
+        Test ID: TEST-T-406
+        Requirements ID: REQ-FUN-406
+        """
+        objTest = self.TestClass()
+        for _ in range(100):
+            k = random.randint(1, 20)
+            m = random.randint(1, 20) + k
+            TestResult = objTest.getQuantile(k, m)
+            self.assertIsInstance(TestResult, float)
+            self.assertGreater(TestResult, objTest.Min)
+            self.assertLess(TestResult, objTest.Max)
+            CheckValue = objTest.qf(k/m)
+            self.assertAlmostEqual(TestResult, CheckValue,
+                                                places = FLOAT_CHECK_PRECISION)
+        del objTest
 
 class Test_Gaussian(Test_Z_Distribution):
     """
@@ -572,6 +655,135 @@ class Test_Gaussian(Test_Z_Distribution):
             Value += random.random()
             with self.assertRaises(ValueError):
                 objTest.Sigma = Value
+        del objTest
+    
+    def test_pdf(self) -> None:
+        """
+        Checks the implementation of the pdf() method.
+        
+        Test ID: TEST-T-404
+        Requirements ID: REQ-FUN-404
+        """
+        objTest = self.TestClass(*self.DefArguments)
+        for _ in range(10):
+            Mean = objTest.Mean
+            Sigma = objTest.Sigma
+            for _ in range(100):
+                Value = random.randint(-10, 10)
+                if random.random() > 0.5:
+                    Value += random.random()
+                z = (Value - Mean) / Sigma
+                TestResult = objTest.pdf(Value)
+                self.assertIsInstance(TestResult, float)
+                self.assertGreaterEqual(TestResult, 0)
+                CheckValue = math.exp(-0.5 * z * z) / math.sqrt(2 * math.pi)
+                CheckValue /= Sigma
+                self.assertAlmostEqual(TestResult, CheckValue,
+                                                places = FLOAT_CHECK_PRECISION)
+            Mean = random.randint(-10, 10)
+            if random.random() > 0.5:
+                Mean += random.random()
+            Sigma = random.randint(1, 3)
+            if random.random() > 0.5:
+                Sigma -= random.random()
+            objTest.Mean = Mean
+            objTest.Sigma = Sigma
+        del objTest
+    
+    def test_cdf(self) -> None:
+        """
+        Checks the implementation of the cdf() method.
+        
+        Test ID: TEST-T-405
+        Requirements ID: REQ-FUN-405
+        """
+        objTest = self.TestClass(*self.DefArguments)
+        for _ in range(10):
+            Mean = objTest.Mean
+            Sigma = objTest.Sigma
+            for _ in range(100):
+                Value = random.randint(-10, 10)
+                if random.random() > 0.5:
+                    Value += random.random()
+                z = (Value - Mean) / Sigma
+                TestResult = objTest.cdf(Value)
+                self.assertIsInstance(TestResult, float)
+                self.assertGreaterEqual(TestResult, 0)
+                CheckValue = 0.5 * (1 + math.erf(z / math.sqrt(2)))
+                self.assertAlmostEqual(TestResult, CheckValue,
+                                                places = FLOAT_CHECK_PRECISION)
+            Mean = random.randint(-10, 10)
+            if random.random() > 0.5:
+                Mean += random.random()
+            Sigma = random.randint(1, 3)
+            if random.random() > 0.5:
+                Sigma -= random.random()
+            objTest.Mean = Mean
+            objTest.Sigma = Sigma
+        del objTest
+    
+    def test_qf(self) -> None:
+        """
+        Checks the implementation of the qf() method.
+        
+        Test ID: TEST-T-406
+        Requirements ID: REQ-FUN-406
+        """
+        objTest = self.TestClass(*self.DefArguments)
+        for _ in range(10):
+            Mean = objTest.Mean
+            Sigma = objTest.Sigma
+            for _ in range(100):
+                Value = random.random()
+                if Value < 1.0E-11:
+                    Value = 1.0E-11
+                TestResult = objTest.qf(Value)
+                self.assertIsInstance(TestResult, float)
+                self.assertGreater(TestResult, objTest.Min)
+                self.assertLess(TestResult, objTest.Max)
+                CheckValue = math.sqrt(2) * sf.inv_erf(2 * Value - 1) * Sigma
+                CheckValue += Mean
+                self.assertAlmostEqual(TestResult, CheckValue,
+                                                places = FLOAT_CHECK_PRECISION)
+            Mean = random.randint(-10, 10)
+            if random.random() > 0.5:
+                Mean += random.random()
+            Sigma = random.randint(1, 3)
+            if random.random() > 0.5:
+                Sigma -= random.random()
+            objTest.Mean = Mean
+            objTest.Sigma = Sigma
+        del objTest
+    
+    def test_getQuantile(self) -> None:
+        """
+        Checks the implementation of the getQuantile() method.
+        
+        Test ID: TEST-T-406
+        Requirements ID: REQ-FUN-406
+        """
+        objTest = self.TestClass(*self.DefArguments)
+        for _ in range(10):
+            Mean = objTest.Mean
+            Sigma = objTest.Sigma
+            for _ in range(100):
+                k = random.randint(1, 20)
+                m = random.randint(1, 20) + k
+                TestResult = objTest.getQuantile(k, m)
+                self.assertIsInstance(TestResult, float)
+                self.assertGreater(TestResult, objTest.Min)
+                self.assertLess(TestResult, objTest.Max)
+                CheckValue = objTest.qf(k/m)
+                self.assertAlmostEqual(TestResult, CheckValue,
+                                                places = FLOAT_CHECK_PRECISION)
+            Mean = random.randint(-10, 10)
+            if random.random() > 0.5:
+                Mean += random.random()
+            Sigma = random.randint(1, 3)
+            if random.random() > 0.5:
+                Sigma -= random.random()
+            objTest.Mean = Mean
+            objTest.Sigma = Sigma
         del objTest
 
 #+ test suites
