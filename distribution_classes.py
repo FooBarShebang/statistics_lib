@@ -7,10 +7,11 @@ Classes:
     DiscreteDistributionABC
     Z_Distribution
     Gaussian
+    Exponential
 """
 
 __version__= '1.0.0.0'
-__date__ = '21-03-2022'
+__date__ = '22-03-2022'
 __status__ = 'Development'
 
 #imports
@@ -298,7 +299,7 @@ class ContinuousDistributionABC(abc.ABC):
         """
         if not isinstance(x, (int, float)):
             raise UT_TypeError(x, (int, float), SkipFrames = 1)
-        if x < self.Min or x > self.Max:
+        if x < self.Min or x >= self.Max:
             Result = 0
         else:
             Result = self._pdf(x)
@@ -376,7 +377,7 @@ class ContinuousDistributionABC(abc.ABC):
             raise UT_TypeError(k, int, SkipFrames = 1)
         if not isinstance(m, int):
             raise UT_TypeError(m, int, SkipFrames = 1)
-        if k < 0:
+        if k <= 0:
             raise UT_ValueError(k, '> 0 - quantile index', SkipFrames = 1)
         if m <= k:
             raise UT_ValueError(k, '< {} - index of quantile'.format(m),
@@ -829,7 +830,7 @@ class Gaussian(Z_Distribution):
     @Mean.setter
     def Mean(self, Value: sf.TReal) -> None:
         """
-        Setter method for the mean parameter of the distribtion.
+        Setter method for the mean parameter of the distribution.
         
         Signature:
             float OR int -> None
@@ -850,7 +851,7 @@ class Gaussian(Z_Distribution):
         the sigma parameter of the distribution.
         
         Signature:
-            None -> float OR int
+            None -> float > 0  OR int > 0
         
         Version 1.0.0.0
         """
@@ -859,7 +860,7 @@ class Gaussian(Z_Distribution):
     @Sigma.setter
     def Sigma(self, Value: sf.TReal) -> None:
         """
-        Setter method for the sigma parameter of the distribtion.
+        Setter method for the sigma parameter of the distribution.
         
         Signature:
             float > 0 OR int > 0 -> None
@@ -873,5 +874,244 @@ class Gaussian(Z_Distribution):
         if not isinstance(Value, (int, float)):
             raise UT_TypeError(Value, (int, float), SkipFrames = 1)
         if Value <= 0:
-            raise UT_ValueError(Value, '> 0', SkipFrames = 1)
+            raise UT_ValueError(Value, '> 0 - sigma parameter', SkipFrames = 1)
         self._Parameters['Sigma'] = Value
+
+class Exponential(ContinuousDistributionABC):
+    """
+    Implementation of the expnential distribution Must be instantiated with
+    a single positive real number argument.
+    
+    Properties:
+        Name: (read-only) str
+        Min: (read-only) float = 0
+        Max: (read-only) float = math.inf
+        Mean: (read-only) float
+        Median: (read-only) float
+        Q1: (read-only) float
+        Q2: (read-only) float
+        Var: (read-only) float
+        Sigma: (read-only) float
+        Skew: (read-only) float
+        Kurt: (read-only) float
+        Rate: int > 0 OR float > 0
+    
+    Methods:
+        pdf(x)
+            int OR float -> float >= 0
+        cdf(x)
+            int OR float -> 0 < float < 1
+        qf()
+            0 < float < 1 -> float
+        getQuantile(k, m)
+            int > 0, int > 0 -> float
+        getHistogram()
+            int OR float, int OR float, int > 1
+                -> tuple(tuple(int OR float, float >= 0))
+        random()
+            None -> float
+    
+    Version 1.0.0.0
+    """
+    
+    #class 'private' fields
+    
+    _Min: ClassVar[sf.TReal] = 0
+    
+    #special methods
+    
+    def __init__(self, Rate: sf.TReal) -> None:
+        """
+        Initialization. Set the single parameter of the distribution - the
+        positive rate.
+        
+        Signature:
+            int > 0 OR float > 0 -> None
+        
+        Args:
+            Rate: int > 0 OR float > 0; the single parameter of the distribution
+        
+        Raises:
+            UT_TypeError: the argument is neither int nor float
+            UT_ValueError: the argument is zero or negaive
+        
+        Version 1.0.0.0
+        """
+        if not isinstance(Rate, (int, float)):
+            raise UT_TypeError(Rate, (int, float), SkipFrames = 1)
+        if Rate <= 0:
+            raise UT_ValueError(Rate, '> 0 - rate parameter', SkipFrames = 1)
+        self._Parameters = dict()
+        self._Parameters['Rate'] = Rate
+    
+    #private methods
+    
+    def _pdf(self, x: sf.TReal) -> float:
+        """
+        The actual implementation of the PDF function.
+        
+        Signature
+            int OR float -> float >= 0
+        
+        Version 1.0.0.0
+        """
+        Rate = self.Rate
+        Result = math.exp(- Rate * x) * Rate
+        return Result
+    
+    def _cdf(self, x: sf.TReal) -> sf.TReal:
+        """
+        The actual implementation of the CDF function.
+        
+        Signature:
+            int OR float -> 0 < float < 1
+        
+        1.0.0.0
+        """
+        Result = 1 - math.exp(- self.Rate * x)
+        return Result
+    
+    def _qf(self, p: float) -> sf.TReal:
+        """
+        The actual implementation of the ICDF / QF function.
+        
+        Signature:
+           0 < float < 1 -> int OR float
+        
+        Version 1.0.0.0
+        """
+        Result = - math.log(1 - p) / self.Rate
+        return Result
+    
+    #public properties
+    
+    @property
+    def Rate(self) -> sf.TReal:
+        """
+        Property for the rate parameter of the distribution.
+        
+        Signature:
+            None -> int > 0 OR float > 0
+        
+        Version 1.0.0.0
+        """
+        return self._Parameters['Rate']
+    
+    @Rate.setter
+    def Rate(self, Value: sf.TReal) -> None:
+        """
+        Setter method for the rate parameter of the distribution.
+        
+        Signature:
+            float > 0 OR int > 0 -> None
+        
+        Raises:
+            UT_TypeError: passed value is not a real number
+            UT_ValueError: passed value is not positive
+        
+        Version 1.0.0.0
+        """
+        if not isinstance(Value, (int, float)):
+            raise UT_TypeError(Value, (int, float), SkipFrames = 1)
+        if Value <= 0:
+            raise UT_ValueError(Value, '> 0 - rate parameter', SkipFrames = 1)
+        self._Parameters['Rate'] = Value
+    
+    @property
+    def Mean(self) -> float:
+        """
+        Getter property for the arithmetic mean of the distribution.
+        
+        Signature:
+            None -> float
+        
+        Version 1.0.0.0
+        """
+        return 1 / self.Rate
+    
+    @property
+    def Median(self) -> sf.TReal:
+        """
+        Getter property for the median of the distribution.
+        
+        Signature:
+            None -> float OR int
+        
+        Version 1.0.0.0
+        """
+        Result = - math.log(0.5) / self.Rate
+        return Result
+    
+    @property
+    def Q1(self) -> float:
+        """
+        Getter property for the first quartile of the distribution.
+        
+        Signature:
+            None -> float
+        
+        Version 1.0.0.0
+        """
+        Result = - math.log(0.75) / self.Rate
+        return Result
+    
+    @property
+    def Q3(self) -> float:
+        """
+        Getter property for the third quartile of the distribution.
+        
+        Signature:
+            None -> float
+        
+        Version 1.0.0.0
+        """
+        Result = - math.log(0.25) / self.Rate
+        return Result
+    
+    @property
+    def Var(self) -> sf.TReal:
+        """
+        Getter property for the variance of the distribution.
+        
+        Signature:
+            None -> float OR int
+        
+        Version 1.0.0.0
+        """
+        return 1 / (self.Rate * self.Rate)
+    
+    @property
+    def Sigma(self) -> float:
+        """
+        Getter property for the standard deviation of the distribution.
+        
+        Signature:
+            None -> float
+        
+        Version 1.0.0.0
+        """
+        return 1 / self.Rate
+    
+    @property
+    def Skew(self) -> float:
+        """
+        Getter property for the skewness of the distribution.
+        
+        Signature:
+            None -> float
+        
+        Version 1.0.0.0
+        """
+        return 2.0
+    
+    @property
+    def Kurt(self) -> float:
+        """
+        Getter property for the excess kurtosis of the distribution.
+        
+        Signature:
+            None -> float
+        
+        Version 1.0.0.0
+        """
+        return 6.0

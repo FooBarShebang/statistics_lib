@@ -112,9 +112,7 @@ class Test_DiscreteDistributionABC(Test_ContinuousDistributionABC):
 class Test_Z_Distribution(Test_ContinuousDistributionABC):
     """
     Unittests for Z_Distribution class from the module
-    statistics_lib.distribution_classes, which is an abstract class / prototype.
-    
-    Also defines some template methods, re-used by the concrete sub-classes.
+    statistics_lib.distribution_classes.
     
     Version 1.0.0.0
     """
@@ -463,9 +461,7 @@ class Test_Z_Distribution(Test_ContinuousDistributionABC):
 class Test_Gaussian(Test_Z_Distribution):
     """
     Unittests for Gaussian class from the module
-    statistics_lib.distribution_classes, which is an abstract class / prototype.
-    
-    Also defines some template methods, re-used by the concrete sub-classes.
+    statistics_lib.distribution_classes.
     
     Version 1.0.0.0
     """
@@ -764,8 +760,6 @@ class Test_Gaussian(Test_Z_Distribution):
         """
         objTest = self.TestClass(*self.DefArguments)
         for _ in range(10):
-            Mean = objTest.Mean
-            Sigma = objTest.Sigma
             for _ in range(100):
                 k = random.randint(1, 20)
                 m = random.randint(1, 20) + k
@@ -786,6 +780,289 @@ class Test_Gaussian(Test_Z_Distribution):
             objTest.Sigma = Sigma
         del objTest
 
+class Test_Exponential(Test_Z_Distribution):
+    """
+    Unittests for Exponential class from the module
+    statistics_lib.distribution_classes.
+    
+    Version 1.0.0.0
+    """
+    
+    @classmethod
+    def setUpClass(cls) -> None:
+        """
+        Preparation for the test cases, done only once.
+        """
+        super().setUpClass()
+        cls.TestClass = test_module.Exponential
+        cls.Parameters = ('Rate', )
+    
+    def setUp(self) -> None:
+        """
+        Preparation of a single unottest - performed before each of them.
+        """
+        Rate = random.randint(1, 10)
+        if random.random() > 0.5:
+            Rate -= random.random()
+        self.DefArguments = (Rate, )
+    
+    def test_init(self) -> None:
+        """
+        Checks that the class can be instantiated, and the parameters of the
+        distribution are properly assigned
+        
+        Test ID: TEST-T-400
+        Requirements: REQ-FUN-401
+        """
+        for _ in range(100):
+            Rate = random.randint(1, 10)
+            if random.random() > 0.5:
+                Rate -= random.random()
+            objTest = self.TestClass(Rate)
+            self.assertAlmostEqual(objTest.Mean, 1 / Rate,
+                                                places= FLOAT_CHECK_PRECISION)
+            self.assertAlmostEqual(objTest.Sigma, 1 / Rate,
+                                                places = FLOAT_CHECK_PRECISION)
+            self.assertAlmostEqual(objTest.Median, math.log(2) / Rate,
+                                                places = FLOAT_CHECK_PRECISION)
+            self.assertAlmostEqual(objTest.Var, 1 / (Rate * Rate),
+                                                places = FLOAT_CHECK_PRECISION)
+            self.assertEqual(objTest.Skew, 2)
+            self.assertEqual(objTest.Kurt, 6)
+            self.assertEqual(objTest.Min, 0)
+            self.assertEqual(objTest.Max, math.inf)
+            self.assertAlmostEqual(objTest.Q1, -math.log(0.75) / Rate,
+                                                places = FLOAT_CHECK_PRECISION)
+            self.assertAlmostEqual(objTest.Q3, -math.log(0.25) / Rate,
+                                                places = FLOAT_CHECK_PRECISION)
+            del objTest
+    
+    def test_hasAttributes(self) -> None:
+        """
+        Checks that the class' instance has all required attributes.
+        
+        Test ID: TEST-T-401
+        Requirements: REQ-FUN-401
+        """
+        for _ in range(100):
+            Rate = random.randint(1, 10)
+            if random.random() > 0.5:
+                Rate -= random.random()
+            objTest = self.TestClass(Rate)
+            for Name in self.Properties:
+                self.assertTrue(hasattr(objTest, Name))
+            for Name in self.Parameters:
+                self.assertTrue(hasattr(objTest, Name))
+            for Name in self.Methods:
+                self.assertTrue(hasattr(objTest, Name))
+            del objTest
+    
+    def test_Parameters(self) -> None:
+        """
+        Checks that the parameters of the distribution can be changed at any
+        time.
+        
+        Test ID: TEST-T-402
+        Requirements: REQ-FUN-402
+        """
+        objTest = self.TestClass(*self.DefArguments)
+        Rate = self.DefArguments[0]
+        self.assertEqual(objTest.Rate, Rate)
+        for _ in range(100):
+            Rate = random.randint(1, 5)
+            if random.random() > 0.5:
+                Rate -= random.random()
+            objTest.Rate = Rate
+            self.assertEqual(objTest.Rate, Rate)
+            self.assertAlmostEqual(objTest.Mean, 1 / Rate,
+                                                places= FLOAT_CHECK_PRECISION)
+            self.assertAlmostEqual(objTest.Sigma, 1 / Rate,
+                                                places = FLOAT_CHECK_PRECISION)
+            self.assertAlmostEqual(objTest.Median, -math.log(0.5) / Rate,
+                                                places = FLOAT_CHECK_PRECISION)
+            self.assertAlmostEqual(objTest.Var, 1 / (Rate * Rate),
+                                                places = FLOAT_CHECK_PRECISION)
+            self.assertEqual(objTest.Skew, 2)
+            self.assertEqual(objTest.Kurt, 6)
+            self.assertEqual(objTest.Min, 0)
+            self.assertEqual(objTest.Max, math.inf)
+            self.assertAlmostEqual(objTest.Q1, -math.log(0.75) / Rate,
+                                                places = FLOAT_CHECK_PRECISION)
+            self.assertAlmostEqual(objTest.Q3, -math.log(0.25) / Rate,
+                                                places = FLOAT_CHECK_PRECISION)
+        del objTest
+    
+    def test_init_TypeError(self) -> None:
+        """
+        Checks that improper data types of the argument(s) of the initialization
+        method result in TypeError or its sub-class exception.
+        
+        Test ID: TEST-T-407
+        Requirements: REQ-AWM-400
+        """
+        for Value in ('1', [1], (1, 2), {1: 1}, int, float, bool):
+            with self.assertRaises(TypeError):
+                self.TestClass(Value)
+    
+    def test_init_ValueError(self) -> None:
+        """
+        Checks that improper values of the argument(s) of the initialization
+        method result in ValueError or its sub-class exception.
+        
+        Test ID: TEST-T-408
+        Requirements: REQ-AWM-401
+        """
+        for _ in range(10):
+            Value = random.randint(-10, -1)
+            with self.assertRaises(ValueError):
+                self.TestClass(Value)
+            Value += random.random()
+            with self.assertRaises(ValueError):
+                self.TestClass(Value)
+        with self.assertRaises(ValueError):
+            self.TestClass(0)
+    
+    def test_setters_TypeError(self) -> None:
+        """
+        Checks that improper data types of the argument(s) of the setter
+        properties result in TypeError or its sub-class exception.
+        
+        Test ID: TEST-T-407
+        Requirements: REQ-AWM-400
+        """
+        objTest = self.TestClass(*self.DefArguments)
+        for Value in ('1', [1], (1, 2), {1: 1}, int, float, bool):
+            with self.assertRaises(TypeError):
+                objTest.Rate = Value
+        del objTest
+    
+    def test_setters_ValueError(self) -> None:
+        """
+        Checks that improper data types of the argument(s) of the setter
+        properties result in TypeError or its sub-class exception.
+        
+        Test ID: TEST-T-408
+        Requirements: REQ-AWM-401
+        """
+        objTest = self.TestClass(*self.DefArguments)
+        for _ in range(10):
+            Value = random.randint(-10, -1)
+            with self.assertRaises(ValueError):
+                objTest.Rate = Value
+            Value += random.random()
+            with self.assertRaises(ValueError):
+                objTest.Rate = Value
+        with self.assertRaises(ValueError):
+            objTest.Rate = 0
+        del objTest
+    
+    def test_pdf(self) -> None:
+        """
+        Checks the implementation of the pdf() method.
+        
+        Test ID: TEST-T-404
+        Requirements ID: REQ-FUN-404
+        """
+        objTest = self.TestClass(*self.DefArguments)
+        for _ in range(10):
+            Rate = objTest.Rate
+            for _ in range(100):
+                Value = random.randint(0, 10)
+                if random.random() > 0.5:
+                    Value += random.random()
+                TestResult = objTest.pdf(Value)
+                self.assertIsInstance(TestResult, (int, float))
+                self.assertGreaterEqual(TestResult, 0)
+                CheckValue = math.exp(- Rate * Value) * Rate
+                self.assertAlmostEqual(TestResult, CheckValue,
+                                                places = FLOAT_CHECK_PRECISION)
+                if Value > 0:
+                    self.assertEqual(objTest.pdf(-Value), 0)
+            Rate = random.randint(1, 5)
+            if random.random() > 0.5:
+                Rate -= random.random()
+            objTest.Rate = Rate
+        del objTest
+    
+    def test_cdf(self) -> None:
+        """
+        Checks the implementation of the cdf() method.
+        
+        Test ID: TEST-T-405
+        Requirements ID: REQ-FUN-405
+        """
+        objTest = self.TestClass(*self.DefArguments)
+        for _ in range(10):
+            Rate = objTest.Rate
+            for _ in range(100):
+                Value = random.randint(0, 10)
+                if random.random() > 0.5:
+                    Value += random.random()
+                TestResult = objTest.cdf(Value)
+                self.assertIsInstance(TestResult, (float, int))
+                self.assertGreaterEqual(TestResult, 0)
+                CheckValue = 1 - math.exp(-Rate * Value)
+                self.assertAlmostEqual(TestResult, CheckValue,
+                                                places = FLOAT_CHECK_PRECISION)
+                self.assertEqual(objTest.cdf(-Value), 0)
+            Rate = random.randint(1, 5)
+            if random.random() > 0.5:
+                Rate -= random.random()
+            objTest.Rate = Rate
+        del objTest
+    
+    def test_qf(self) -> None:
+        """
+        Checks the implementation of the qf() method.
+        
+        Test ID: TEST-T-406
+        Requirements ID: REQ-FUN-406
+        """
+        objTest = self.TestClass(*self.DefArguments)
+        for _ in range(10):
+            Rate = objTest.Rate
+            for _ in range(100):
+                Value = random.random()
+                if Value < 1.0E-11:
+                    Value = 1.0E-11
+                TestResult = objTest.qf(Value)
+                self.assertIsInstance(TestResult, float)
+                self.assertGreater(TestResult, objTest.Min)
+                self.assertLess(TestResult, objTest.Max)
+                CheckValue = - math.log(1 - Value) / Rate
+                self.assertAlmostEqual(TestResult, CheckValue,
+                                                places = FLOAT_CHECK_PRECISION)
+            Rate = random.randint(1, 5)
+            if random.random() > 0.5:
+                Rate -= random.random()
+            objTest.Rate = Rate
+        del objTest
+    
+    def test_getQuantile(self) -> None:
+        """
+        Checks the implementation of the getQuantile() method.
+        
+        Test ID: TEST-T-406
+        Requirements ID: REQ-FUN-406
+        """
+        objTest = self.TestClass(*self.DefArguments)
+        for _ in range(10):
+            for _ in range(100):
+                k = random.randint(1, 20)
+                m = random.randint(1, 20) + k
+                TestResult = objTest.getQuantile(k, m)
+                self.assertIsInstance(TestResult, float)
+                self.assertGreater(TestResult, objTest.Min)
+                self.assertLess(TestResult, objTest.Max)
+                CheckValue = objTest.qf(k/m)
+                self.assertAlmostEqual(TestResult, CheckValue,
+                                                places = FLOAT_CHECK_PRECISION)
+            Rate = random.randint(1, 5)
+            if random.random() > 0.5:
+                Rate -= random.random()
+            objTest.Rate = Rate
+        del objTest
+
 #+ test suites
 
 TestSuite1 = unittest.TestLoader().loadTestsFromTestCase(
@@ -795,10 +1072,11 @@ TestSuite2 = unittest.TestLoader().loadTestsFromTestCase(
 TestSuite3 = unittest.TestLoader().loadTestsFromTestCase(
                                                 Test_Z_Distribution)
 TestSuite4 = unittest.TestLoader().loadTestsFromTestCase(Test_Gaussian)
-
+TestSuite5 = unittest.TestLoader().loadTestsFromTestCase(Test_Exponential)
 
 TestSuite = unittest.TestSuite()
-TestSuite.addTests([TestSuite1, TestSuite2, TestSuite3, TestSuite4])
+TestSuite.addTests([TestSuite1, TestSuite2, TestSuite3, TestSuite4, TestSuite5,
+                        ])
 
 if __name__ == "__main__":
     sys.stdout.write(
