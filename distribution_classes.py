@@ -108,15 +108,51 @@ class ContinuousDistributionABC(abc.ABC):
         """
         pass
     
-    @abc.abstractmethod
     def _qf(self, x: float) -> sf.TReal:
         """
-        The placeholder for the actual implementation of the ICDF / QF function,
-        which must be properly implemented in each sub-class using the following
-        signature:
+        The actual (internal) implementation of the ICDF / QF function. This
+        is the default option using bisection if the ICDF cannot be easily
+        calculated using simple or special mathematical functions.
+        
+        Signature:
            0 < float < 1 -> int OR float
+        
+        Version 1.0.0.0
         """
-        pass
+        Point = self.Mean
+        Sigma = self.Sigma
+        Min = self.Min
+        Max = self.Max
+        Precision = 1.0E-8
+        y = self._cdf(Point)
+        if abs(y - x) <= Precision:
+            Result = y
+        else:
+            if y < x:
+                Left = Point
+                while Left < Max:
+                    Right = min(Left + Sigma, Max)
+                    if self._cdf(Right) > x:
+                        break
+                    Left = Right
+            else:
+                Right = Point
+                while Right > Min:
+                    Left = max(Right - Sigma, Min)
+                    if self._cdf(Left) < x:
+                        break
+                    Right = Left
+            while (Right - Left) > Precision:
+                Point = 0.5 * (Left + Right)
+                y = self._cdf(Point)
+                if abs(y - x) <= Precision:
+                    Result = y
+                    break
+                elif y > x:
+                    Right = Point
+                else:
+                    Left = Point
+        return Result
     
     #+ special methods
     
@@ -491,6 +527,56 @@ class DiscreteDistributionABC(ContinuousDistributionABC):
     _Min: ClassVar[int] = 0
     
     _Max: ClassVar[sf.TReal] = math.inf
+    
+    #private instance methods
+    
+    def _qf(self, x: float) -> sf.TReal:
+        """
+        The actual (internal) implementation of the ICDF / QF function. This
+        is the default option using bisection if the ICDF cannot be easily
+        calculated using simple or special mathematical functions.
+        
+        Signature:
+           0 < float < 1 -> int OR float
+        
+        Version 1.0.0.0
+        """
+        Point = round(self.Mean)
+        Sigma = self.Sigma
+        Min = self.Min
+        Max = self.Max
+        Precision = 1.0E-8
+        y = self._cdf(Point)
+        if abs(y - x) <= Precision:
+            Result = y
+        else:
+            if y < x:
+                Left = Point
+                while Left < Max:
+                    Right = min(round(Left + Sigma), Max)
+                    if self._cdf(Right) > x:
+                        break
+                    Left = Right
+            else:
+                Right = Point
+                while Right > Min:
+                    Left = max(round(Right - Sigma), Min)
+                    if self._cdf(Left) < x:
+                        break
+                    Right = Left
+            while (Right - Left) > 1:
+                Point = round(0.5 * (Left + Right))
+                y = self._cdf(Point)
+                if abs(y - x) <= Precision:
+                    break
+                elif y > x:
+                    Right = Point
+                else:
+                    Left = Point
+            LeftCDF = self._cdf(Left)
+            Slope = self._cdf(Right) - LeftCDF
+            Result = Left + (x - LeftCDF) / Slope
+        return Result
     
     #public instance methods
     
