@@ -534,7 +534,7 @@ The function f(x) is monotonically increasing if for a < x < b the function's va
   * equal to y - the solution is found, which is (a+b) / 2
 * Iteratevely apply the following step, untill the required precision is achieved, i.e. $b - a \leq \delta$ or $| f(\frac{a+b}{2}) - y | \leq \varepsilon$
 
-In the case of *discrete distributions* the boundaries *a* and *b* are integer numbers, thus the new (lower or upper) boundary is defined as $\lfloor \frac{a+b}{2} \rfloor$, and the iterative narrowing of the range is terminated as soon as a + 1 = b. Furthermore, if at any step f(a) = y or f(b) = y the corresponding boundary value is returned as the result. Otherwise, as soon as a + 1 = b situation is reached the return value x is calculated as
+In the case of *discrete distributions* the boundaries *a* and *b* are **integer numbers**, because CDF is step-wise increasing function is this case, thus the new (lower or upper) boundary is defined as $\lfloor \frac{a+b}{2} \rfloor$, and the iterative narrowing of the range is terminated as soon as a + 1 = b. Furthermore, if at any step $|f(a) - y| \leq \varepsilon$ or $|f(b) - y| \leq \varepsilon$ the corresponding boundary value is returned as the result. Otherwise, as soon as a - b = q situation is reached the return value x is calculated as
 
 $$
 x = a + \frac{y - f(a)}{f(a+1) - f(a)}
@@ -542,18 +542,31 @@ $$
 
 Naturally, f(x) is the CDF, where y is the specified cummulative propability *p*.
 
-Furthermore, for the discrete distributions $\{ x_1, x_2, ...\}$ or $\{ x_1, x_2, ..., x_N\}$ an additional check must be performed, if $cdf(x_1) > p$, in which case $a = x_1 - 1$ and $b = a + 1 = x_1$ are immediately the terminal bounds.
-
-Also, for the finite discrete distributions $\{ x_1, x_2, ..., x_N\}$ it should be checked if $cdf(x_{n-1}) > p$, in which case  $a = x_{N-1}$ and $b = a + 1 = x_N$ are immediately the terminal bounds.
+Furthermore, for the discrete distributions $\{ x_1, x_2, ...\}$ (infinite) or $\{ x_1, x_2, ..., x_N\}$ (finite) an additional check must be performed, if $cdf(x_1) > p$, in which case $a = x_1 - 1$ and $b = a + 1 = x_1$ are immediately the terminal bounds.
 
 Then, the following procedure should be used for the selection of the *initial guesses*:
 
-* Calculate cdf(Mean) and compare it with the passed *p* value:
-  * cdf(Mean) = p - the solution is found, which is Mean
-  * cdf(Mean) < p
-    * the distribution is discrete - chose a = Min and b = Mean
-    * the distribution is continuous and defined only for x > 0 or x $\geq$ 0 - chose a = 0 and b = Mean
-    * the distribution is continuous and defined on $(- \infin, + \infin)$ - find such $k \in \mathbb{N}$ that $cdf(Mean - k \times Sigma) \leq p < cdf(Mean - (k-1) \times Sigma)$, and select $a=Mean - k \times Sigma$ and $b=Mean - (k-1) \times Sigma$
-  * cdf(Mean) > p
-    * the distribution is finite discrete - chose a = Mean and b = Max
-    * the distribution is infinite discrete or continous - find such $k \in \mathbb{N}$ that $cdf(Mean + (k-1) \times Sigma) \leq p < cdf(Mean + k \times Sigma)$, and select $a=Mean + (k-1) \times Sigma$ and $b=Mean + k \times Sigma$
+* Calculate $cdf(Mean)$ for continuous distribution or $cdf(\lfloor Mean \rfloor)$ for discreate and compare it with the passed *p* value:
+  * = p - the solution is found
+  * \< p - shift to the left (towards Min) using frames of 1 *Sigma* width, until:
+    * for a continuous distribution such $k \in \mathbb{N}$ is found that
+      * either $cdf(Mean - k \times Sigma) \leq p < cdf(Mean - (k-1) \times Sigma)$, then select $a=Mean - k \times Sigma$ and $b=Mean - (k-1) \times Sigma$
+      * or $Mean - k \times Sigma < Min \rightarrow 0 < p < cdf(Mean - (k-1) \times Sigma)$, then select $a=Min$ and $b=Mean - (k-1) \times Sigma$
+    * for a discrete distribution such $k \in \mathbb{N}$ is found that
+      * either $cdf(\lfloor Mean - k \times Sigma \rfloor) \leq p < cdf(\lfloor Mean - (k-1) \times Sigma \rfloor)$, then select $a=\lfloor Mean - k \times Sigma \rfloor$ and $b=\lfloor Mean - (k-1) \times Sigma \rfloor$
+      * or $\lfloor Mean - k \times Sigma \rfloor < Min \rightarrow 0 < p < cdf(\lfloor Mean - (k-1) \times Sigma \rfloor)$, then select $a=Min$ and $b=\lfloor Mean - (k-1) \times Sigma \rfloor $
+  * \> p - shift to the right (towards Max) using frames of 1 *Sigma* width, until:
+    * for a continuous distribution such $k \in \mathbb{N}$ is found that:
+      * either $cdf(Mean + (k - 1) \times Sigma) \leq p < cdf(Mean + k \times Sigma)$, then select $a=Mean + (k - 1) \times Sigma$ and $b=Mean + k \times Sigma$
+      * or $Mean + k \times Sigma > Max \rightarrow cdf(Mean + (k-1) \times Sigma) < p  < 1$, then select $a = Mean + (k-1) \times Sigma$ and $b = Max$
+    * for a discrete distribution such $k \in \mathbb{N}$ is found that:
+      * either $cdf(\lfloor Mean + (k - 1) \times Sigma \rfloor ) \leq p < cdf(\lfloor Mean + k \times Sigma \rfloor)$, then select $a=\lfloor Mean + (k - 1) \times Sigma \rfloor$ and $b=\lfloor Mean + k \times Sigma \rfloor$
+      * or $\lfloor Mean + k \times Sigma \rfloor > Max \rightarrow cdf(\lfloor Mean + (k-1) \times Sigma \rfloor) < p  < 1$, then select $a = \lfloor Mean + (k-1) \times Sigma \rfloor$ and $b = Max$
+
+The described modifications to the bisection method takes extend the method for the cases of:
+
+* step-wise growing functions
+* functions being defined not on the entire real numbers set $\mathbb{R}$, i.e. $(- \infin, + \infin)$ but also:
+  * intervals with finite lower bound $[a, + \infin)$
+  * intervals with finite upper bound $(- \infin, b]$
+  * bound (closed) intevals $[a, b]$

@@ -119,39 +119,53 @@ class ContinuousDistributionABC(abc.ABC):
         
         Version 1.0.0.0
         """
-        Point = self.Mean
         Sigma = self.Sigma
         Min = self.Min
         Max = self.Max
         Precision = 1.0E-8
+        Point = self.Mean #check self.Mean
         y = self._cdf(Point)
-        if abs(y - x) <= Precision:
-            Result = y
-        else:
-            if y < x:
+        if abs(y - x) <= Precision: #instant hit
+            Result = Point
+        else: #need to find an interval below or above self.Mean -> find a frame
+            #+ self.Sigma width at max, where the value lays
+            Result = None
+            if y < x: #between self.Mean and self.Max
                 Left = Point
                 while Left < Max:
                     Right = min(Left + Sigma, Max)
-                    if self._cdf(Right) > x:
+                    z = self._cdf(Right)
+                    if abs(z - x) <= Precision: #found solution
+                        Result = Right
+                        break
+                    elif z > x: #found frame
                         break
                     Left = Right
-            else:
+            else: #between self.Min and self.Mean
                 Right = Point
                 while Right > Min:
                     Left = max(Right - Sigma, Min)
-                    if self._cdf(Left) < x:
+                    z = self._cdf(Left)
+                    if abs(z - x) <= Precision: #found solution
+                        Result = Left
+                        break
+                    elif z < x: #found frame
                         break
                     Right = Left
-            while (Right - Left) > Precision:
+            if Result is None: #only frame is found, not the solution
+                #narrow it down by bisection until the difference in either
+                #+ probability or in the value (position) is below the precision
                 Point = 0.5 * (Left + Right)
-                y = self._cdf(Point)
-                if abs(y - x) <= Precision:
-                    Result = y
-                    break
-                elif y > x:
-                    Right = Point
-                else:
-                    Left = Point
+                while (Right - Left) > Precision:
+                    y = self._cdf(Point)
+                    if abs(y - x) <= Precision: #found solution
+                        Result = Point
+                        break
+                    elif y > x:
+                        Right = Point
+                    else:
+                        Left = Point
+                    Point = 0.5 * (Left + Right)
         return Result
     
     #+ special methods
@@ -541,41 +555,65 @@ class DiscreteDistributionABC(ContinuousDistributionABC):
         
         Version 1.0.0.0
         """
-        Point = round(self.Mean)
         Sigma = self.Sigma
         Min = self.Min
         Max = self.Max
         Precision = 1.0E-8
-        y = self._cdf(Point)
-        if abs(y - x) <= Precision:
-            Result = y
-        else:
-            if y < x:
-                Left = Point
-                while Left < Max:
-                    Right = min(round(Left + Sigma), Max)
-                    if self._cdf(Right) > x:
-                        break
-                    Left = Right
-            else:
-                Right = Point
-                while Right > Min:
-                    Left = max(round(Right - Sigma), Min)
-                    if self._cdf(Left) < x:
-                        break
-                    Right = Left
-            while (Right - Left) > 1:
-                Point = round(0.5 * (Left + Right))
-                y = self._cdf(Point)
-                if abs(y - x) <= Precision:
-                    break
-                elif y > x:
-                    Right = Point
-                else:
+        #check for x <= self.pdf(self.Min)
+        y = self._pdf(Min)
+        if abs(y - x) <= Precision: #instant hit
+            Result = Min
+        elif y > x: #just below self.Min - use linear extrapolation
+            Result = Min - 1 + x /y
+        else: #between self.Min and self.Max
+            Point = round(self.Mean) #check self.Mean
+            y = self._cdf(Point) 
+            if abs(y - x) <= Precision: #instant hit
+                Result = Point
+            else: # below or above self.Mean -> find a frame self.Sigma width
+                #+ at max, where the value lays
+                Result = None
+                if y < x: #shift towards self.Max
                     Left = Point
-            LeftCDF = self._cdf(Left)
-            Slope = self._cdf(Right) - LeftCDF
-            Result = Left + (x - LeftCDF) / Slope
+                    while Left < Max:
+                        Right = min(round(Left + Sigma), Max)
+                        z = self._cdf(Right)
+                        if abs(z - x) <= Precision: #found solution
+                            Result = Right
+                            break
+                        elif z > x: #found the frame
+                            break
+                        Left = Right
+                else: #shift towards self.Min
+                    Right = Point
+                    while Right > Min:
+                        Left = max(round(Right - Sigma), Min)
+                        z = self._cdf(Left)
+                        if abs(z - x) <= Precision: #found solution
+                            Result = Left
+                            break
+                        elif z < x: #found the frame
+                            break
+                        Right = Left
+                if Result is None:
+                    #a frame with width <= self.Sigma is found - narrow it down
+                    #+ to a single step = 1 using bisection
+                    Point = round(0.5 * (Left + Right))
+                    while (Right - Left) > 1:
+                        y = self._cdf(Point)
+                        if abs(y - x) <= Precision: #found solution
+                            Result = Point
+                            break
+                        elif y > x:
+                            Right = Point
+                        else:
+                            Left = Point
+                        Point = round(0.5 * (Left + Right))
+                    else: #solution is still not found
+                        #+ use linear interpolation between two integer steps
+                        LeftCDF = self._cdf(Left)
+                        Slope = self._cdf(Right) - LeftCDF
+                        Result = Left + (x - LeftCDF) / Slope
         return Result
     
     #public instance methods
@@ -624,12 +662,13 @@ class DiscreteDistributionABC(ContinuousDistributionABC):
         """
         if not isinstance(x, (int, float)):
             raise UT_TypeError(x, (int, float), SkipFrames = 1)
-        if x <= self.Min:
-            Result = 0
-        elif x >= self.Max:
+        x_floor = int(math.floor(x))
+        if x_floor >= self.Max:
             Result = 1
+        elif x_floor < self.Min:
+            Result = 0
         else:
-            Result = self._cdf(int(math.floor(x)))
+            Result = self._cdf(x_floor)
         return Result
     
     def random(self) -> int:
