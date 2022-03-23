@@ -25,7 +25,7 @@ import abc
 
 from random import random as base_random
 
-from typing import ClassVar, Tuple
+from typing import ClassVar, Tuple, Union
 
 #+ custom modules
 
@@ -1004,7 +1004,7 @@ class Gaussian(Z_Distribution):
 
 class Exponential(ContinuousDistributionABC):
     """
-    Implementation of the expnential distribution Must be instantiated with
+    Implementation of the exponential distribution. Must be instantiated with
     a single positive real number argument.
     
     Properties:
@@ -1240,3 +1240,558 @@ class Exponential(ContinuousDistributionABC):
         Version 1.0.0.0
         """
         return 6.0
+
+class Student(ContinuousDistributionABC):
+    """
+    Implementation of the Student's t-distribution. Must be instantiated with
+    a single positive real number argument.
+    
+    Properties:
+        Name: (read-only) str
+        Min: (read-only) float = - math.inf
+        Max: (read-only) float = math.inf
+        Mean: (read-only) float = 0 OR None
+        Median: (read-only) float = 0
+        Q1: (read-only) float
+        Q2: (read-only) float
+        Var: (read-only) float OR None
+        Sigma: (read-only) float OR None
+        Skew: (read-only) float OR None
+        Kurt: (read-only) float OR None
+        Degree: int > 0 OR float > 0
+    
+    Methods:
+        pdf(x)
+            int OR float -> float >= 0
+        cdf(x)
+            int OR float -> 0 < float < 1
+        qf()
+            0 < float < 1 -> float
+        getQuantile(k, m)
+            int > 0, int > 0 -> float
+        getHistogram()
+            int OR float, int OR float, int > 1
+                -> tuple(tuple(int OR float, float >= 0))
+        random()
+            None -> float
+    
+    Version 1.0.0.0
+    """
+    
+    #special methods
+    
+    def __init__(self, Degree: sf.TReal) -> None:
+        """
+        Initialization. Set the single parameter of the distribution - the
+        positive number as the number of degrees of freedom (not necessarily an
+        integer).
+        
+        Signature:
+            int > 0 OR float > 0 -> None
+        
+        Args:
+            Degree: int > 0 OR float > 0; the single parameter of the
+                distribution
+        
+        Raises:
+            UT_TypeError: the argument is neither int nor float
+            UT_ValueError: the argument is zero or negaive
+        
+        Version 1.0.0.0
+        """
+        if not isinstance(Degree, (int, float)):
+            raise UT_TypeError(Degree, (int, float), SkipFrames = 1)
+        if Degree <= 0:
+            raise UT_ValueError(Degree, '> 0 - rate parameter', SkipFrames = 1)
+        self._Parameters = dict()
+        self._Parameters['Degree'] = Degree
+        Temp = math.lgamma(0.5 * (Degree + 1)) - math.lgamma(0.5 * Degree)
+        Temp -= 0.5 * math.log(Degree * math.pi)
+        self._Factor = math.exp(Temp) #correction factor for PDF
+        self._Q1 = None #cached first quartile
+        self._Q3 = None #cached third quartile
+    
+    #private methods
+    
+    def _pdf(self, x: sf.TReal) -> float:
+        """
+        The actual implementation of the PDF function.
+        
+        Signature
+            int OR float -> float >= 0
+        
+        Version 1.0.0.0
+        """
+        Degree = self.Degree
+        Result = self._Factor * math.pow(1 + x * x / Degree, - 0.5*(Degree + 1))
+        return Result
+    
+    def _cdf(self, x: sf.TReal) -> sf.TReal:
+        """
+        The actual implementation of the CDF function.
+        
+        Signature:
+            int OR float -> 0 < float < 1
+        
+        1.0.0.0
+        """
+        Degree = self.Degree
+        #---
+        def inner(x: sf.TReal) -> float:
+            """
+            Closure to wrap a call to incomplete regularized beta function.
+            """
+            z = Degree / (Degree + x * x)
+            x = 0.5 * Degree
+            y = 0.5
+            Value = 0 #TODO call Iz(x,y) = B(z; x, y) / B(x, y)
+            return Value
+        #---
+        if x > 0:
+            Result = 1 - inner(x)
+        elif x < 0:
+            Result = inner(x)
+        else:
+            Result = 0
+        return Result
+    
+    def _qf(self, p: float) -> sf.TReal:
+        """
+        The actual implementation of the ICDF / QF function.
+        
+        Signature:
+           0 < float < 1 -> int OR float
+        
+        Version 1.0.0.0
+        """
+        if p == 0.5:
+            Result = 0
+        else:
+            Degree = self.Degree
+            if Degree == 1:
+                Result = math.tan(math.pi * (p - 0.5))
+            elif Degree == 2:
+                Result = math.sqrt(0.5 * (p * (1 -p)))
+            elif Degree == 4:
+                a = math.sqrt(4 * p * (1 - p))
+                q = math.sqrt(math.cos(math.acos(a) / 3) / a - 1)
+                if p > 0.5:
+                    Result = q
+                else:
+                    Result = -q
+            else:
+                Result = super()._qf(p)
+        return Result
+    
+    #public properties
+    
+    @property
+    def Degree(self) -> sf.TReal:
+        """
+        Property for the number of degrees of freedom parameter of the
+        distribution.
+        
+        Signature:
+            None -> int > 0 OR float > 0
+        
+        Version 1.0.0.0
+        """
+        return self._Parameters['Degree']
+    
+    @Degree.setter
+    def Degree(self, Value: sf.TReal) -> None:
+        """
+        Setter method for the number of degrees of freedom parameter of the
+        distribution.
+        
+        Signature:
+            float > 0 OR int > 0 -> None
+        
+        Raises:
+            UT_TypeError: passed value is not a real number
+            UT_ValueError: passed value is not positive
+        
+        Version 1.0.0.0
+        """
+        if not isinstance(Value, (int, float)):
+            raise UT_TypeError(Value, (int, float), SkipFrames = 1)
+        if Value <= 0:
+            raise UT_ValueError(Value, '> 0 - rate parameter', SkipFrames = 1)
+        self._Parameters['Degree'] = Value
+    
+    @property
+    def Mean(self) -> Union[float, None]:
+        """
+        Getter property for the arithmetic mean of the distribution.
+        
+        Signature:
+            None -> float OR None
+        
+        Returns:
+            float = 0.0: number of degrees of freedom > 1
+            None: number of degrees of freedom is in the interval (0, 1]
+        
+        Version 1.0.0.0
+        """
+        if self.Degree > 1:
+            Result = 0
+        else:
+            Result = None
+        return Result
+    
+    @property
+    def Median(self) -> float:
+        """
+        Getter property for the median of the distribution.
+        
+        Signature:
+            None -> float
+        
+        Version 1.0.0.0
+        """
+        return 0.0
+    
+    @property
+    def Q1(self) -> float:
+        """
+        Getter property for the first quartile of the distribution.
+        
+        Signature:
+            None -> float
+        
+        Version 1.0.0.0
+        """
+        if self._Q1 is None:
+            Result = self._qf(0.25)
+            self._Q1 = Result
+        else:
+            Result = self._Q1
+        return Result
+    
+    @property
+    def Q3(self) -> float:
+        """
+        Getter property for the third quartile of the distribution.
+        
+        Signature:
+            None -> float
+        
+        Version 1.0.0.0
+        """
+        if self._Q3 is None:
+            Result = self._qf(0.75)
+            self._Q3 = Result
+        else:
+            Result = self._Q3
+        return Result
+    
+    @property
+    def Var(self) -> Union[float, None]:
+        """
+        Getter property for the variance of the distribution.
+        
+        Signature:
+            None -> float OR None
+        
+        Returns:
+            float = 0.0: number of degrees of freedom > 2
+            float = math.inf: number of degrees of freedom is in the interval
+                (1, 2]
+            None: number of degrees of freedom is in the interval (0, 1]
+        
+        Version 1.0.0.0
+        """
+        Degree = self.Degree
+        if Degree > 2:
+            Result = Degree / (Degree - 2)
+        elif Degree > 1:
+            Result = math.inf
+        else:
+            Result = None
+        return Result
+    
+    @property
+    def Sigma(self) -> Union[float, None]:
+        """
+        Getter property for the standard deviation of the distribution.
+        
+        Signature:
+            None -> float OR None
+        
+        Returns:
+            float = 0.0: number of degrees of freedom > 2
+            float = math.inf: number of degrees of freedom is in the interval
+                (1, 2]
+            None: number of degrees of freedom is in the interval (0, 1]
+        
+        Version 1.0.0.0
+        """
+        Degree = self.Degree
+        if Degree > 2:
+            Result = math.sqrt(Degree / (Degree - 2))
+        elif Degree > 1:
+            Result = math.inf
+        else:
+            Result = None
+        return Result
+    
+    @property
+    def Skew(self) -> Union[float, None]:
+        """
+        Getter property for the skewness of the distribution.
+        
+        Signature:
+            None -> float OR None
+        
+        Returns:
+            float = 0.0: number of degrees of freedom > 3
+            None: number of degrees of freedom is in the interval (0, 3]
+        
+        Version 1.0.0.0
+        """
+        if self.Degree > 3:
+            Result = 0
+        else:
+            Result = None
+        return Result
+    
+    @property
+    def Kurt(self) -> Union[float, None]:
+        """
+        Getter property for the excess kurtosis of the distribution.
+        
+        Signature:
+            None -> float OR None
+        
+        Returns:
+            float: number of degrees of freedom > 4
+            float = math.inf: number of degrees of freedom is in the interval
+                (2, 4]
+            None: number of degrees of freedom is in the interval (0, 2]
+        
+        Version 1.0.0.0
+        """
+        Degree = self.Degree
+        if Degree > 4:
+            Result = 6 / (Degree - 4)
+        elif Degree > 2:
+            Result = math.inf
+        else:
+            Result = None
+        return Result
+
+class ChiSquare(Student):
+    """
+    Implementation of the chi-square distribution. Must be instantiated with
+    a single positive integer number argument.
+    
+    Properties:
+        Name: (read-only) str
+        Min: (read-only) float >= 0
+        Max: (read-only) float = math.inf
+        Mean: (read-only) int
+        Median: (read-only) float OR int
+        Q1: (read-only) float OR int
+        Q2: (read-only) float OR int
+        Var: (read-only) int
+        Sigma: (read-only) float
+        Skew: (read-only) float
+        Kurt: (read-only) float
+        Degree: int > 0
+    
+    Methods:
+        pdf(x)
+            int OR float -> float >= 0
+        cdf(x)
+            int OR float -> 0 < float < 1
+        qf()
+            0 < float < 1 -> float
+        getQuantile(k, m)
+            int > 0, int > 0 -> float
+        getHistogram()
+            int OR float, int OR float, int > 1
+                -> tuple(tuple(int OR float, float >= 0))
+        random()
+            None -> float
+    
+    Version 1.0.0.0
+    """
+    
+    #class 'private' fields
+    
+    _Min: ClassVar[sf.TReal] = 0
+    
+    #special methods
+    
+    def __init__(self, Degree: sf.TReal) -> None:
+        """
+        Initialization. Set the single parameter of the distribution - the
+        positive number as the number of degrees of freedom (not necessarily an
+        integer).
+        
+        Signature:
+            int > 0 OR float > 0 -> None
+        
+        Args:
+            Degree: int > 0 OR float > 0; the single parameter of the
+                distribution
+        
+        Raises:
+            UT_TypeError: the argument is neither int nor float
+            UT_ValueError: the argument is zero or negaive
+        
+        Version 1.0.0.0
+        """
+        if not isinstance(Degree, int):
+            raise UT_TypeError(Degree, int, SkipFrames = 1)
+        if Degree < 1:
+            raise UT_ValueError(Degree, '> 0 - rate parameter', SkipFrames = 1)
+        self._Parameters = dict()
+        self._Parameters['Degree'] = Degree
+        Temp = math.gamma(Degree / 2) * math.pow(2, Degree / 2)
+        self._Factor = 1 / Temp #correction factor for PDF
+        self._Q1 = None #cached first quartile
+        self._Q3 = None #cached third quartile
+        self._Median = None
+        if Degree == 1: #override the class attribute, make open > 0 interval
+            self._Min = sys.float_info.epsilon
+    
+    #private methods
+    
+    def _pdf(self, x: sf.TReal) -> float:
+        """
+        The actual implementation of the PDF function.
+        
+        Signature
+            int OR float -> float >= 0
+        
+        Version 1.0.0.0
+        """
+        k = self.Degree
+        Result= self._Factor * math.pow(x, 0.5 * k - 1) * math.exp(- x / 2)
+        return Result
+    
+    def _cdf(self, x: sf.TReal) -> sf.TReal:
+        """
+        The actual implementation of the CDF function.
+        
+        Signature:
+            int OR float -> 0 < float < 1
+        
+        1.0.0.0
+        """
+        Result = 0 #call regularized lower incomplete gama function P(k/2, x/2)
+        return Result
+    
+    #public properties
+    
+    @property
+    def Degree(self) -> int:
+        """
+        Property for the number of degrees of freedom parameter of the
+        distribution.
+        
+        Signature:
+            None -> int > 0
+        
+        Version 1.0.0.0
+        """
+        return self._Parameters['Degree']
+    
+    @Degree.setter
+    def Degree(self, Value: sf.TReal) -> None:
+        """
+        Setter method for the number of degrees of freedom parameter of the
+        distribution.
+        
+        Signature:
+            int > 0 -> None
+        
+        Raises:
+            UT_TypeError: passed value is not a real number
+            UT_ValueError: passed value is not positive
+        
+        Version 1.0.0.0
+        """
+        if not isinstance(Value, int):
+            raise UT_TypeError(Value, int, SkipFrames = 1)
+        if Value < 1:
+            raise UT_ValueError(Value, '> 0 - rate parameter', SkipFrames = 1)
+        self._Parameters['Degree'] = Value
+    
+    @property
+    def Mean(self) -> int:
+        """
+        Getter property for the arithmetic mean of the distribution.
+        
+        Signature:
+            None -> int
+        
+        Version 1.0.0.0
+        """
+        return self.Degree
+    
+    @property
+    def Median(self) -> float:
+        """
+        Getter property for the median of the distribution.
+        
+        Signature:
+            None -> float
+        
+        Version 1.0.0.0
+        """
+        if self._Median is None:
+            Result = self._qf(0.5)
+            self._Median = Result
+        else:
+            Result = self._Median
+        return Result
+    
+    @property
+    def Var(self) -> int:
+        """
+        Getter property for the variance of the distribution.
+        
+        Signature:
+            None -> int
+        
+        Version 1.0.0.0
+        """
+        return 2 * self.Degree
+    
+    @property
+    def Sigma(self) -> float:
+        """
+        Getter property for the standard deviation of the distribution.
+        
+        Signature:
+            None -> float
+        
+        Version 1.0.0.0
+        """
+        return math.sqrt(2 * self.Degree)
+    
+    @property
+    def Skew(self) -> float:
+        """
+        Getter property for the skewness of the distribution.
+        
+        Signature:
+            None -> float
+        
+        Version 1.0.0.0
+        """
+        return math.sqrt(8) / self.Degree
+    
+    @property
+    def Kurt(self) -> float:
+        """
+        Getter property for the excess kurtosis of the distribution.
+        
+        Signature:
+            None -> float
+        
+        Version 1.0.0.0
+        """
+        return 12 / self.Degree
