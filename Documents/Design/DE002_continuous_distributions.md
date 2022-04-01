@@ -473,7 +473,7 @@ The following statistical properties are defined:
 * Mean is $n \frac{K}{N}$
 * Variance is $n \frac{K}{N} \frac{N-K}{N} \frac{N-n}{N-1}$
 * Skewness is $\frac{(N-2K) (N-1)^{1/2} (N - 2n)}{\lfloor nK(N-K)(N-n) \rfloor^{1/2} (N-2)}$
-* Excess kurtosis is $\frac{(N-1)N^2(N(N+1)-6K(N-K)-6n(N-n))+6nK(N-k)(N-n)(5N-6))}{nK(N-k)(N-n)(N-2)(N-3)}$
+* Excess kurtosis is $\frac{(N-1)N^2(N(N+1)-6K(N-K)-6n(N-n))+6nK(N-K)(N-n)(5N-6))}{nK(N-K)(N-n)(N-2)(N-3)}$
 
 All quantiles, including quartiles and median must be calculated from CDF using numerical methods.
 

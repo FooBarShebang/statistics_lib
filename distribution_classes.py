@@ -12,10 +12,14 @@ Classes:
     ChiSquare
     Gamma
     Erlang
+    Poisson
+    Binomial
+    Geometric
+    Hypergeometric
 """
 
 __version__= '1.0.0.0'
-__date__ = '24-03-2022'
+__date__ = '01-04-2022'
 __status__ = 'Development'
 
 #imports
@@ -259,37 +263,65 @@ class ContinuousDistributionABC(abc.ABC):
         """
         pass
     
-    @abc.abstractproperty
+    @property
     def Median(self) -> sf.TReal:
         """
-        Prototype for the getter property for the median of the distribution.
+        Getter property for the median value of the distribution.
         
-        Sub-classes must implement it with a signature:
+        Signature:
             None -> float OR int
+        
+        Version 1.0.0.0
         """
-        pass
+        if hasattr(self, '_Cached'):
+            if not (self._Cached['Median'] is None):
+                Result = self._Cached['Median']
+            else:
+                Result = self._qf(0.5)
+                self._Cached['Median'] = Result
+        else:
+            Result = self._qf(0.5)
+        return Result
     
-    @abc.abstractproperty
+    @property
     def Q1(self) -> sf.TReal:
         """
-        Prototype for the getter property for the first quartile of the
-        distribution.
+        Getter property for the first quartile value of the distribution.
         
-        Sub-classes must implement it with a signature:
+        Signature:
             None -> float OR int
+        
+        Version 1.0.0.0
         """
-        pass
+        if hasattr(self, '_Cached'):
+            if not (self._Cached['Q1'] is None):
+                Result = self._Cached['Q1']
+            else:
+                Result = self._qf(0.25)
+                self._Cached['Q1'] = Result
+        else:
+            Result = self._qf(0.25)
+        return Result
     
-    @abc.abstractproperty
+    @property
     def Q3(self) -> sf.TReal:
         """
-        Prototype for the getter property for the third quartile of the
-        distribution.
+        Getter property for the first quartile value of the distribution.
         
-        Sub-classes must implement it with a signature:
+        Signature:
             None -> float OR int
+        
+        Version 1.0.0.0
         """
-        pass
+        if hasattr(self, '_Cached'):
+            if not (self._Cached['Q3'] is None):
+                Result = self._Cached['Q3']
+            else:
+                Result = self._qf(0.75)
+                self._Cached['Q3'] = Result
+        else:
+            Result = self._qf(0.75)
+        return Result
     
     @abc.abstractproperty
     def Var(self) -> sf.TReal:
@@ -524,7 +556,7 @@ class DiscreteDistributionABC(ContinuousDistributionABC):
     
     Methods:
         pdf(x)
-            int OR float -> float >= 0
+            int OR float -> int = 0 OR float > 0
         cdf(x)
             int OR float -> 0 < float < 1 OR 0 <= int <= 1
         qf()
@@ -628,7 +660,7 @@ class DiscreteDistributionABC(ContinuousDistributionABC):
         random variable X, which is Pr[X = x].
         
         Signature:
-            int OR float -> float >= 0
+            int OR float -> int = 0 OR float > 0
         
         Args:
             x: int OR float; value of the random variable
@@ -1062,7 +1094,7 @@ class Exponential(ContinuousDistributionABC):
         
         Raises:
             UT_TypeError: the argument is neither int nor float
-            UT_ValueError: the argument is zero or negaive
+            UT_ValueError: the argument is zero or negative
         
         Version 1.0.0.0
         """
@@ -1299,7 +1331,7 @@ class Student(ContinuousDistributionABC):
         
         Raises:
             UT_TypeError: the argument is neither int nor float
-            UT_ValueError: the argument is zero or negaive
+            UT_ValueError: the argument is zero or negative
         
         Version 1.0.0.0
         """
@@ -1463,40 +1495,6 @@ class Student(ContinuousDistributionABC):
         return 0.0
     
     @property
-    def Q1(self) -> float:
-        """
-        Getter property for the first quartile of the distribution.
-        
-        Signature:
-            None -> float
-        
-        Version 1.0.0.0
-        """
-        if self._Cached['Q1'] is None:
-            Result = self._qf(0.25)
-            self._Cached['Q1'] = Result
-        else:
-            Result = self._Cached['Q1']
-        return Result
-    
-    @property
-    def Q3(self) -> float:
-        """
-        Getter property for the third quartile of the distribution.
-        
-        Signature:
-            None -> float
-        
-        Version 1.0.0.0
-        """
-        if self._Cached['Q3'] is None:
-            Result = self._qf(0.75)
-            self._Cached['Q3'] = Result
-        else:
-            Result = self._Cached['Q3']
-        return Result
-    
-    @property
     def Var(self) -> Union[float, None]:
         """
         Getter property for the variance of the distribution.
@@ -1648,7 +1646,7 @@ class ChiSquare(Student):
         
         Raises:
             UT_TypeError: the argument is neither int nor float
-            UT_ValueError: the argument is zero or negaive
+            UT_ValueError: the argument is zero or negative
         
         Version 1.0.0.0
         """
@@ -1761,24 +1759,7 @@ class ChiSquare(Student):
         Version 1.0.0.0
         """
         return self.Degree
-    
-    @property
-    def Median(self) -> float:
-        """
-        Getter property for the median of the distribution.
-        
-        Signature:
-            None -> float
-        
-        Version 1.0.0.0
-        """
-        if self._Cached['Median'] is None:
-            Result = self._qf(0.5)
-            self._Cached['Median'] = Result
-        else:
-            Result = self._Cached['Median']
-        return Result
-    
+ 
     @property
     def Var(self) -> int:
         """
@@ -1884,7 +1865,7 @@ class Gamma(ContinuousDistributionABC):
         
         Raises:
             UT_TypeError: either of the arguments is neither int nor float
-            UT_ValueError: either of the arguments is zero or negaive
+            UT_ValueError: either of the arguments is zero or negative
         
         Version 1.0.0.0
         """
@@ -2032,57 +2013,6 @@ class Gamma(ContinuousDistributionABC):
         return Result
     
     @property
-    def Median(self) -> float:
-        """
-        Getter property for the median of the distribution.
-        
-        Signature:
-            None -> float
-        
-        Version 1.0.0.0
-        """
-        if self._Cached['Median'] is None:
-            Result = self._qf(0.5)
-            self._Cached['Median'] = Result
-        else:
-            Result = self._Cached['Median']
-        return Result
-    
-    @property
-    def Q1(self) -> float:
-        """
-        Getter property for the first quartile of the distribution.
-        
-        Signature:
-            None -> float
-        
-        Version 1.0.0.0
-        """
-        if self._Cached['Q1'] is None:
-            Result = self._qf(0.25)
-            self._Cached['Q1'] = Result
-        else:
-            Result = self._Cached['Q1']
-        return Result
-    
-    @property
-    def Q3(self) -> float:
-        """
-        Getter property for the third quartile of the distribution.
-        
-        Signature:
-            None -> float
-        
-        Version 1.0.0.0
-        """
-        if self._Cached['Q3'] is None:
-            Result = self._qf(0.75)
-            self._Cached['Q3'] = Result
-        else:
-            Result = self._Cached['Q3']
-        return Result
-    
-    @property
     def Var(self) -> float:
         """
         Getter property for the variance of the distribution.
@@ -2196,7 +2126,7 @@ class Erlang(Gamma):
         
         Raises:
             UT_TypeError: either of the arguments is neither int nor float
-            UT_ValueError: either of the arguments is zero or negaive
+            UT_ValueError: either of the arguments is zero or negative
         
         Version 1.0.0.0
         """
@@ -2257,3 +2187,586 @@ class Erlang(Gamma):
         for Key in self._Cached.keys():
             self._Cached[Key] = None
         self._Cached['Factor'] = Temp
+
+class Poisson(DiscreteDistributionABC):
+    """
+    Implementation of the Poisson distribution. Must be instantiated with
+    a positive integer or floating point number argument - rate.
+    
+    Properties:
+        Name: (read-only) str
+        Min: (read-only) int = 0
+        Max: (read-only) float = math.inf
+        Mean: (read-only) int > 0 OR float > 0
+        Median: (read-only) float > 0
+        Q1: (read-only) float > 0
+        Q2: (read-only) float > 0
+        Var: (read-only) int > 0 OR float > 0
+        Sigma: (read-only) float > 0
+        Skew: (read-only) float > 0
+        Kurt: (read-only) float > 0
+        Rate: int > 0 OR float > 0
+    
+    Methods:
+        pdf(x)
+            int OR float -> int = 0 OR float > 0
+        cdf(x)
+            int OR float -> 0 < float < 1
+        qf()
+            0 < float < 1 -> float
+        getQuantile(k, m)
+            int > 0, int > 0 -> float
+        getHistogram()
+            int OR float, int OR float, int > 1
+                -> tuple(tuple(int OR float, float >= 0))
+        random()
+            None -> int
+    
+    Version 1.0.0.0
+    """
+    
+     #class 'private' fields
+    
+    _Min: ClassVar[int] = 0
+
+    #special methods
+    
+    def __init__(self, Rate: sf.TReal) -> None:
+        """
+        Initialization. Set the rate parameter of the distribution.
+        
+        Signature:
+            int > 0 OR float > 0 -> None
+        
+        Args:
+            Rate: int > 0 OR float > 0; the rate parameter of the distribution
+        
+        Raises:
+            UT_TypeError: the argument is neither int nor float
+            UT_ValueError: the argument is zero or negative
+        
+        Version 1.0.0.0
+        """
+        if not isinstance(Rate, (int, float)):
+            raise UT_TypeError(Rate, (int, float), SkipFrames = 1)
+        if Rate <= 0:
+            raise UT_ValueError(Rate, '> 0, rate parameter', SkipFrames = 1)
+        self._Parameters = dict()
+        self._Parameters['Rate'] = Rate
+        self._Cached = dict()
+        self._Cached['Factor'] = math.exp(- Rate) #correction factor for PDF
+        self._Cached['Q1'] = None #cached first quartile
+        self._Cached['Q3'] = None #cached third quartile
+        self._Cached['Median'] = None
+    
+    #public properties
+    
+    @property
+    def Rate(self) -> sf.TReal:
+        """
+        Property for the rate parameter of the distribution.
+        
+        Signature:
+            None -> int > 0 OR float > 0
+        
+        Version 1.0.0.0
+        """
+        return self._Parameters['Rate']
+    
+    @Rate.setter
+    def Rate(self, Value: sf.TReal) -> None:
+        """
+        Setter method for the rate parameter of the distribution.
+        
+        Signature:
+            int > 0 OR float > 0 -> None
+        
+        Raises:
+            UT_TypeError: passed value is not an integer number nor float
+            UT_ValueError: passed value is not positive
+        
+        Version 1.0.0.0
+        """
+        if not isinstance(Value, (int, float)):
+            raise UT_TypeError(Value, (int, float), SkipFrames = 1)
+        if Value <= 0:
+            raise UT_ValueError(Value, '> 0 - rate parameter', SkipFrames = 1)
+        self._Parameters['Rate'] = Value
+        for Key in self._Cached.keys():
+            self._Cached[Key] = None
+        self._Cached['Factor'] = math.exp(- Value)
+
+class Binomial(DiscreteDistributionABC):
+    """
+    Implementation of the binomial distribution. Must be instantiated with
+    a floating point number argument - probabilty - in the range (0, 1), and a
+    positive integer argument - draws.
+    
+    Properties:
+        Name: (read-only) str
+        Min: (read-only) int = 0
+        Max: (read-only) int
+        Mean: (read-only) float > 0
+        Median: (read-only) float > 0
+        Q1: (read-only) float > 0
+        Q2: (read-only) float > 0
+        Var: (read-only) float > 0
+        Sigma: (read-only) float > 0
+        Skew: (read-only) float
+        Kurt: (read-only) float
+        Draws: int > 0
+        Probability: 0 < float < 1
+    
+    Methods:
+        pdf(x)
+            int OR float -> int = 0 OR float > 0
+        cdf(x)
+            int OR float -> 0 < float < 1
+        qf()
+            0 < float < 1 -> float
+        getQuantile(k, m)
+            int > 0, int > 0 -> float
+        getHistogram()
+            int OR float, int OR float, int > 1
+                -> tuple(tuple(int OR float, float >= 0))
+        random()
+            None -> int
+    
+    Version 1.0.0.0
+    """
+    
+     #class 'private' fields
+    
+    _Min: ClassVar[int] = 0
+
+    #special methods
+    
+    def __init__(self, Probability: float, Draws: int) -> None:
+        """
+        Initialization. Set the probability and draws parameters of the
+        distribution.
+        
+        Signature:
+            0 < float < 1, int > 0 -> None
+        
+        Args:
+            Probability: 0 < float < 1; the probability parameter of the
+                distribution
+            Draws: int > 0; the number of draws
+        
+        Raises:
+            UT_TypeError: the first argument is not float, OR the second
+                argument is not int
+            UT_ValueError: either of the arguments is zero or negative, OR
+                probability is greater than or equal to 1
+        
+        Version 1.0.0.0
+        """
+        if not isinstance(Probability, float):
+            raise UT_TypeError(Probability, float, SkipFrames = 1)
+        if not isinstance(Draws, int):
+            raise UT_TypeError(Draws, int, SkipFrames = 1)
+        if Probability >= 1 or Probability <= 0:
+            raise UT_ValueError(Probability, '0 < p < 1', SkipFrames = 1)
+        if Draws < 1:
+            raise UT_ValueError(Draws, '>= 1, number of draws', SkipFrames = 1)
+        self._Parameters = dict()
+        self._Parameters['Probability'] = Probability
+        self._Parameters['Draws'] = Draws
+        self._Cached = dict()
+        self._Cached['Q1'] = None #cached first quartile
+        self._Cached['Q3'] = None #cached third quartile
+        self._Cached['Median'] = None
+    
+    #public properties
+    
+    @property
+    def Probability(self) -> float:
+        """
+        Property for the probability parameter of the distribution.
+        
+        Signature:
+            None -> in0 < float < 1
+        
+        Version 1.0.0.0
+        """
+        return self._Parameters['Probability']
+    
+    @Probability.setter
+    def Probability(self, Value: float) -> None:
+        """
+        Setter method for the probability parameter of the distribution.
+        
+        Signature:
+            0 < float < 1 -> None
+        
+        Raises:
+            UT_TypeError: passed value is not float
+            UT_ValueError: passed value is not in the range (0, 1)
+        
+        Version 1.0.0.0
+        """
+        if not isinstance(Value, float):
+            raise UT_TypeError(Value, float, SkipFrames = 1)
+        if Value <= 0 or Value >= 1:
+            raise UT_ValueError(Value, '0 < p < 1 - probability parameter',
+                                                                SkipFrames = 1)
+        self._Parameters['Probability'] = Value
+        for Key in self._Cached.keys():
+            self._Cached[Key] = None
+    
+    @property
+    def Draws(self) -> int:
+        """
+        Property for the draws parameter of the distribution.
+        
+        Signature:
+            None -> int > 0
+        
+        Version 1.0.0.0
+        """
+        return self._Parameters['Draws']
+    
+    @Draws.setter
+    def Draws(self, Value: int) -> None:
+        """
+        Setter method for the draws parameter of the distribution.
+        
+        Signature:
+            int > 0 -> None
+        
+        Raises:
+            UT_TypeError: passed value is not int
+            UT_ValueError: passed value is not positive
+        
+        Version 1.0.0.0
+        """
+        if not isinstance(Value, float):
+            raise UT_TypeError(Value, float, SkipFrames = 1)
+        if Value <= 0:
+            raise UT_ValueError(Value, '> 0 - draws parameter', SkipFrames = 1)
+        self._Parameters['Draws'] = Value
+        for Key in self._Cached.keys():
+            self._Cached[Key] = None
+
+class Geometric(DiscreteDistributionABC):
+    """
+    Implementation of the geometric distribution. Must be instantiated with
+    a floating point number argument - probabilty - in the range (0, 1).
+    
+    Properties:
+        Name: (read-only) str
+        Min: (read-only) int = 1
+        Max: (read-only) float = math.inf
+        Mean: (read-only) float > 0
+        Median: (read-only) float > 0
+        Q1: (read-only) float > 0
+        Q2: (read-only) float > 0
+        Var: (read-only) float > 0
+        Sigma: (read-only) float > 0
+        Skew: (read-only) float > 0
+        Kurt: (read-only) float > 0
+        Probability:  0 < float < 1
+    
+    Methods:
+        pdf(x)
+            int OR float -> int = 0 OR float > 0
+        cdf(x)
+            int OR float -> 0 < float < 1
+        qf()
+            0 < float < 1 -> float
+        getQuantile(k, m)
+            int > 0, int > 0 -> float
+        getHistogram()
+            int OR float, int OR float, int > 1
+                -> tuple(tuple(int OR float, float >= 0))
+        random()
+            None -> int
+    
+    Version 1.0.0.0
+    """
+    
+     #class 'private' fields
+    
+    _Min: ClassVar[int] = 1
+
+    #special methods
+    
+    def __init__(self, Probability: float) -> None:
+        """
+        Initialization. Set the probability parameter of the distribution.
+        
+        Signature:
+            0 < float < 1 -> None
+        
+        Args:
+            Probability: 0 < float < 1; the probability parameter of the
+                distribution
+        
+        Raises:
+            UT_TypeError: the argument is not float
+            UT_ValueError: the argument is not in the range (0, 1)
+        
+        Version 1.0.0.0
+        """
+        if not isinstance(Probability, float):
+            raise UT_TypeError(Probability, float, SkipFrames = 1)
+        if Probability >= 1 or Probability <= 0:
+            raise UT_ValueError(Probability, '0 < p < 1', SkipFrames = 1)
+        self._Parameters = dict()
+        self._Parameters['Probability'] = Probability
+        self._Cached = dict()
+        self._Cached['Q1'] = None #cached first quartile
+        self._Cached['Q3'] = None #cached third quartile
+        self._Cached['Median'] = None
+    
+    #public properties
+    
+    @property
+    def Probability(self) -> float:
+        """
+        Property for the probability parameter of the distribution.
+        
+        Signature:
+            None -> in0 < float < 1
+        
+        Version 1.0.0.0
+        """
+        return self._Parameters['Probability']
+    
+    @Probability.setter
+    def Probability(self, Value: float) -> None:
+        """
+        Setter method for the probability parameter of the distribution.
+        
+        Signature:
+            0 < float < 1 -> None
+        
+        Raises:
+            UT_TypeError: passed value is not float
+            UT_ValueError: passed value is not in the range (0, 1)
+        
+        Version 1.0.0.0
+        """
+        if not isinstance(Value, float):
+            raise UT_TypeError(Value, float, SkipFrames = 1)
+        if Value <= 0 or Value >= 1:
+            raise UT_ValueError(Value, '0 < p < 1 - probability parameter',
+                                                                SkipFrames = 1)
+        self._Parameters['Probability'] = Value
+        for Key in self._Cached.keys():
+            self._Cached[Key] = None
+
+class Hypergeometric(DiscreteDistributionABC):
+    """
+    Implementation of the hypergeometric distribution. Must be instantiated with
+    threee positive integer numbers: population size N, number of all successes
+    within the population K, and number of draws made n - where 0 < n < N and
+    0 < K < N; hence, N >= 2.
+    
+    Properties:
+        Name: (read-only) str
+        Min: (read-only) int = 0
+        Max: (read-only) int > 0
+        Mean: (read-only) int > 0 OR float > 0
+        Median: (read-only) float > 0
+        Q1: (read-only) float > 0
+        Q2: (read-only) float > 0
+        Var: (read-only) float > 0
+        Sigma: (read-only) float > 0
+        Skew: (read-only) float
+        Kurt: (read-only) float
+        Size: int >= 2
+        Successes: int > 0
+        Draws: int > 0
+    
+    Methods:
+        pdf(x)
+            int OR float -> int = 0 OR float > 0
+        cdf(x)
+            int OR float -> 0 < float < 1
+        qf()
+            0 < float < 1 -> float
+        getQuantile(k, m)
+            int > 0, int > 0 -> float
+        getHistogram()
+            int OR float, int OR float, int > 1
+                -> tuple(tuple(int OR float, float >= 0))
+        random()
+            None -> int
+    
+    Version 1.0.0.0
+    """
+    
+     #class 'private' fields
+    
+    _Min: ClassVar[int] = 0
+
+    #special methods
+    
+    def __init__(self, Size: int, Successes: int, Draws: int) -> None:
+        """
+        Initialization. Set the size, number of successes and number of draws
+        parameters of the distribution.
+        
+        Signature:
+            int > 1, int > 0, int > 0 -> None
+        
+        Args:
+            Size: int > 1; the size parameter of the distribution
+            Successes: int > 0; the number of the success items in the
+                distribution
+            Draws: int > 0; the number of draws from the population
+        
+        Raises:
+            UT_TypeError: either of the arguments is not int
+            UT_ValueError: the first argument is less than 2, OR the second or
+                the third argument is less than 1, OR the second or the third
+                argument is greater than or equal to the first
+        
+        Version 1.0.0.0
+        """
+        if not isinstance(Size, int):
+            raise UT_TypeError(Size, int, SkipFrames = 1)
+        if not isinstance(Successes, int):
+            raise UT_TypeError(Successes, int, SkipFrames = 1)
+        if not isinstance(Draws, int):
+            raise UT_TypeError(Draws, Draws, SkipFrames = 1)
+        if Size < 2:
+            raise UT_ValueError(Size, '>= 2, size of the population',
+                                                                SkipFrames = 1)
+        if Successes < 1:
+            raise UT_ValueError(Successes, '>= 1, number of successes',
+                                                                SkipFrames = 1)
+        if Draws < 1:
+            raise UT_ValueError(Draws, '>= 1, number of draws', SkipFrames = 1)
+        if Successes >= Size:
+            raise UT_ValueError(Successes,
+                    '< {}, number of successes'.format(Size), SkipFrames = 1)
+        if Draws >= Size:
+            raise UT_ValueError(Draws, '< {}, number of draws'.format(Size),
+                                                                SkipFrames = 1)
+        self._Parameters = dict()
+        self._Parameters['Size'] = Size
+        self._Parameters['Successes'] = Successes
+        self._Parameters['Draws'] = Draws
+        self._Cached = dict()
+        Temp = sf.combination(Size, Draws)
+        self._Cached['Factor'] = Temp #correction factor for PDF
+        self._Cached['Q1'] = None #cached first quartile
+        self._Cached['Q3'] = None #cached third quartile
+        self._Cached['Median'] = None
+    
+    @property
+    def Size(self) -> int:
+        """
+        Property for the size parameter of the distribution.
+        
+        Signature:
+            None -> int > 1
+        
+        Version 1.0.0.0
+        """
+        return self._Parameters['Size']
+    
+    @Size.setter
+    def Size(self, Value: int) -> None:
+        """
+        Setter method for the size parameter of the distribution.
+        
+        Signature:
+            int > 1 -> None
+        
+        Raises:
+            UT_TypeError: passed value is not int
+            UT_ValueError: passed value is less than 2
+        
+        Version 1.0.0.0
+        """
+        if not isinstance(Value, float):
+            raise UT_TypeError(Value, float, SkipFrames = 1)
+        if Value < 2:
+            raise UT_ValueError(Value, '> 1 - size parameter', SkipFrames = 1)
+        self._Parameters['Size'] = Value
+        for Key in self._Cached.keys():
+            self._Cached[Key] = None
+        self._Cached['Factor'] = sf.combination(Value, self.Draws)
+
+    @property
+    def Successes(self) -> int:
+        """
+        Property for the successes parameter of the distribution.
+        
+        Signature:
+            None -> int > 0
+        
+        Version 1.0.0.0
+        """
+        return self._Parameters['Successes']
+    
+    @Successes.setter
+    def Successes(self, Value: int) -> None:
+        """
+        Setter method for the successes parameter of the distribution.
+        
+        Signature:
+            int > 0 -> None
+        
+        Raises:
+            UT_TypeError: passed value is not int
+            UT_ValueError: passed value is not positive
+        
+        Version 1.0.0.0
+        """
+        if not isinstance(Value, float):
+            raise UT_TypeError(Value, float, SkipFrames = 1)
+        if Value <= 0:
+            raise UT_ValueError(Value, '> 0 - successes parameter',
+                                                                SkipFrames = 1)
+        Size = self.Size
+        if Value >= Size:
+            raise UT_ValueError(Value, '< {} - successes number'.format(Size),
+                                                                SkipFrames = 1)
+        self._Parameters['Successes'] = Value
+        for Key in self._Cached.keys():
+            self._Cached[Key] = None
+        self._Cached['Factor'] = sf.combination(Size, self.Draws)
+
+    @property
+    def Draws(self) -> int:
+        """
+        Property for the draws parameter of the distribution.
+        
+        Signature:
+            None -> int > 0
+        
+        Version 1.0.0.0
+        """
+        return self._Parameters['Draws']
+    
+    @Draws.setter
+    def Draws(self, Value: int) -> None:
+        """
+        Setter method for the draws parameter of the distribution.
+        
+        Signature:
+            int > 0 -> None
+        
+        Raises:
+            UT_TypeError: passed value is not int
+            UT_ValueError: passed value is not positive
+        
+        Version 1.0.0.0
+        """
+        if not isinstance(Value, float):
+            raise UT_TypeError(Value, float, SkipFrames = 1)
+        if Value <= 0:
+            raise UT_ValueError(Value, '> 0 - draws parameter', SkipFrames = 1)
+        Size = self.Size
+        if Value >= Size:
+            raise UT_ValueError(Value, '< {} - draws parameter'.format(Size),
+                                                                SkipFrames = 1)
+        self._Parameters['Draws'] = Value
+        for Key in self._Cached.keys():
+            self._Cached[Key] = None
+        self._Cached['Factor'] = sf.combination(Size, Value)
