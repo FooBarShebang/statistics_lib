@@ -19,7 +19,7 @@ Classes:
 """
 
 __version__= '1.0.0.0'
-__date__ = '01-04-2022'
+__date__ = '04-04-2022'
 __status__ = 'Development'
 
 #imports
@@ -65,8 +65,8 @@ class ContinuousDistributionABC(abc.ABC):
         Median: (read-only) int OR float
         Q1: (read-only) int OR float
         Q2: (read-only) int OR float
-        Var: (read-only) int OR float
-        Sigma: (read-only) int OR float
+        Var: (read-only) int > 0 OR float > 0
+        Sigma: (read-only) int > 0 OR float > 0
         Skew: (read-only) int OR float
         Kurt: (read-only) int OR float
     
@@ -329,20 +329,21 @@ class ContinuousDistributionABC(abc.ABC):
         Prototype for the getter property for the variance of the distribution.
         
         Sub-classes must implement it with a signature:
-            None -> float OR int
+            None -> float > 0 OR int > 0
         """
         pass
     
-    @abc.abstractproperty
+    @property
     def Sigma(self) -> sf.TReal:
         """
-        Prototype for the getter property for the standard deviation of the
-        distribution.
+        Getter property for the standard deviation of the distribution.
         
-        Sub-classes must implement it with a signature:
-            None -> float OR int
+        Signature:
+            None -> float > 0 OR int > 0
+        
+        Version 1.0.0.0
         """
-        pass
+        return math.sqrt(self.Var)
     
     @abc.abstractproperty
     def Skew(self) -> sf.TReal:
@@ -549,8 +550,8 @@ class DiscreteDistributionABC(ContinuousDistributionABC):
         Median: (read-only) int OR float
         Q1: (read-only) int OR float
         Q2: (read-only) int OR float
-        Var: (read-only) int OR float
-        Sigma: (read-only) int OR float
+        Var: (read-only) int > 0 OR float > 0
+        Sigma: (read-only) int > 0 OR float > 0
         Skew: (read-only) int OR float
         Kurt: (read-only) int OR float
     
@@ -733,9 +734,9 @@ class Z_Distribution(ContinuousDistributionABC):
         Max: (read-only) float = math.inf
         Mean: (read-only) float = 0
         Median: (read-only) float = 0
-        Q1: (read-only) float
-        Q2: (read-only) float
-        Var: (read-only) float
+        Q1: (read-only) float < 0
+        Q2: (read-only) float > 0
+        Var: (read-only) float = 1.0
         Sigma: (read-only) float = 1.0
         Skew: (read-only) float = 0.0
         Kurt: (read-only) float = 0.0
@@ -870,7 +871,7 @@ class Z_Distribution(ContinuousDistributionABC):
         Getter property for the variance of the distribution.
         
         Signature:
-            None -> float OR int
+            None -> float > 0 OR int > 0
         
         Version 1.0.0.0
         """
@@ -882,7 +883,7 @@ class Z_Distribution(ContinuousDistributionABC):
         Getter property for the standard deviation of the distribution.
         
         Signature:
-            None -> float
+            None -> float > 0
         
         Version 1.0.0.0
         """
@@ -894,7 +895,7 @@ class Z_Distribution(ContinuousDistributionABC):
         Getter property for the skewness of the distribution.
         
         Signature:
-            None -> float
+            None -> float = 0
         
         Version 1.0.0.0
         """
@@ -906,7 +907,7 @@ class Z_Distribution(ContinuousDistributionABC):
         Getter property for the excess kurtosis of the distribution.
         
         Signature:
-            None -> float
+            None -> float = 0.0
         
         Version 1.0.0.0
         """
@@ -925,7 +926,7 @@ class Gaussian(Z_Distribution):
         Median: (read-only) float OR int
         Q1: (read-only) float
         Q2: (read-only) float
-        Var: (read-only) float OR int
+        Var: (read-only) float > 0 OR int > 0
         Sigma: float > 0 OR int > 0
         Skew: (read-only) float = 0.0
         Kurt: (read-only) float = 0.0
@@ -976,7 +977,7 @@ class Gaussian(Z_Distribution):
     #public properties
     
     @property
-    def Mean(self) -> float:
+    def Mean(self) -> sf.TReal:
         """
         Property for the arithmetic mean of the distribution, which is also the
         parameter of the distibution.
@@ -1006,13 +1007,13 @@ class Gaussian(Z_Distribution):
         self._Parameters['Mean'] = Value
     
     @property
-    def Sigma(self) -> float:
+    def Sigma(self) -> sf.TReal:
         """
         Property for the standard deviation of the distribution, which is also
         the sigma parameter of the distribution.
         
         Signature:
-            None -> float > 0  OR int > 0
+            None -> float > 0 OR int > 0
         
         Version 1.0.0.0
         """
@@ -1047,14 +1048,14 @@ class Exponential(ContinuousDistributionABC):
         Name: (read-only) str
         Min: (read-only) float = 0
         Max: (read-only) float = math.inf
-        Mean: (read-only) float
-        Median: (read-only) float
-        Q1: (read-only) float
-        Q2: (read-only) float
-        Var: (read-only) float
-        Sigma: (read-only) float
-        Skew: (read-only) float
-        Kurt: (read-only) float
+        Mean: (read-only) float > 0
+        Median: (read-only) float > 0
+        Q1: (read-only) float > 0
+        Q2: (read-only) float > 0
+        Var: (read-only) float > 0
+        Sigma: (read-only) float > 0
+        Skew: (read-only) float > 0
+        Kurt: (read-only) float > 0
         Rate: int > 0 OR float > 0
     
     Methods:
@@ -1184,19 +1185,19 @@ class Exponential(ContinuousDistributionABC):
         Getter property for the arithmetic mean of the distribution.
         
         Signature:
-            None -> float
+            None -> float > 0
         
         Version 1.0.0.0
         """
         return 1 / self.Rate
     
     @property
-    def Median(self) -> sf.TReal:
+    def Median(self) -> float:
         """
         Getter property for the median of the distribution.
         
         Signature:
-            None -> float OR int
+            None -> float > 0
         
         Version 1.0.0.0
         """
@@ -1209,7 +1210,7 @@ class Exponential(ContinuousDistributionABC):
         Getter property for the first quartile of the distribution.
         
         Signature:
-            None -> float
+            None -> float > 0
         
         Version 1.0.0.0
         """
@@ -1222,7 +1223,7 @@ class Exponential(ContinuousDistributionABC):
         Getter property for the third quartile of the distribution.
         
         Signature:
-            None -> float
+            None -> float > 0
         
         Version 1.0.0.0
         """
@@ -1230,12 +1231,12 @@ class Exponential(ContinuousDistributionABC):
         return Result
     
     @property
-    def Var(self) -> sf.TReal:
+    def Var(self) -> float:
         """
         Getter property for the variance of the distribution.
         
         Signature:
-            None -> float OR int
+            None -> float > 0
         
         Version 1.0.0.0
         """
@@ -1247,7 +1248,7 @@ class Exponential(ContinuousDistributionABC):
         Getter property for the standard deviation of the distribution.
         
         Signature:
-            None -> float
+            None -> float > 0
         
         Version 1.0.0.0
         """
@@ -1259,7 +1260,7 @@ class Exponential(ContinuousDistributionABC):
         Getter property for the skewness of the distribution.
         
         Signature:
-            None -> float
+            None -> float > 0
         
         Version 1.0.0.0
         """
@@ -1271,7 +1272,7 @@ class Exponential(ContinuousDistributionABC):
         Getter property for the excess kurtosis of the distribution.
         
         Signature:
-            None -> float
+            None -> float > 0
         
         Version 1.0.0.0
         """
@@ -1286,13 +1287,13 @@ class Student(ContinuousDistributionABC):
         Name: (read-only) str
         Min: (read-only) float = - math.inf
         Max: (read-only) float = math.inf
-        Mean: (read-only) float = 0 OR None
-        Median: (read-only) float = 0
+        Mean: (read-only) int = 0 OR None
+        Median: (read-only) int = 0
         Q1: (read-only) float
         Q2: (read-only) float
         Var: (read-only) float OR None
         Sigma: (read-only) float OR None
-        Skew: (read-only) float OR None
+        Skew: (read-only) int = 0 OR None
         Kurt: (read-only) float OR None
         Degree: int > 0 OR float > 0
     
@@ -1463,12 +1464,12 @@ class Student(ContinuousDistributionABC):
         self._Cached['Factor'] = math.exp(Temp)
     
     @property
-    def Mean(self) -> Union[float, None]:
+    def Mean(self) -> Union[int, None]:
         """
         Getter property for the arithmetic mean of the distribution.
         
         Signature:
-            None -> float OR None
+            None -> int = 0 OR None
         
         Returns:
             float = 0.0: number of degrees of freedom > 1
@@ -1483,16 +1484,16 @@ class Student(ContinuousDistributionABC):
         return Result
     
     @property
-    def Median(self) -> float:
+    def Median(self) -> int:
         """
         Getter property for the median of the distribution.
         
         Signature:
-            None -> float
+            None -> int = 0
         
         Version 1.0.0.0
         """
-        return 0.0
+        return 0
     
     @property
     def Var(self) -> Union[float, None]:
@@ -1545,12 +1546,12 @@ class Student(ContinuousDistributionABC):
         return Result
     
     @property
-    def Skew(self) -> Union[float, None]:
+    def Skew(self) -> Union[int, None]:
         """
         Getter property for the skewness of the distribution.
         
         Signature:
-            None -> float OR None
+            None -> int = 0 OR None
         
         Returns:
             float = 0.0: number of degrees of freedom > 3
@@ -1598,14 +1599,14 @@ class ChiSquare(Student):
         Name: (read-only) str
         Min: (read-only) float >= 0
         Max: (read-only) float = math.inf
-        Mean: (read-only) int
-        Median: (read-only) float OR int
-        Q1: (read-only) float OR int
-        Q2: (read-only) float OR int
-        Var: (read-only) int
-        Sigma: (read-only) float
-        Skew: (read-only) float
-        Kurt: (read-only) float
+        Mean: (read-only) int > 0
+        Median: (read-only) float > 0 OR int > 0
+        Q1: (read-only) float > 0 OR int > 0
+        Q2: (read-only) float > 0 OR int > 0
+        Var: (read-only) int > 0
+        Sigma: (read-only) float > 0
+        Skew: (read-only) float > 0
+        Kurt: (read-only) float > 0
         Degree: int > 0
     
     Methods:
@@ -1754,7 +1755,7 @@ class ChiSquare(Student):
         Getter property for the arithmetic mean of the distribution.
         
         Signature:
-            None -> int
+            None -> int > 0
         
         Version 1.0.0.0
         """
@@ -1766,23 +1767,11 @@ class ChiSquare(Student):
         Getter property for the variance of the distribution.
         
         Signature:
-            None -> int
+            None -> int > 0
         
         Version 1.0.0.0
         """
         return 2 * self.Degree
-    
-    @property
-    def Sigma(self) -> float:
-        """
-        Getter property for the standard deviation of the distribution.
-        
-        Signature:
-            None -> float
-        
-        Version 1.0.0.0
-        """
-        return math.sqrt(2 * self.Degree)
     
     @property
     def Skew(self) -> float:
@@ -1790,7 +1779,7 @@ class ChiSquare(Student):
         Getter property for the skewness of the distribution.
         
         Signature:
-            None -> float
+            None -> float > 0
         
         Version 1.0.0.0
         """
@@ -1802,7 +1791,7 @@ class ChiSquare(Student):
         Getter property for the excess kurtosis of the distribution.
         
         Signature:
-            None -> float
+            None -> float > 0
         
         Version 1.0.0.0
         """
@@ -2028,21 +2017,6 @@ class Gamma(ContinuousDistributionABC):
         return Result
     
     @property
-    def Sigma(self) -> float:
-        """
-        Getter property for the standard deviation of the distribution.
-        
-        Signature:
-            None -> float > 0
-        
-        Version 1.0.0.0
-        """
-        Shape = self._Parameters['Shape']
-        Rate = self._Parameters['Rate']
-        Result = math.sqrt(Shape) / Rate
-        return Result
-    
-    @property
     def Skew(self) -> float:
         """
         Getter property for the skewness of the distribution.
@@ -2259,6 +2233,35 @@ class Poisson(DiscreteDistributionABC):
         self._Cached['Q3'] = None #cached third quartile
         self._Cached['Median'] = None
     
+    #private methods
+    
+    def _pdf(self, x: int) -> float:
+        """
+        The actual implementation of the PDF function.
+        
+        Signature
+            int >= 0 -> float > 0
+        
+        Version 1.0.0.0
+        """
+        Rate = self._Parameters['Rate']
+        Factor = self._Cached['Factor']
+        Result= Factor * math.pow(Rate, x) / math.factorial(x)
+        return Result
+    
+    def _cdf(self, x: int) -> sf.TReal:
+        """
+        The actual implementation of the CDF function.
+        
+        Signature:
+            int >= 0 -> 0 < float < 1
+        
+        1.0.0.0
+        """
+        Result = 0 #call regularized upper incomplete gamma function
+        #+ Q(floor(k + 1), Rate)
+        return Result
+
     #public properties
     
     @property
@@ -2295,6 +2298,54 @@ class Poisson(DiscreteDistributionABC):
         for Key in self._Cached.keys():
             self._Cached[Key] = None
         self._Cached['Factor'] = math.exp(- Value)
+    
+    @property
+    def Mean(self) -> sf.TReal:
+        """
+        Property for the mean of the distribution.
+        
+        Signature:
+            None -> int > 0 OR float > 0
+        
+        Version 1.0.0.0
+        """
+        return self.Rate
+    
+    @property
+    def Var(self) -> sf.TReal:
+        """
+        Property for the variance of the distribution.
+        
+        Signature:
+            None -> int > 0 OR float > 0
+        
+        Version 1.0.0.0
+        """
+        return self.Rate
+    
+    @property
+    def Skew(self) -> float:
+        """
+        Property for the skewness of the distribution.
+        
+        Signature:
+            None -> float > 0
+        
+        Version 1.0.0.0
+        """
+        return 1 / math.sqrt(self.Rate)
+    
+    @property
+    def Kurt(self) -> float:
+        """
+        Property for the excess kurtosis of the distribution.
+        
+        Signature:
+            None -> float > 0
+        
+        Version 1.0.0.0
+        """
+        return 1 / self.Rate
 
 class Binomial(DiscreteDistributionABC):
     """
@@ -2305,7 +2356,7 @@ class Binomial(DiscreteDistributionABC):
     Properties:
         Name: (read-only) str
         Min: (read-only) int = 0
-        Max: (read-only) int
+        Max: (read-only) int > 0
         Mean: (read-only) float > 0
         Median: (read-only) float > 0
         Q1: (read-only) float > 0
@@ -2378,6 +2429,35 @@ class Binomial(DiscreteDistributionABC):
         self._Cached['Q3'] = None #cached third quartile
         self._Cached['Median'] = None
     
+    #private methods
+    
+    def _pdf(self, x: int) -> float:
+        """
+        The actual implementation of the PDF function.
+        
+        Signature
+            int >= 0 -> float > 0
+        
+        Version 1.0.0.0
+        """
+        Prob = self._Parameters['Probability']
+        N = self._Cached['Draws']
+        Result= sf.combination(N, x)*math.pow(Prob, x)*math.pow((1-Prob), (N-x))
+        return Result
+    
+    def _cdf(self, x: int) -> sf.TReal:
+        """
+        The actual implementation of the CDF function.
+        
+        Signature:
+            int >= 0 -> 0 < float <= 1
+        
+        1.0.0.0
+        """
+        Result = 0 #call regularized incomplete beta function
+        #+ I(1-p)(n-x, 1 + x)
+        return Result
+
     #public properties
     
     @property
@@ -2448,6 +2528,70 @@ class Binomial(DiscreteDistributionABC):
         self._Parameters['Draws'] = Value
         for Key in self._Cached.keys():
             self._Cached[Key] = None
+    
+    @property
+    def Max(self) -> int:
+        """
+        Property for the maximum supported value of the distribution.
+        
+        Signature:
+            None -> int > 0
+        
+        Version 1.0.0.0
+        """
+        return self.Draws
+
+    @property
+    def Mean(self) -> float:
+        """
+        Property for the arithmetic mean of the distribution.
+        
+        Signature:
+            None -> float > 0
+        
+        Version 1.0.0.0
+        """
+        return self.Draws * self.Probability
+    
+    @property
+    def Var(self) -> float:
+        """
+        Property for the variance of the distribution.
+        
+        Signature:
+            None -> float > 0
+        
+        Version 1.0.0.0
+        """
+        Prob = self.Probability
+        return self.Draws * (1 - Prob) * Prob
+    
+    @property
+    def Skew(self) -> float:
+        """
+        Property for the skewness of the distribution.
+        
+        Signature:
+            None -> float
+        
+        Version 1.0.0.0
+        """
+        Prob = self.Probability
+        return (1 -2 * Prob) / math.sqrt(self.Draws * (1 - Prob) * Prob)
+    
+    @property
+    def Kurt(self) -> float:
+        """
+        Property for the excess kurtosis of the distribution.
+        
+        Signature:
+            None -> float
+        
+        Version 1.0.0.0
+        """
+        Prob = self.Probability
+        pq = Prob * (1 - Prob)
+        return (1 - 6 * pq) / (self.Draws * pq)
 
 class Geometric(DiscreteDistributionABC):
     """
@@ -2519,7 +2663,35 @@ class Geometric(DiscreteDistributionABC):
         self._Cached['Q1'] = None #cached first quartile
         self._Cached['Q3'] = None #cached third quartile
         self._Cached['Median'] = None
+
+    #private methods
     
+    def _pdf(self, x: int) -> float:
+        """
+        The actual implementation of the PDF function.
+        
+        Signature
+            int >= 0 -> float > 0
+        
+        Version 1.0.0.0
+        """
+        Prob = self._Parameters['Probability']
+        Result= Prob * math.pow((1-Prob), x - 1)
+        return Result
+    
+    def _cdf(self, x: int) -> sf.TReal:
+        """
+        The actual implementation of the CDF function.
+        
+        Signature:
+            int >= 0 -> 0 < float <= 1
+        
+        1.0.0.0
+        """
+        Prob = self._Parameters['Probability']
+        Result = 1 - math.pow((1-Prob), x)
+        return Result
+
     #public properties
     
     @property
@@ -2556,6 +2728,58 @@ class Geometric(DiscreteDistributionABC):
         self._Parameters['Probability'] = Value
         for Key in self._Cached.keys():
             self._Cached[Key] = None
+    
+    @property
+    def Mean(self) -> float:
+        """
+        Property for the arithmetic mean of the distribution.
+        
+        Signature:
+            None -> float > 0
+        
+        Version 1.0.0.0
+        """
+        return 1 / self.Probability
+    
+    @property
+    def Var(self) -> float:
+        """
+        Property for the variance of the distribution.
+        
+        Signature:
+            None -> float > 0
+        
+        Version 1.0.0.0
+        """
+        Prob = self.Probability
+        return (1 - Prob) / (Prob * Prob)
+    
+    @property
+    def Skew(self) -> float:
+        """
+        Property for the skewness of the distribution.
+        
+        Signature:
+            None -> float > 0
+        
+        Version 1.0.0.0
+        """
+        Prob = self.Probability
+        return (2 - Prob) / math.sqrt(1 - Prob)
+    
+    @property
+    def Kurt(self) -> float:
+        """
+        Property for the excess kurtosis of the distribution.
+        
+        Signature:
+            None -> float > 0
+        
+        Version 1.0.0.0
+        """
+        Prob = self.Probability
+        pq = Prob * (1 - Prob)
+        return 6 + Prob * Prob / (1 - Prob)
 
 class Hypergeometric(DiscreteDistributionABC):
     """
@@ -2566,7 +2790,7 @@ class Hypergeometric(DiscreteDistributionABC):
     
     Properties:
         Name: (read-only) str
-        Min: (read-only) int = 0
+        Min: (read-only) int >= 0
         Max: (read-only) int > 0
         Mean: (read-only) int > 0 OR float > 0
         Median: (read-only) float > 0
@@ -2574,8 +2798,8 @@ class Hypergeometric(DiscreteDistributionABC):
         Q2: (read-only) float > 0
         Var: (read-only) float > 0
         Sigma: (read-only) float > 0
-        Skew: (read-only) float
-        Kurt: (read-only) float
+        Skew: (read-only) float OR None
+        Kurt: (read-only) float OR None
         Size: int >= 2
         Successes: int > 0
         Draws: int > 0
@@ -2597,10 +2821,6 @@ class Hypergeometric(DiscreteDistributionABC):
     
     Version 1.0.0.0
     """
-    
-     #class 'private' fields
-    
-    _Min: ClassVar[int] = 0
 
     #special methods
     
@@ -2657,6 +2877,40 @@ class Hypergeometric(DiscreteDistributionABC):
         self._Cached['Q3'] = None #cached third quartile
         self._Cached['Median'] = None
     
+    #private methods
+    
+    def _pdf(self, x: int) -> float:
+        """
+        The actual implementation of the PDF function.
+        
+        Signature
+            int >=0 -> float > 0
+        
+        Version 1.0.0.0
+        """
+        N = self.Size
+        K = self.Successes
+        n = self.Draws
+        Factor = self._Cached['Factor']
+        Result = sf.combination(K, x) * sf.combination(N - K, n - x) / Factor
+        return Result
+    
+    def _cdf(self, x: int) -> sf.TReal:
+        """
+        The actual implementation of the CDF function.
+        
+        Signature:
+            int >= 0 -> 0 < float <= 1
+        
+        1.0.0.0
+        """
+        Result = 0
+        for k in range(self.Min, x + 1):
+            Result += self._pdf(k)
+        return Result
+    
+    #public properties
+
     @property
     def Size(self) -> int:
         """
@@ -2770,3 +3024,100 @@ class Hypergeometric(DiscreteDistributionABC):
         for Key in self._Cached.keys():
             self._Cached[Key] = None
         self._Cached['Factor'] = sf.combination(Size, Value)
+    
+    @property
+    def Min(self) -> int:
+        """
+        Property for the minimum supported value of the distribution.
+        
+        Signature:
+            None -> int >= 0
+        
+        Version 1.0.0.0
+        """
+        return max(0, self.Draws + self.Successes - self.Size)
+
+    @property
+    def Max(self) -> int:
+        """
+        Property for the maximum supported value of the distribution.
+        
+        Signature:
+            None -> int > 0
+        
+        Version 1.0.0.0
+        """
+        return min(self.Draws, self.Successes)
+    
+    @property
+    def Mean(self) -> float:
+        """
+        Property for the arithmetic mean of the distribution.
+        
+        Signature:
+            None -> float > 0
+        
+        Version 1.0.0.0
+        """
+        N = self.Size
+        K = self.Successes
+        n = self.Draws
+        return n * K / N
+    
+    @property
+    def Var(self) -> float:
+        """
+        Property for the variance of the distribution.
+        
+        Signature:
+            None -> float > 0
+        
+        Version 1.0.0.0
+        """
+        N = self.Size
+        K = self.Successes
+        n = self.Draws
+        Result = n * K * (N - K) * (N - n) / ((N- 1) * N * N)
+        return Result
+    
+    @property
+    def Skew(self) -> Union[float, None]:
+        """
+        Property for the skewness of the distribution.
+        
+        Signature:
+            None -> float  OR None
+        
+        Version 1.0.0.0
+        """
+        N = self.Size
+        K = self.Successes
+        n = self.Draws
+        if N > 2:
+            Result = math.sqrt(N - 1) * (N - 2 * K) * (N - 2 * n) / (N - 2)
+            Result /= math.sqrt(n * K *(N - K) * (N - n))
+        else:
+            Result = None
+        return Result
+    
+    @property
+    def Kurt(self) -> float:
+        """
+        Property for the excess kurtosis of the distribution.
+        
+        Signature:
+            None -> float > 0
+        
+        Version 1.0.0.0
+        """
+        N = self.Size
+        K = self.Successes
+        n = self.Draws
+        if N > 3:
+            Result = N * (N + 1) - 6 * K * (N - K) - 6 * n * (N - n)
+            Result *= N * N * (N - 1)
+            Result += 6 * n * K * (N - K) * (N - n) * (5 * N - 6)
+            Result /= n * K * (N - K) * (N - n) * (N - 2) * (N - 3)
+        else:
+            Result = None
+        return Result

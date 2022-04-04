@@ -453,7 +453,7 @@ Basically, it is defined by three parameters:
 * Number of 'success' objects $0 \leq K \leq N, \; K \in \mathbb{Z}$
 * Number of draws $0 \leq n \leq N, \; n \in \mathbb{Z}$
 
-It supports $0 \leq k \leq \mathtt{min}(n, K), \; k \in \mathbb{Z}$. Its PMF and CDF are defined as:
+It supports $\mathtt{max}(0, n + K - N) \leq k \leq \mathtt{min}(n, K), \; k \in \mathbb{Z}$. Its PMF and CDF are defined as:
 
 $$
 p(k) = \frac{C_K^k C_{N-K}^{n-k}}{C_N^n}\newline
