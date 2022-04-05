@@ -433,15 +433,22 @@ p(k) = (1-p)^{k-1} p\newline
 F(k) = 1 - (1-p)^k
 $$
 
-where the first definition of the distribution is used. The following statistical properties are defined:
+where the first definition of the distribution is used. Therefore, the ICDF / QF is:
+
+$$
+F^{-1}(z) = \frac{\mathtt{ln}(1 - z)}{\mathtt{ln}(1 - p)}
+$$
+
+
+The following statistical properties are defined:
 
 * Mean is $\frac{1}{p}$
 * Variance is $\frac{1-p}{p^2}$
 * Skewness is $\frac{2 - p}{\sqrt{1-p}}$
 * Excess kurtosis is $6 + \frac{p^2}{1-p}$
-* Median is $\lceil \frac{-1}{\mathtt{log}_2 (1-p)} \rceil$
-
-All quantiles, including quartiles must be calculated from CDF using numerical methods.
+* Median is $\frac{\mathtt{ln}(0.5)}{\mathtt{ln}(1 - p)} = \frac{- \mathtt{ln}(2)}{\mathtt{ln}(1 - p)} = \frac{-1}{\mathtt{log}_2 (1-p)}$
+* Q1 is $\frac{\mathtt{ln}(0.75)}{\mathtt{ln}(1 - p)}$
+* Q3 is $\frac{\mathtt{ln}(0.25)}{\mathtt{ln}(1 - p)} = \frac{- \mathtt{ln}(4)}{\mathtt{ln}(1 - p)} = \frac{- 2 * \mathtt{ln}(2)}{\mathtt{ln}(1 - p)} = \frac{-2}{\mathtt{log}_2 (1-p)}$
 
 ## Hypergeometric distribution
 

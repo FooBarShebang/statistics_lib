@@ -19,7 +19,7 @@ Classes:
 """
 
 __version__= '1.0.0.0'
-__date__ = '04-04-2022'
+__date__ = '05-04-2022'
 __status__ = 'Development'
 
 #imports
@@ -2691,6 +2691,19 @@ class Geometric(DiscreteDistributionABC):
         Prob = self._Parameters['Probability']
         Result = 1 - math.pow((1-Prob), x)
         return Result
+    
+    def _qf(self, x: float) -> sf.TReal:
+        """
+        The actual (internal) implementation of the ICDF / QF function.
+        
+        Signature:
+           0 < float < 1 -> int OR float
+        
+        Version 1.0.0.0
+        """
+        Prob = self._Parameters['Probability']
+        Result = math.log(1 - x) / math.log(1 - Prob)
+        return Result
 
     #public properties
     
@@ -2740,6 +2753,42 @@ class Geometric(DiscreteDistributionABC):
         Version 1.0.0.0
         """
         return 1 / self.Probability
+    
+    @property
+    def Median(self) -> float:
+        """
+        Property for the median of the distribution.
+        
+        Signature:
+            None -> float > 0
+        
+        Version 1.0.0.0
+        """
+        return - 1 / math.log2(1 - self.Probability)
+    
+    @property
+    def Q1(self) -> float:
+        """
+        Property for the first quartile of the distribution.
+        
+        Signature:
+            None -> float > 0
+        
+        Version 1.0.0.0
+        """
+        return math.log(0.75) / math.log(1 - self.Probability)
+    
+    @property
+    def Q3(self) -> float:
+        """
+        Property for the third quartile of the distribution.
+        
+        Signature:
+            None -> float > 0
+        
+        Version 1.0.0.0
+        """
+        return - 2 / math.log2(1 - self.Probability)
     
     @property
     def Var(self) -> float:
