@@ -16,11 +16,32 @@ Functions:
         int > 0 OR float > 0, int > 0 OR float > 0 -> float > 0
     inv_erg(x)
         -1 < int < 1 OR -1 < float < 1 -> float
+    lower_gamma(x, y)
+        int > 0 OR float > 0, int >= 0 OR float > 0 -> float >= 0
+    log_lower_gamma(x, y)
+        int > 0 OR float > 0, int > 0 OR float > 0 -> float
+    lower_gamma_reg(x, y)
+        int > 0 OR float > 0, int >= 0 OR float > 0 -> 0 <= float < 1
+    upper_gamma(x, y)
+        int > 0 OR float > 0, int >= 0 OR float > 0 -> float > 0
+    log_upper_gamma(x, y)
+        int > 0 OR float > 0, int >= 0 OR float > 0 -> float
+    upper_gamma_reg(x, y)
+        int > 0 OR float > 0, int >= 0 OR float > 0 -> 0 < float <= 1
+    incomplete_beta(z, x, y)
+        0 <= int <= 1 OR 0 <= float <= 1, int > 0 OR float > 0,
+            int > 0 OR float > 0 -> float >= 0
+    log_incomplete_beta(z, x, y)
+        int = 1 OR 0 < float <= 1, int > 0 OR float > 0,
+            int > 0 OR float > 0 -> float
+    incomplete_beta_reg(z, x, y)
+        0 <= int <= 1 OR 0 <= float <= 1, int > 0 OR float > 0,
+            int > 0 OR float > 0 -> 0 <= float <= 1
 """
 
 __version__= '1.0.0.0'
-__date__ = '21-03-2022'
-__status__ = 'Development'
+__date__ = '06-04-2022'
+__status__ = 'Testing'
 
 #imports
 
@@ -138,6 +159,18 @@ Q2_INV_ERF = (
     1.0000000000000000000E0,
 )
 
+#+ precision and iteration related
+
+ITMAX = 10000 #maximum length of the iteration loop, 100 in the original
+#+ algorithm
+
+EPS = 3.0E-7 #relative precision of series convergence criteria
+
+FPMIN = 1.0E-60 #proxy for the smallest representative floating point number,
+#+ affectes the precision . In the original algorithm it is 1.0E-30 - near
+#+ single precision float min value; no reason to set it near 2.2E-308 for
+#+ double precision.
+
 #functions
 
 #+ helper functions
@@ -237,6 +270,255 @@ _InvErfRat1 = functools.partial(_evaluateRational, P= P1_INV_ERF, Q= Q1_INV_ERF)
 
 _InvErfRat2 = functools.partial(_evaluateRational, P= P2_INV_ERF, Q= Q2_INV_ERF)
 
+def _gammaSeries(x: TReal, y : TReal) -> float:
+    """
+    Calculates the series part of the lower incomplete gamma function. Note,
+    that the data sanity check is not implemented, but it is supposed to be
+    incorporated into the higher abstraction level functions.
+    
+    Based on the algorithm given in:
+    
+    William H. Press, Saul A. Teukolsky, William T. Vetterling and
+    Brian P. Flannery. Numerical Recipes in C: The Art of Scientific Computing.
+    2nd Ed. Cambridge University Press (1992), pp. 216-219. ISBN: 0-521-43108-5
+    
+    Signature:
+        int > 0 OR float > 0, int > 0 OR float > 0 -> float > 0
+    
+    Args:
+        x: int > 0 OR float > 0; power parameter of the function
+        y: int > 0 OR float > 0; the integeral boundary parameter of the
+            function
+    
+    Raises:
+        Exception: maximum number of iteration is reached
+    
+    Version 1.0.0.0
+    """
+    Coeff = x
+    Term = 1.0 / x
+    Sum = Term
+    for n in range(1, ITMAX):
+        Coeff += 1
+        Term *= y / Coeff
+        Sum += Term
+        if math.fabs(Term) < EPS * math.fabs(Sum):
+            break
+    else: #max number of iterations is reached - error
+        raise Exception('Unable to converge the gamma series')
+    return Sum
+
+def _gammaContFraction(x: TReal, y : TReal) -> float:
+    """
+    Calculates the continued fraction part of the upper incomplete gamma
+    function. Note, that the data sanity check is not implemented, but it is
+    supposed to be incorporated into the higher abstraction level functions.
+    
+    Based on the algorithm given in:
+    
+    William H. Press, Saul A. Teukolsky, William T. Vetterling and
+    Brian P. Flannery. Numerical Recipes in C: The Art of Scientific Computing.
+    2nd Ed. Cambridge University Press (1992), pp. 216-219. ISBN: 0-521-43108-5
+    
+    Signature:
+        int > 0 OR float > 0, int > 0 OR float > 0 -> float > 0
+    
+    Args:
+        x: int > 0 OR float > 0; power parameter of the function
+        y: int > 0 OR float > 0; the integeral boundary parameter of the
+            function
+    
+    Raises:
+        Exception: maximum number of iteration is reached
+    
+    Version 1.0.0.0
+    """
+    b = 1.0 + y - x
+    c = 1.0 / FPMIN
+    d = 1.0 / b
+    h = d
+    for i in range(1, ITMAX):
+        an = - i * (i - x)
+        b += 2.0
+        d = an * d + b
+        if (math.fabs(d) < FPMIN):
+            d = FPMIN
+        c = b + an / c
+        if (math.fabs(c) < FPMIN):
+            c = FPMIN
+        d = 1.0 / d
+        res = d * c
+        h *= res
+        if math.fabs(res - 1.0) < EPS:
+            break
+    else: #max number of iterations is reached - error
+        raise Exception('Unable to converge the gamma series')
+    return h
+
+def _betaContFraction(z: float, x: TReal, y : TReal) -> float:
+    """
+    Calculates the continued fraction part of the incomplete beta function.
+    Note, that the data sanity check is not implemented, but it is supposed to
+    be incorporated into the higher abstraction level functions.
+    
+    Based on the algorithm given in:
+    
+    William H. Press, Saul A. Teukolsky, William T. Vetterling and
+    Brian P. Flannery. Numerical Recipes in C: The Art of Scientific Computing.
+    2nd Ed. Cambridge University Press (1992), pp. 226-228. ISBN: 0-521-43108-5
+    
+    Signature:
+        0 < float < 1, int > 0 OR float > 0, int > 0 OR float > 0 -> float > 0
+    
+    Args:
+        z: 0 < float < 1; the integeral boundary parameter of the function
+        x: int > 0 OR float > 0; the first power parameter of the function
+        y: int > 0 OR float > 0; the second power parameter of the function
+    
+    Raises:
+        Exception: maximum number of iteration is reached
+    
+    Version 1.0.0.0
+    """
+    qab = x + y
+    qap = x + 1.0
+    qam = x - 1.0
+    c = 1.0
+    d = 1.0 - qab * z / qap
+    if (math.fabs(d) < FPMIN):
+        d = FPMIN
+    d = 1.0 / d
+    h = d
+    for m in range(1, ITMAX):
+        m2 = 2 * m
+        aa = m * (y - m) * z / ((qam + m2) * (x + m2))
+        d = 1.0 + aa * d
+        if (math.fabs(d) < FPMIN):
+            d = FPMIN
+        c = 1.0 + aa / c
+        if (math.fabs(c) < FPMIN):
+            c = FPMIN
+        d = 1.0 / d
+        h *= d * c
+        aa = - (x + m) * (qab + m) * z / ((x + m2) * (qap + m2))
+        d = 1.0 + aa * d
+        if (math.fabs(d) < FPMIN):
+            d = FPMIN
+        c = 1.0 + aa / c
+        if (math.fabs(c) < FPMIN):
+            c = FPMIN
+        d = 1.0 / d
+        res = d * c
+        h *= res
+        if math.fabs(res - 1.0) < EPS:
+            break
+    else: #max number of iterations is reached - error
+        raise Exception('Unable to converge the gamma series')
+    return h
+
+def _checkSanity1(n: int, k: int) -> None:
+    """
+    Performs the input data sanity check - the both arguments must be positive
+    real numbers, with the relation 0 <= k <= n
+    
+    Signature:
+        int >= 0, int >= 0 -> None
+    
+    Raises:
+        UT_TypeError: either of the arguments is not an integer
+        UT_ValueError: either of the arguments is negative, OR k > n
+    
+    Version 1.0.0.0
+    """
+    if not isinstance(n, int):
+        raise UT_TypeError(n, int, SkipFrames = 2)
+    if not isinstance(k, int):
+        raise UT_TypeError(k, int, SkipFrames = 2)
+    if n < 0:
+        raise UT_ValueError(n, '>= 0, number of objects', SkipFrames = 2)
+    if k < 0:
+        raise UT_ValueError(k, '>= 0, number of trials', SkipFrames = 2)
+    if k > n:
+        raise UT_ValueError(k,
+                    '<= {}, number of trials <= number of objects'.format(n),
+                                                                SkipFrames = 2)
+
+def _checkSanity2(x: TReal, y: TReal) -> None:
+    """
+    Performs the input data sanity check - the both arguments must be positive
+    real numbers.
+    
+    Signature:
+        int > 0 OR float > 0, int > 0 OR float > 0 -> None
+    
+    Raises:
+        UT_TypeError: either of the arguments is neither integer nor float
+        UT_ValueError: either of the arguments is zero or negative
+    
+    Version 1.0.0.0
+    """
+    if not isinstance(x, (int, float)):
+        raise UT_TypeError(x, (int, float), SkipFrames = 2)
+    if not isinstance(y, (int, float)):
+        raise UT_TypeError(y, (int, float), SkipFrames = 2)
+    if x <= 0:
+        raise UT_ValueError(x, '> 0, x argument', SkipFrames = 2)
+    if y <= 0:
+        raise UT_ValueError(y, '> 0, y argument', SkipFrames = 2)
+
+def _checkSanity3(x: TReal, y: TReal) -> None:
+    """
+    Performs the input data sanity check - the first argument must be positive
+    real number, and the second - non-negative real number.
+    
+    Signature:
+        int > 0 OR float > 0, int >= 0 OR float > 0 -> None
+    
+    Raises:
+        UT_TypeError: either of the arguments is neither integer nor float
+        UT_ValueError: either of the arguments is zero or negative
+    
+    Version 1.0.0.0
+    """
+    if not isinstance(x, (int, float)):
+        raise UT_TypeError(x, (int, float), SkipFrames = 2)
+    if not isinstance(y, (int, float)):
+        raise UT_TypeError(y, (int, float), SkipFrames = 2)
+    if x <= 0:
+        raise UT_ValueError(x, '> 0, x argument', SkipFrames = 2)
+    if y < 0:
+        raise UT_ValueError(y, '>= 0, y argument', SkipFrames = 2)
+
+def _checkSanity4(z: TReal, x: TReal, y: TReal) -> None:
+    """
+    Performs the input data sanity check - the first argument must be a real
+    number in the closed range [0, 1], the other two arguments must be positive
+    real numbers.
+    
+    Signature:
+        0 <= int <= 1 OR 0 <= float <= 1, int > 0 OR float > 0,
+            int > 0 OR float > 0 -> None
+    
+    Raises:
+        UT_TypeError: either of the arguments is neither integer nor float
+        UT_ValueError: the first argument is not in the range [0, 1], OR either
+            of the other arguments is zero or negative
+    
+    Version 1.0.0.0
+    """
+    if not isinstance(z, (int, float)):
+        raise UT_TypeError(z, (int, float), SkipFrames = 2)
+    if not isinstance(x, (int, float)):
+        raise UT_TypeError(x, (int, float), SkipFrames = 2)
+    if not isinstance(y, (int, float)):
+        raise UT_TypeError(y, (int, float), SkipFrames = 2)
+    if z < 0 or z > 1:
+        raise UT_ValueError(z, 'in range [0, 1], z argument', SkipFrames = 2)
+    if x <= 0:
+        raise UT_ValueError(x, '> 0, x argument', SkipFrames = 2)
+    if y <= 0:
+        raise UT_ValueError(y, '> 0, y argument', SkipFrames = 2)
+
 #+ main set of functions
 
 def permutation(n: int, k: int) -> int:
@@ -256,18 +538,7 @@ def permutation(n: int, k: int) -> int:
     
     Version 1.0.0.0
     """
-    if not isinstance(n, int):
-        raise UT_TypeError(n, int, SkipFrames = 1)
-    if not isinstance(k, int):
-        raise UT_TypeError(k, int, SkipFrames = 1)
-    if n < 0:
-        raise UT_ValueError(n, '>= 0, number of objects', SkipFrames = 1)
-    if k < 0:
-        raise UT_ValueError(k, '>= 0, number of trials', SkipFrames = 1)
-    if k > n:
-        raise UT_ValueError(k,
-                    '<= {}, number of trials <= number of objects'.format(n),
-                                                                SkipFrames = 1)
+    _checkSanity1(n, k)
     if IS_V3_8_PLUS:
         Result = math.perm(n, k)
     else:
@@ -296,18 +567,7 @@ def combination(n: int, k: int) -> int:
     
     Version 1.0.0.0
     """
-    if not isinstance(n, int):
-        raise UT_TypeError(n, int, SkipFrames = 1)
-    if not isinstance(k, int):
-        raise UT_TypeError(k, int, SkipFrames = 1)
-    if n < 0:
-        raise UT_ValueError(n, '>= 0, number of objects', SkipFrames = 1)
-    if k < 0:
-        raise UT_ValueError(k, '>= 0, number of trials', SkipFrames = 1)
-    if k > n:
-        raise UT_ValueError(k,
-                    '<= {}, number of trials <= number of objects'.format(n),
-                                                                SkipFrames = 1)
+    _checkSanity1(n, k)
     if IS_V3_8_PLUS:
         Result = math.comb(n, k)
     else:
@@ -334,14 +594,7 @@ def log_beta(x: TReal, y: TReal) -> float:
     
     Version 1.0.0.0
     """
-    if not isinstance(x, (int, float)):
-        raise UT_TypeError(x, (int, float), SkipFrames = 1)
-    if not isinstance(y, (int, float)):
-        raise UT_TypeError(y, (int, float), SkipFrames = 1)
-    if x <= 0:
-        raise UT_ValueError(x, '> 0, x argument', SkipFrames = 1)
-    if y <= 0:
-        raise UT_ValueError(y, '> 0, y argument', SkipFrames = 1)
+    _checkSanity2(x, y)
     Result = math.lgamma(x) + math.lgamma(y) - math.lgamma(x + y)
     return Result
 
@@ -362,14 +615,7 @@ def beta(x: TReal, y: TReal) -> float:
     
     Version 1.0.0.0
     """
-    if not isinstance(x, (int, float)):
-        raise UT_TypeError(x, (int, float), SkipFrames = 1)
-    if not isinstance(y, (int, float)):
-        raise UT_TypeError(y, (int, float), SkipFrames = 1)
-    if x <= 0:
-        raise UT_ValueError(x, '> 0, x argument', SkipFrames = 1)
-    if y <= 0:
-        raise UT_ValueError(y, '> 0, y argument', SkipFrames = 1)
+    _checkSanity2(x, y)
     Result = math.lgamma(x) + math.lgamma(y) - math.lgamma(x + y)
     return math.exp(Result)
 
@@ -424,3 +670,367 @@ def inv_erf(x: TReal) -> float:
         if x < 0:
             Result = - Result
     return Result / math.sqrt(2)
+
+def lower_gamma(x: TReal, y : TReal) -> float:
+    """
+    Calculates the lower incomplete gamma function.
+    
+    Based on the algorithm given in:
+    
+    William H. Press, Saul A. Teukolsky, William T. Vetterling and
+    Brian P. Flannery. Numerical Recipes in C: The Art of Scientific Computing.
+    2nd Ed. Cambridge University Press (1992), pp. 216-219. ISBN: 0-521-43108-5
+    
+    Signature:
+        int > 0 OR float > 0, int >= 0 OR float > 0 -> float >= 0
+    
+    Args:
+        x: int > 0 OR float > 0; power parameter of the function
+        y: int >= 0 OR float > 0; the integeral boundary parameter of the
+            function
+    
+    Raises:
+        Raises:
+        UT_TypeError: either of the arguments is neither integer nor float
+        UT_ValueError: either of the arguments is zero or negative
+        Exception: maximum number of iteration is reached
+    
+    Version 1.0.0.0
+    """
+    _checkSanity3(x, y)
+    if y == 0:
+        Result = 0.0
+    elif (y < x + 1.0):
+        Sum = _gammaSeries(x, y)
+        Result = math.exp(-y + x * math.log(y)) * Sum
+    else:
+        Sum = _gammaContFraction(x, y)
+        GammaLn = math.lgamma(x)
+        Factor = math.exp(-y + x * math.log(y) - GammaLn)
+        Result = math.exp(GammaLn + math.log(1 - Factor * Sum))
+    return Result
+
+def log_lower_gamma(x: TReal, y : TReal) -> float:
+    """
+    Calculates the natural logarithm of the lower incomplete gamma function.
+    
+    Based on the algorithm given in:
+    
+    William H. Press, Saul A. Teukolsky, William T. Vetterling and
+    Brian P. Flannery. Numerical Recipes in C: The Art of Scientific Computing.
+    2nd Ed. Cambridge University Press (1992), pp. 216-219. ISBN: 0-521-43108-5
+    
+    Signature:
+        int > 0 OR float > 0, int > 0 OR float > 0 -> float
+    
+    Args:
+        x: int > 0 OR float > 0; power parameter of the function
+        y: int > 0 OR float > 0; the integeral boundary parameter of the
+            function
+    
+    Raises:
+        Raises:
+        UT_TypeError: either of the arguments is neither integer nor float
+        UT_ValueError: either of the arguments is zero or negative
+        Exception: maximum number of iteration is reached
+    
+    Version 1.0.0.0
+    """
+    _checkSanity2(x, y)
+    if (y < x + 1.0):
+        Sum = _gammaSeries(x, y)
+        Result = -y + x * math.log(y) + math.log(Sum)
+    else:
+        Sum = _gammaContFraction(x, y)
+        GammaLn = math.lgamma(x)
+        Factor = math.exp(-y + x * math.log(y) - GammaLn)
+        Result = GammaLn + math.log(1 - Factor * Sum)
+    return Result
+
+def lower_gamma_reg(x: TReal, y : TReal) -> float:
+    """
+    Calculates the regularized lower incomplete gamma function.
+    
+    Based on the algorithm given in:
+    
+    William H. Press, Saul A. Teukolsky, William T. Vetterling and
+    Brian P. Flannery. Numerical Recipes in C: The Art of Scientific Computing.
+    2nd Ed. Cambridge University Press (1992), pp. 216-219. ISBN: 0-521-43108-5
+    
+    Signature:
+        int > 0 OR float > 0, int >= 0 OR float > 0 -> 0 <= float < 1
+    
+    Args:
+        x: int > 0 OR float > 0; power parameter of the function
+        y: int >= 0 OR float > 0; the integeral boundary parameter of the
+            function
+    
+    Raises:
+        Raises:
+        UT_TypeError: either of the arguments is neither integer nor float
+        UT_ValueError: either of the arguments is zero or negative
+        Exception: maximum number of iteration is reached
+    
+    Version 1.0.0.0
+    """
+    _checkSanity3(x, y)
+    if y == 0:
+        Result = 0.0
+    else:
+        GammaLn = math.lgamma(x)
+        Factor = math.exp(-y + x * math.log(y) - GammaLn)
+        if (y < x + 1.0):
+            Sum = _gammaSeries(x, y)
+            Result = Factor * Sum
+        else:
+            Sum = _gammaContFraction(x, y)
+            Result = 1 - Factor * Sum
+    return Result
+
+def upper_gamma(x: TReal, y : TReal) -> float:
+    """
+    Calculates the upper incomplete gamma function.
+    
+    Based on the algorithm given in:
+    
+    William H. Press, Saul A. Teukolsky, William T. Vetterling and
+    Brian P. Flannery. Numerical Recipes in C: The Art of Scientific Computing.
+    2nd Ed. Cambridge University Press (1992), pp. 216-219. ISBN: 0-521-43108-5
+    
+    Signature:
+        int > 0 OR float > 0, int >= 0 OR float > 0 -> float > 0
+    
+    Args:
+        x: int > 0 OR float > 0; power parameter of the function
+        y: int >= 0 OR float > 0; the integeral boundary parameter of the
+            function
+    
+    Raises:
+        Raises:
+        UT_TypeError: either of the arguments is neither integer nor float
+        UT_ValueError: either of the arguments is zero or negative
+        Exception: maximum number of iteration is reached
+    
+    Version 1.0.0.0
+    """
+    _checkSanity3(x, y)
+    if y == 0:
+        Result = math.gamma(x) 
+    elif (y > x + 1.0):
+        Sum = _gammaContFraction(x, y)
+        Result = math.exp(-y + x * math.log(y)) * Sum
+    else:
+        Sum = _gammaSeries(x, y)
+        GammaLn = math.lgamma(x)
+        Factor = math.exp(-y + x * math.log(y) - GammaLn)
+        Result = math.exp(GammaLn + math.log(1 - Factor * Sum))
+    return Result
+
+def log_upper_gamma(x: TReal, y : TReal) -> float:
+    """
+    Calculates the natural logarithm of the upper incomplete gamma function.
+    
+    Based on the algorithm given in:
+    
+    William H. Press, Saul A. Teukolsky, William T. Vetterling and
+    Brian P. Flannery. Numerical Recipes in C: The Art of Scientific Computing.
+    2nd Ed. Cambridge University Press (1992), pp. 216-219. ISBN: 0-521-43108-5
+    
+    Signature:
+        int > 0 OR float > 0, int >= 0 OR float > 0 -> float
+    
+    Args:
+        x: int > 0 OR float > 0; power parameter of the function
+        y: int >= 0 OR float > 0; the integeral boundary parameter of the
+            function
+    
+    Raises:
+        Raises:
+        UT_TypeError: either of the arguments is neither integer nor float
+        UT_ValueError: either of the arguments is zero or negative
+        Exception: maximum number of iteration is reached
+    
+    Version 1.0.0.0
+    """
+    _checkSanity3(x, y)
+    if y == 0:
+        Result = math.lgamma(x) 
+    elif (y > x + 1.0):
+        Sum = _gammaContFraction(x, y)
+        Result = -y + x * math.log(y) + math.log(Sum)
+    else:
+        Sum = _gammaSeries(x, y)
+        GammaLn = math.lgamma(x)
+        Factor = math.exp(-y + x * math.log(y) - GammaLn)
+        Result = GammaLn + math.log(1 - Factor * Sum)
+    return Result
+
+def upper_gamma_reg(x: TReal, y : TReal) -> float:
+    """
+    Calculates the regularized upper incomplete gamma function.
+    
+    Based on the algorithm given in:
+    
+    William H. Press, Saul A. Teukolsky, William T. Vetterling and
+    Brian P. Flannery. Numerical Recipes in C: The Art of Scientific Computing.
+    2nd Ed. Cambridge University Press (1992), pp. 216-219. ISBN: 0-521-43108-5
+    
+    Signature:
+        int > 0 OR float > 0, int >= 0 OR float > 0 -> 0 < float <= 1
+    
+    Args:
+        x: int > 0 OR float > 0; power parameter of the function
+        y: int >= 0 OR float > 0; the integeral boundary parameter of the
+            function
+    
+    Raises:
+        Raises:
+        UT_TypeError: either of the arguments is neither integer nor float
+        UT_ValueError: either of the arguments is zero or negative
+        Exception: maximum number of iteration is reached
+    
+    Version 1.0.0.0
+    """
+    _checkSanity3(x, y)
+    GammaLn = math.lgamma(x)
+    if y == 0:
+        Result = GammaLn
+    else:
+        Factor = math.exp(-y + x * math.log(y) - GammaLn)
+        if (y > x + 1.0):
+            Sum = _gammaContFraction(x, y)
+            Result = Factor * Sum
+        else:
+            Sum = _gammaSeries(x, y)
+            Result = 1 - Factor * Sum
+    return Result
+
+def beta_incomplete(z: TReal, x: TReal, y : TReal) -> float:
+    """
+    Calculates the incomplete beta function.
+    
+    Based on the algorithm given in:
+    
+    William H. Press, Saul A. Teukolsky, William T. Vetterling and
+    Brian P. Flannery. Numerical Recipes in C: The Art of Scientific Computing.
+    2nd Ed. Cambridge University Press (1992), pp. 226-228. ISBN: 0-521-43108-5
+    
+    Signature:
+        0 <= int <= 1 OR 0 <= float <= 1, int > 0 OR float > 0,
+            int > 0 OR float > 0 -> float >= 0
+    
+    Args:
+        z: 0 <= int <= 1 OR 0 <= float <= 1; the integeral boundary parameter of
+            the function
+        x: int > 0 OR float > 0; the first power parameter of the function
+        y: int > 0 OR float > 0; the second power parameter of the function
+    
+    Raises:
+        Raises:
+        UT_TypeError: either of the arguments is neither integer nor float
+        UT_ValueError: the first argument is not in the range [0, 1], OR either
+            of the other arguments is zero or negative
+        Exception: maximum number of iteration is reached
+    
+    Version 1.0.0.0
+    """
+    _checkSanity4(z, x, y)
+    if z == 0:
+        Result = 0
+    elif z == 1:
+        Result = beta(x, y)
+    else:
+        Factor = math.exp(x * math.log(z) + y * math.log(1 - z))
+        if z < (x + 1.0) / (x + y + 2.0):
+            Sum = _betaContFraction(z, x, y)
+            Factor /=  x
+            Result = Factor * Sum
+        else:
+            Sum = _betaContFraction(1 - z, y, x)
+            Beta = beta(x, y)
+            Factor /= y
+            Result = Beta - Factor * Sum
+    return Result
+
+def log_beta_incomplete(z: TReal, x: TReal, y : TReal) -> float:
+    """
+    Calculates the natural logarithm of the incomplete beta function.
+    
+    Based on the algorithm given in:
+    
+    William H. Press, Saul A. Teukolsky, William T. Vetterling and
+    Brian P. Flannery. Numerical Recipes in C: The Art of Scientific Computing.
+    2nd Ed. Cambridge University Press (1992), pp. 226-228. ISBN: 0-521-43108-5
+    
+    Signature:
+        int = 1 OR 0 < float <= 1, int > 0 OR float > 0,
+            int > 0 OR float > 0 -> float >= 0
+    
+    Args:
+        z: int = 1 OR 0 < float <= 1; the integeral boundary parameter of
+            the function
+        x: int > 0 OR float > 0; the first power parameter of the function
+        y: int > 0 OR float > 0; the second power parameter of the function
+    
+    Raises:
+        Raises:
+        UT_TypeError: either of the arguments is neither integer nor float
+        UT_ValueError: the first argument is not in the range [0, 1], OR either
+            of the other arguments is zero or negative
+        Exception: maximum number of iteration is reached
+    
+    Version 1.0.0.0
+    """
+    _checkSanity4(z, x, y)
+    if z == 0:
+        raise UT_ValueError(z, '> 0, z argument', SkipFrames = 1)
+    elif z == 1:
+        Result = log_beta(x, y)
+    else:
+        pass
+
+def beta_incomplete_reg(z: TReal, x: TReal, y : TReal) -> float:
+    """
+    Calculates the regularized incomplete beta function.
+    
+    Based on the algorithm given in:
+    
+    William H. Press, Saul A. Teukolsky, William T. Vetterling and
+    Brian P. Flannery. Numerical Recipes in C: The Art of Scientific Computing.
+    2nd Ed. Cambridge University Press (1992), pp. 226-228. ISBN: 0-521-43108-5
+    
+    Signature:
+        0 <= int <= 1 OR 0 <= float <= 1, int > 0 OR float > 0,
+            int > 0 OR float > 0 -> 0<= float <= 1
+    
+    Args:
+        z: 0 <= int <= 1 OR 0 <= float <= 1; the integeral boundary parameter of
+            the function
+        x: int > 0 OR float > 0; the first power parameter of the function
+        y: int > 0 OR float > 0; the second power parameter of the function
+    
+    Raises:
+        Raises:
+        UT_TypeError: either of the arguments is neither integer nor float
+        UT_ValueError: the first argument is not in the range [0, 1], OR either
+            of the other arguments is zero or negative
+        Exception: maximum number of iteration is reached
+    
+    Version 1.0.0.0
+    """
+    _checkSanity4(z, x, y)
+    if z == 0:
+        Result = 0
+    elif z == 1:
+        Result = 1
+    else:
+        Factor = math.exp(x * math.log(z) + y * math.log(1 - z) - log_beta(x,y))
+        if z < (x + 1.0) / (x + y + 2.0):
+            Sum = _betaContFraction(z, x, y)
+            Factor /=  x
+            Result = Factor * Sum
+        else:
+            Sum = _betaContFraction(1 - z, y, x)
+            Factor /= y
+            Result = 1 - Factor * Sum
+    return Result

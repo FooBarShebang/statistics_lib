@@ -1664,7 +1664,7 @@ class ChiSquare(Student):
         self._Cached['Q3'] = None #cached third quartile
         self._Cached['Median'] = None
         if Degree == 1: #override the class attribute, make open > 0 interval
-            self._Min = sys.float_info.epsilon
+            self._Min = 2 * sys.float_info.min
     
     #private methods
     
@@ -1745,7 +1745,7 @@ class ChiSquare(Student):
         Temp = math.gamma(Value / 2) * math.pow(2, Value / 2)
         self._Cached['Factor'] = 1 / Temp
         if Value == 1: #override the class attribute, make open > 0 interval
-            self._Min = sys.float_info.epsilon
+            self._Min = 2 * sys.float_info.min
         else: # > 1 - makes the interval closed
             self._Min = 0
     
@@ -1837,7 +1837,7 @@ class Gamma(ContinuousDistributionABC):
     
     #class 'private' fields
     
-    _Min: ClassVar[sf.TReal] = sys.float_info.epsilon
+    _Min: ClassVar[sf.TReal] = 2 * sys.float_info.min
     
     #special methods
     

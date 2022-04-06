@@ -501,7 +501,7 @@ Both types of the random distributions: discrete and continuous - can be impleme
   * Min
   * Max
 * If these properties have fixed values or can be easily calculated from the parameters of the distribution, such calculations can be performed each time; however, if intensive calculations are requried - the respective values should be cached and re-used
-* The positive infinity value (for Max) should be represented as *math.inf* constant, the negative infinity value (for Min) - as *-math.inf*, and the open zero interval (for Min) as *sys.float_info.epsilon*
+* The positive infinity value (for Max) should be represented as *math.inf* constant, the negative infinity value (for Min) - as *-math.inf*, and the open zero interval (for Min) as *2 \* sys.float_info.min*
 * All classes should provide the following methods:
   * pdf(Value: int OR float), which must return the value of:
     * PDF for a continuous distribution with the following special cases
