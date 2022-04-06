@@ -86,7 +86,7 @@ $$
 R_{n,m}(x) = \frac{P_n(x)}{Q_m(x)} = \frac{p_0 + p_1 * x + p_2 * x^2 + ... + p_n * x^n}{q_0 + q_1 * x + q_2 * x^2 + ... + q_m * x^m}
 $$
 
-Specifically concerning the inverse error function algorithm AS241[^Ref2] can be used, wich defines 3 distict rational functions of 7th-7th power for each of the regions: central / core $\mathtt{abs}(x) \leq 0.85$, tails $0.85 < \mathtt{abs}(x) \leq 1 - 2.77759 \times {10}^{-11}$ and far tails $1 - 2.77759 \times {10}^{-11} < \mathtt{abs}(x) < 1$. This algorith was proposed in 1988 for the double precision floating point calculations.
+Specifically concerning the inverse error function algorithm AS241[^Ref2] can be used, wich defines 3 distict rational functions of 7th-7th power for each of the regions: central / core $\mathtt{abs}(x) \leq 0.85$, tails $0.85 < \mathtt{abs}(x) \leq 1 - 2.77759 \times {10}^{-11}$ and far tails $1 - 2.77759 \times {10}^{-11} < \mathtt{abs}(x) < 1$. This algorithm was proposed in 1988 for the double precision floating point calculations.
 
 Note, that the actual algorithm defines the quantile function of Z-distribution (see [DE002](./DE002_continuous_distributions.md) document)
 
@@ -137,6 +137,15 @@ $$
 
 for the better precision, where $\mathtt{ln} (\Gamma (x))$ is implemented as *math.lgamma*() function in the Standard Python Library, and exp() is *math.exp*() function.
 
+Also note the following properties of the beta function:
+
+$$
+B(x,y) = B(x + 1, y) + B(x, y + 1) \newline
+B(x + 1, y) = B(x,y) * \frac{x}{x + y} \newline
+B(x, y + 1) = B(x,y) * \frac{y}{x + y} \newline
+B(x,y) = B(y,x)
+$$
+
 ## Incomplete beta functions
 
 The generalization of the *beta function*, i.e. *incomplete beta function* is defined as:
@@ -151,7 +160,7 @@ $$
 I_z(x,y) = \frac{B(z;x,y)}{B(x,y)}
 $$
 
-with the eadge cases:
+with the edge cases:
 
 $$
 I_0(x > 0, y>0) = 0 \newline
@@ -159,6 +168,43 @@ B(0; x > 0, y >0) = 0 \newline
 I_1(x > 0, y>0) = 1 \newline
 B(1; x>0, y>0) = B(x,y)
 $$
+
+and the symmetry relation:
+
+$$
+I_z(x,y) = 1 - I_{1 -z}(y,x) \newline
+B(z; x, y) = B(x,y) - B(1-z; y, x)
+$$
+
+The regularized incomplete beta function can be calculated using the series expansion[^5]
+
+$$
+I_z(x,y) = \frac{z^x*(1-z)^y}{x * B(x,y)} \times \left( 1 + \sum_{n=0}^{\infin} {c_n * z^{n + 1}} \right) \; \mathtt{where} \newline
+c_n = \frac{B(x+1, n + 1)}{B(x + y, n + 1)} = \frac{B(x+1, n) * n / (x + 1 + n)}{B(x+y, n) * n / (x + y + n)} = \frac{x + y + n}{x + 1 + n} * c_{n - 1} \; \mathtt{and} \newline
+c_0 = \frac{B(x + 1, 1)}{B(x + y, 1)}
+$$
+
+However, this series converges slowly. Instead, a continued fraction representation can be utilized
+
+$$
+I_z(x,y) = \frac{z^x*(1-z)^y}{x * B(x,y)} \times \left( \cfrac{1}{1+\cfrac{d_1}{1+\cfrac{d_2}{1+\cdots}}} \right) \; \mathtt{where} \newline
+d_{2m+1} = - \frac{(x + m) * (x + y + m) * z}{(x + 2m) * (x + 2m  + 1)} \newline
+d_{2m} = \frac{m * (y - m)*z}{(x + 2m - 1) * (x + 2m)}
+$$
+
+which converges rapidly for
+
+$$
+z < \frac{x + 1}{x + y + 2} \equiv 1 -z > \frac{y + 1}{x + y + 2}
+$$
+
+In the opposite case
+
+$$
+z > \frac{x + 1}{x + y + 2} \equiv 1 -z < \frac{y + 1}{x + y + 2}
+$$
+
+the symmetry relation is to be used for the computations.
 
 ## Incomplete gamma functions
 
@@ -185,6 +231,23 @@ Q(x > 0, 0) = 1 \newline
 \Gamma (x > 0, 0) = \Gamma(x)
 $$
 
+The lower incomplete gamma function can be calculated using the series expansion[^6]
+
+$$
+\gamma(x,y) = e^{-y} y^x \sum_{n=0}^{\infin} {\frac{\Gamma(x)}{\Gamma(x + 1 + n)} y^n} = e^{-y} y^x \sum_{n=0}^{\infin} {b_n y^n} \; \mathtt{where} \newline
+b_0 = 1 / x\newline
+b_n = 1 / \prod_{i = 0}^{n} {(x + i)}
+$$
+
+which follows from the property of the gamma function $\Gamma(x + 1) = x * \Gamma(x)$. This series converges rapidly for $y < x + 1$. For the opposite case $y > x + 1$ the continued fraction expression for the upper incomplete gamma function converges faster:
+
+$$
+\Gamma(x,y) = e^{-y} y^x \left( \cfrac{1}{y + \cfrac{1 - x}{1 + \cfrac{1}{y + \cfrac{2 - x}{1 + \cfrac{2}{y + \cdots}}}}} \right) = \newline
+= e^{-y} y^x \left( \cfrac{1}{y + 1 -x - \cfrac{1 - x}{y + 3 - x - \cfrac{2 * (2 - x)}{y + 5 - x - \cdots}}} \right)
+$$
+
+Thus, depending on the relation between the arguments either of the expressions should be used in order to calculate the value of the function directly or via its complementary counterpart.
+
 ## References
 
 [^Ref1]: \[Ref 1\]: William H. Press, Saul A. Teukolsky, William T. Vetterling and Brian P. Flannery. **Numerical Recipes in C: The Art of Scientific Computing**. 2nd Ed. Cambridge University Press (1992). ISBN: 0-521-43108-5
@@ -198,4 +261,8 @@ $$
 
 [^3]: [Wikipedia - error function](https://en.wikipedia.org/wiki/Error_function)
 
-[^4]: Numerical Recipes. p ???.
+[^4]: Numerical Recipes. pp. 173 - 175
+
+[^5]: Numerical Recipes. pp. 226 - 228
+
+[^6]: Numerical Recipes. pp. 216 - 219

@@ -439,7 +439,6 @@ $$
 F^{-1}(z) = \frac{\mathtt{ln}(1 - z)}{\mathtt{ln}(1 - p)}
 $$
 
-
 The following statistical properties are defined:
 
 * Mean is $\frac{1}{p}$
