@@ -22,18 +22,24 @@ Modules:
         floating point numbers) and / or measurements with uncertainty, which
         are treated as the entire population. The statistical properties of the
         population distribution are calculated and returned on demand.
+    special_functions: Implements special mathematical functions such as inverse
+        error function, beta function, incomplete beta function and incomplete
+        gamma functions; as well as wrappers for (Python v >= 3.8) / actual
+        implementation (Python v < 3.8) of the combinatorics functions for
+        permutation and combinations.
 
 """
 
 __project__ = 'Statistics of the measurements with experimental uncertainties'
-__version_info__= (0, 4, 0)
+__version_info__= (0, 5, 0)
 __version_suffix__= '-dev1'
 __version__= ''.join(['.'.join(map(str, __version_info__)), __version_suffix__])
-__date__ = '09-03-2022'
+__date__ = '07-04-2022'
 __status__ = 'Development'
 __author__ = 'Anton Azarov'
 __maintainer__ = 'a.azarov@diagnoptics.com'
 __license__ = 'Public Domain'
 __copyright__ = 'Diagnoptics Technologies B.V.'
 
-__all__ = ['base_functions', 'ordered_functions', 'data_classes']
+__all__ = ['base_functions', 'ordered_functions', 'data_classes',
+            'special_functions']

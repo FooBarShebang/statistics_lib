@@ -41,7 +41,7 @@ Functions:
 
 __version__= '1.0.0.0'
 __date__ = '07-04-2022'
-__status__ = 'Testing'
+__status__ = 'Production'
 
 #imports
 
@@ -698,7 +698,7 @@ def lower_gamma(x: TReal, y : TReal) -> float:
     Version 1.0.0.0
     """
     _checkSanity3(x, y)
-    if y == 0:
+    if y <= 0:
         Result = 0.0
     elif (y < x + 1.0):
         Sum = _gammaSeries(x, y)
@@ -774,7 +774,7 @@ def lower_gamma_reg(x: TReal, y : TReal) -> float:
     Version 1.0.0.0
     """
     _checkSanity3(x, y)
-    if y == 0:
+    if y <= 0:
         Result = 0.0
     else:
         GammaLn = math.lgamma(x)
@@ -814,7 +814,7 @@ def upper_gamma(x: TReal, y : TReal) -> float:
     Version 1.0.0.0
     """
     _checkSanity3(x, y)
-    if y == 0:
+    if y <= 0:
         Result = math.gamma(x) 
     elif (y > x + 1.0):
         Sum = _gammaContFraction(x, y)
@@ -853,7 +853,7 @@ def log_upper_gamma(x: TReal, y : TReal) -> float:
     Version 1.0.0.0
     """
     _checkSanity3(x, y)
-    if y == 0:
+    if y <= 0:
         Result = math.lgamma(x) 
     elif (y > x + 1.0):
         Sum = _gammaContFraction(x, y)
@@ -892,10 +892,10 @@ def upper_gamma_reg(x: TReal, y : TReal) -> float:
     Version 1.0.0.0
     """
     _checkSanity3(x, y)
-    GammaLn = math.lgamma(x)
-    if y == 0:
-        Result = GammaLn
+    if y <= 0:
+        Result = 1.0
     else:
+        GammaLn = math.lgamma(x)
         Factor = math.exp(-y + x * math.log(y) - GammaLn)
         if (y > x + 1.0):
             Sum = _gammaContFraction(x, y)

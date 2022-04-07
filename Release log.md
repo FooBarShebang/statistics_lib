@@ -1,5 +1,9 @@
 # Release log of library statistics_lib
 
+## 2022-04-07 v0.5.0-dev1
+
+Implemented and tested module *special_functions*, which provides inverse error function, beta function, incomplete beta functions and incomplete gamma functions.
+
 ## 2022-03-09 v0.4.0-dev1
 
 Implemented and tested module *data_classes*, which provides classes for 1D and 2D statistical data encapsulation and calculation of the relevant statistical properties.

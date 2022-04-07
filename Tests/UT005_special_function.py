@@ -83,6 +83,22 @@ RIBF = (
     (0.999675, 0.999, 0.997896, 0.9963, 0.994161, 0.99144, 0.988109),
     (0.999904, 0.999684, 0.999293, 0.998687, 0.997826, 0.996671, 0.995186)))
 
+# regularized incomplete beta function values
+#+ https://keisan.casio.com/exec/system/1180573447
+#+ https://keisan.casio.com/exec/system/1180573444
+
+RLIGF_X = (0.5, 1, 2.5, 5, 7.5, 10) #power parameter
+
+RLIGF_Y = (0.5, 1, 2.5, 5, 7.5, 10, 15) #integration limit
+
+RLIGF = ((0.6826895, 0.8427008, 0.9746527, 0.9984346, 0.9998925, 0.999992, 1.0),
+        (0.3934693, 0.6321206, 0.917915, 0.993262, 0.9994469, 0.9999546, 1.0),
+        (0.0374342, 0.150855, 0.58412, 0.924765, 0.989638, 0.9987506, 0.999986),
+        (0.0001721, 0.0036599, 0.108822, 0.5595067, 0.8679381, 0.9707473,
+                                                                    0.9991433),
+        (0.0, 0.0000297, 0.0078736, 0.1802601, 0.5485828, 0.8280673, 0.9880785),
+        (0.0, 0.0000001, 0.0002774, 0.0318281, 0.2235924, 0.5420703, 0.9301463))
+
 #classes
 
 #+ test cases
@@ -869,6 +885,337 @@ class Test_log_beta_incomplete(Test_beta_incomplete_reg):
                 self.assertIsInstance(TestValue, float)
                 self.assertAlmostEqual(TestValue, Check)
 
+class Test_lower_gamma_reg(unittest.TestCase):
+    """
+    Checks the implementation of the function
+    special_functions.lower_gamma_reg().
+
+    Implements tests: TEST-T-500, TEST-T-501 and TEST-T-560.
+    Covers requirements: REQ-FUN-560, REQ-AWM-500 and REQ-AWM-501.
+
+    Version 1.0.0.0
+    """
+    
+    @classmethod
+    def setUpClass(cls) -> None:
+        """
+        Preparation for the test cases, done only once.
+        """
+        cls.TestFunction = staticmethod(test_module.lower_gamma_reg)
+    
+    def test_TypeError(self):
+        """
+        Checks that sub-class TypeError is raised with non-integer argument.
+
+        Test ID: TEST-T-500
+        Requirement(s): REQ-AWM-500
+
+        Version 1.0.0.0
+        """
+        for Value in [int, float, [1, 2], '1', (1, 1), {1 : 1}, bool]:
+            with self.assertRaises(TypeError):
+                self.TestFunction(Value, 1)
+            with self.assertRaises(TypeError):
+                self.TestFunction(0.5, Value)
+            with self.assertRaises(TypeError):
+                self.TestFunction(Value, Value)
+    
+    def test_ValueError(self):
+        """
+        Checks that sub-class ValueError is raised with wrong value argument.
+
+        Test ID: TEST-T-501
+        Requirement(s): REQ-AWM-501
+
+        Version 1.0.0.0
+        """
+        for _ in range(100):
+            ValueInt = - random.randint(1, 10)
+            ValueFloat = - (random.random() + 0.0000001)
+            ValueMix = ValueInt + ValueFloat
+            for Value in (ValueInt, ValueFloat, ValueMix): #negative values
+                with self.assertRaises(ValueError):
+                    self.TestFunction(Value, 1)
+                with self.assertRaises(ValueError):
+                    self.TestFunction(0.5, Value)
+                with self.assertRaises(ValueError):
+                    self.TestFunction(Value, Value)
+            #special cases
+            #+ zero x
+            with self.assertRaises(ValueError):
+                self.TestFunction(0, - ValueFloat)
+    
+    def test_OK(self):
+        """
+        Checks that the values are calculated properly. The check values are
+        calculated using online calculators:
+        
+        https://keisan.casio.com/exec/system/1180573447
+        https://keisan.casio.com/exec/system/1180573444
+        
+        Test ID: TEST-T-560
+        Requirement(s): REQ-FUN-560.
+
+        Version 1.0.0.0
+        """
+        for IndX, x in enumerate(RLIGF_X):
+            for IndY, y in enumerate(RLIGF_Y):
+                Check = RLIGF[IndX][IndY]
+                TestValue = self.TestFunction(x, y)
+                strError = 'for gamma({}, {})'.format(x, y)
+                self.assertIsInstance(TestValue, float)
+                self.assertAlmostEqual(TestValue, Check,
+                                                places = FLOAT_CHECK_PRECISION,
+                                                                msg = strError)
+        #edge cases
+        for _ in range(100):
+            TestValue = self.TestFunction(random.randint(1, 10), 0)
+            self.assertIsInstance(TestValue, float)
+            self.assertEqual(TestValue, 0.0)
+            TestValue = self.TestFunction(
+                                random.randint(1, 10) + random.random(), 0.0)
+            self.assertIsInstance(TestValue, float)
+            self.assertEqual(TestValue, 0.0)
+
+class Test_lower_gamma(Test_lower_gamma_reg):
+    """
+    Checks the implementation of the function
+    special_functions.lower_gamma().
+
+    Implements tests: TEST-T-500, TEST-T-501 and TEST-T-560.
+    Covers requirements: REQ-FUN-560, REQ-AWM-500 and REQ-AWM-501.
+
+    Version 1.0.0.0
+    """
+    
+    @classmethod
+    def setUpClass(cls) -> None:
+        """
+        Preparation for the test cases, done only once.
+        """
+        cls.TestFunction = staticmethod(test_module.lower_gamma)
+    
+    def test_OK(self):
+        """
+        Checks that the values are calculated properly using comparison with
+        the already tested functions.
+        
+        Test ID: TEST-T-560
+        Requirement(s): REQ-FUN-560.
+
+        Version 1.0.0.0
+        """
+        for _ in range(1000):
+            x = random.random() + random.randint(0, 10) + 0.000001
+            y = random.random() + random.randint(0, 15)
+            TestValue = self.TestFunction(x, y)
+            Check = test_module.lower_gamma_reg(x, y) * math.gamma(x)
+            self.assertIsInstance(TestValue, float)
+            self.assertAlmostEqual(TestValue, Check)
+        #edge cases
+        for _ in range(100):
+            TestValue = self.TestFunction(random.randint(1, 10), 0)
+            self.assertIsInstance(TestValue, float)
+            self.assertEqual(TestValue, 0.0)
+            TestValue = self.TestFunction(
+                                random.randint(1, 10) + random.random(), 0.0)
+            self.assertIsInstance(TestValue, float)
+            self.assertEqual(TestValue, 0.0)
+
+class Test_log_lower_gamma(Test_lower_gamma_reg):
+    """
+    Checks the implementation of the function
+    special_functions.log_lower_gamma().
+
+    Implements tests: TEST-T-500, TEST-T-501 and TEST-T-560.
+    Covers requirements: REQ-FUN-560, REQ-AWM-500 and REQ-AWM-501.
+
+    Version 1.0.0.0
+    """
+    
+    @classmethod
+    def setUpClass(cls) -> None:
+        """
+        Preparation for the test cases, done only once.
+        """
+        cls.TestFunction = staticmethod(test_module.log_lower_gamma)
+    
+    def test_ValueError(self):
+        """
+        Checks that sub-class ValueError is raised with wrong value argument.
+
+        Test ID: TEST-T-501
+        Requirement(s): REQ-AWM-501
+
+        Version 1.0.0.0
+        """
+        super().test_ValueError()
+        #special cases of y = 0
+        for _ in range(100):
+            with self.assertRaises(ValueError):
+                self.TestFunction(random.randint(1, 10), 0)
+            with self.assertRaises(ValueError):
+                self.TestFunction(random.randint(1, 10) + random.random(), 0)
+    
+    def test_OK(self):
+        """
+        Checks that the values are calculated properly using comparison with
+        the already tested functions.
+        
+        Test ID: TEST-T-560
+        Requirement(s): REQ-FUN-560.
+
+        Version 1.0.0.0
+        """
+        for _ in range(1000):
+            x = random.random() + random.randint(0, 10) + 0.000001
+            y = random.random() + random.randint(0, 15) + 0.000001
+            TestValue = self.TestFunction(x, y)
+            Check = test_module.lower_gamma_reg(x, y) * math.gamma(x)
+            self.assertIsInstance(TestValue, float)
+            self.assertAlmostEqual(TestValue, math.log(Check))
+
+class Test_upper_gamma_reg(Test_lower_gamma_reg):
+    """
+    Checks the implementation of the function
+    special_functions.upper_gamma_reg().
+
+    Implements tests: TEST-T-500, TEST-T-501 and TEST-T-560.
+    Covers requirements: REQ-FUN-560, REQ-AWM-500 and REQ-AWM-501.
+
+    Version 1.0.0.0
+    """
+    
+    @classmethod
+    def setUpClass(cls) -> None:
+        """
+        Preparation for the test cases, done only once.
+        """
+        cls.TestFunction = staticmethod(test_module.upper_gamma_reg)
+    
+    def test_OK(self):
+        """
+        Checks that the values are calculated properly using comparison with
+        the already tested functions.
+        
+        Test ID: TEST-T-560
+        Requirement(s): REQ-FUN-560.
+
+        Version 1.0.0.0
+        """
+        for _ in range(1000):
+            x = random.random() + random.randint(0, 10) + 0.000001
+            y = random.random() + random.randint(0, 15)
+            TestValue = self.TestFunction(x, y)
+            Check = 1 - test_module.lower_gamma_reg(x, y)
+            self.assertIsInstance(TestValue, float)
+            self.assertAlmostEqual(TestValue, Check)
+        #edge cases
+        for _ in range(100):
+            TestValue = self.TestFunction(random.randint(1, 10), 0)
+            self.assertIsInstance(TestValue, float)
+            self.assertEqual(TestValue, 1.0)
+            TestValue = self.TestFunction(
+                                random.randint(1, 10) + random.random(), 0.0)
+            self.assertIsInstance(TestValue, float)
+            self.assertEqual(TestValue, 1.0)
+
+class Test_upper_gamma(Test_lower_gamma_reg):
+    """
+    Checks the implementation of the function
+    special_functions.upper_gamma().
+
+    Implements tests: TEST-T-500, TEST-T-501 and TEST-T-560.
+    Covers requirements: REQ-FUN-560, REQ-AWM-500 and REQ-AWM-501.
+
+    Version 1.0.0.0
+    """
+    
+    @classmethod
+    def setUpClass(cls) -> None:
+        """
+        Preparation for the test cases, done only once.
+        """
+        cls.TestFunction = staticmethod(test_module.upper_gamma)
+    
+    def test_OK(self):
+        """
+        Checks that the values are calculated properly using comparison with
+        the already tested functions.
+        
+        Test ID: TEST-T-560
+        Requirement(s): REQ-FUN-560.
+
+        Version 1.0.0.0
+        """
+        for _ in range(1000):
+            x = random.random() + random.randint(0, 10) + 0.000001
+            y = random.random() + random.randint(0, 15)
+            TestValue = self.TestFunction(x, y)
+            Check = test_module.upper_gamma_reg(x, y) * math.gamma(x)
+            self.assertIsInstance(TestValue, float)
+            self.assertAlmostEqual(TestValue, Check)
+        #edge cases
+        for _ in range(100):
+            Value = random.randint(1, 10)
+            TestValue = self.TestFunction(Value, 0)
+            Check = math.gamma(Value)
+            self.assertIsInstance(TestValue, float)
+            self.assertEqual(TestValue, Check)
+            Value = random.randint(1, 10) + random.random()
+            TestValue = self.TestFunction(Value, 0.0)
+            Check = math.gamma(Value)
+            self.assertIsInstance(TestValue, float)
+            self.assertEqual(TestValue, Check)
+
+class Test_log_upper_gamma(Test_lower_gamma_reg):
+    """
+    Checks the implementation of the function
+    special_functions.log_upper_gamma().
+
+    Implements tests: TEST-T-500, TEST-T-501 and TEST-T-560.
+    Covers requirements: REQ-FUN-560, REQ-AWM-500 and REQ-AWM-501.
+
+    Version 1.0.0.0
+    """
+    
+    @classmethod
+    def setUpClass(cls) -> None:
+        """
+        Preparation for the test cases, done only once.
+        """
+        cls.TestFunction = staticmethod(test_module.log_upper_gamma)
+    
+    def test_OK(self):
+        """
+        Checks that the values are calculated properly using comparison with
+        the already tested functions.
+        
+        Test ID: TEST-T-560
+        Requirement(s): REQ-FUN-560.
+
+        Version 1.0.0.0
+        """
+        for _ in range(1000):
+            x = random.random() + random.randint(0, 10) + 0.000001
+            y = random.random() + random.randint(0, 15)
+            TestValue = self.TestFunction(x, y)
+            Check = test_module.upper_gamma_reg(x, y) * math.gamma(x)
+            self.assertIsInstance(TestValue, float)
+            self.assertAlmostEqual(TestValue, math.log(Check))
+        #edge cases
+        for _ in range(100):
+            Value = random.randint(1, 10)
+            TestValue = self.TestFunction(Value, 0)
+            Check = math.lgamma(Value)
+            self.assertIsInstance(TestValue, float)
+            self.assertEqual(TestValue, Check)
+            Value = random.randint(1, 10) + random.random()
+            TestValue = self.TestFunction(Value, 0.0)
+            Check = math.lgamma(Value)
+            self.assertIsInstance(TestValue, float)
+            self.assertEqual(TestValue, Check)
+
 #+ test suites
 
 TestSuite1 = unittest.TestLoader().loadTestsFromTestCase(Test_factorial)
@@ -884,11 +1231,18 @@ TestSuite9 = unittest.TestLoader().loadTestsFromTestCase(
 TestSuite10 = unittest.TestLoader().loadTestsFromTestCase(Test_beta_incomplete)
 TestSuite11 = unittest.TestLoader().loadTestsFromTestCase(
                                                     Test_log_beta_incomplete)
+TestSuite12 = unittest.TestLoader().loadTestsFromTestCase(Test_lower_gamma_reg)
+TestSuite13 = unittest.TestLoader().loadTestsFromTestCase(Test_upper_gamma_reg)
+TestSuite14 = unittest.TestLoader().loadTestsFromTestCase(Test_lower_gamma)
+TestSuite15 = unittest.TestLoader().loadTestsFromTestCase(Test_upper_gamma)
+TestSuite16 = unittest.TestLoader().loadTestsFromTestCase(Test_log_lower_gamma)
+TestSuite17 = unittest.TestLoader().loadTestsFromTestCase(Test_log_upper_gamma)
 
 TestSuite = unittest.TestSuite()
 TestSuite.addTests([TestSuite1, TestSuite2, TestSuite3, TestSuite4, TestSuite5,
                         TestSuite6, TestSuite7, TestSuite8, TestSuite9,
-                        TestSuite10, TestSuite11])
+                        TestSuite10, TestSuite11, TestSuite12, TestSuite13,
+                        TestSuite14, TestSuite15, TestSuite16, TestSuite17])
 
 if __name__ == "__main__":
     sys.stdout.write(

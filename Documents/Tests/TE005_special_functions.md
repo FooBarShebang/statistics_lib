@@ -45,7 +45,7 @@ The verification method for a requirement is given by a single letter according 
 
 **Test steps:** Analyze the source code of the module [special\_functions](../../special_functions.py) as well as of the unit-test module [/Tests/UT005\_special\_functions](../../Tests/UT005_special_functions.py). Execute the mentioned unit-test module.
 
-**Test result:** PASS / FAIL
+**Test result:** PASS
 
 ## Tests definition (Test)
 
@@ -64,7 +64,7 @@ The verification method for a requirement is given by a single letter according 
 
 **Test steps:** This test should be implemented as a method *test_TypeError* of all unit-test classes testing a specific function. The test is simple - try to call the function being tested and pass an inappropriate data type value as the value one of the arguments, whereas the other arguments are of the acceptable data type and value. Check that the expected exception is raised. Repeat this process with a number of inappropriate data type for the same argument. Also apply the same checks for each of the other arguments. Also try to pass all arguments of an improper data type simultaneously.
 
-**Test result:** PASS / FAIL
+**Test result:** PASS
 
 ___
 
@@ -89,7 +89,7 @@ ___
 
 **Test steps:** This test should be implemented as a method *test_ValueError* of all unit-test classes testing a specific function. The test is simple - try to call the function being tested and pass an inappropriate value of the proper data type as the value one of the arguments, whereas the other arguments are of the acceptable data type and value. Check that the expected exception is raised. Repeat this process with a number of inappropriate vlaues for the same argument. Also apply the same checks for each of the other arguments. Also try to pass all arguments of an improper value simultaneously.
 
-**Test result:** PASS / FAIL
+**Test result:** PASS
 
 ___
 
@@ -187,7 +187,7 @@ The functions *upper_gamma*(x, y), *upper_gamma_reg*(x, y) and *log_upper_gamma*
 
 **Test steps:** This test is implemented as method *test_Ok*() of the unit-test classes **Test_lower_gamma**, **Test_log_lower_gamma**, **Test_lower_gamma_reg**, **Test_upper_gamma**, **Test_log_upper_gamma** and **Test_upper_gamma_reg**. Call the function being tested with a number of combination of values of the arguments, for which the expected result is known (either using published tables or on-line calculators, the source should be indicated in the unit-test method description). Compare the returned values with the expected ones. Also call the same function with a number of random values of arguments within the acceptable range, and check that the function returns a **float** number within the expected range.
 
-**Test result:** PASS / FAIL
+**Test result:** PASS
 
 ## Traceability
 
@@ -195,16 +195,16 @@ For traceability the relation between tests and requirements is summarized in th
 
 | **Requirement ID** | **Covered in test(s)** | **Verified \[YES/NO\]**) |
 | :----------------- | :--------------------- | :----------------------- |
-| REQ-FUN-500        | TEST-A-500             | NO                       |
+| REQ-FUN-500        | TEST-A-500             | YES                      |
 | REQ-FUN-510        | TEST-T-510             | YES                      |
 | REQ-FUN-520        | TEST-T-520             | YES                      |
 | REQ-FUN-530        | TEST-T-530             | YES                      |
 | REQ-FUN-540        | TEST-T-540             | YES                      |
 | REQ-FUN-550        | TEST-T-550             | YES                      |
-| REQ-FUN-560        | TEST-T-560             | NO                       |
-| REQ-AWM-500        | TEST-T-500             | NO                       |
-| REQ-AWM-501        | TEST-T-501             | NO                       |
+| REQ-FUN-560        | TEST-T-560             | YES                      |
+| REQ-AWM-500        | TEST-T-500             | YES                      |
+| REQ-AWM-501        | TEST-T-501             | YES                      |
 
 | **Software ready for production \[YES/NO\]** | **Rationale**        |
 | :------------------------------------------: | :------------------- |
-| NO                                           | Under development    |
+| YES                                          | All tests are passed |
