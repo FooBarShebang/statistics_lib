@@ -169,7 +169,7 @@ ___
 
 **Test steps:** This test is implemented as method *test_Ok*() of the unit-test classes **Test_beta_incomplete**, **Test_log_beta_incomplete** and **Test_beta_incomplete_reg**. Call the function being tested with a number of combination of values of the arguments, for which the expected result is known (either using published tables or on-line calculators, the source should be indicated in the unit-test method description). Compare the returned values with the expected ones. Also call the same function with a number of random values of arguments within the acceptable range, and check that the function returns a **float** number within the expected range.
 
-**Test result:** PASS / FAIL
+**Test result:** PASS
 
 ___
 
@@ -200,7 +200,7 @@ For traceability the relation between tests and requirements is summarized in th
 | REQ-FUN-520        | TEST-T-520             | YES                      |
 | REQ-FUN-530        | TEST-T-530             | YES                      |
 | REQ-FUN-540        | TEST-T-540             | YES                      |
-| REQ-FUN-550        | TEST-T-550             | NO                       |
+| REQ-FUN-550        | TEST-T-550             | YES                      |
 | REQ-FUN-560        | TEST-T-560             | NO                       |
 | REQ-AWM-500        | TEST-T-500             | NO                       |
 | REQ-AWM-501        | TEST-T-501             | NO                       |

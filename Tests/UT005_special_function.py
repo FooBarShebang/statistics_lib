@@ -7,7 +7,7 @@ plan / report TE005_special_functions.md
 
 
 __version__= '1.0.0.0'
-__date__ = '21-03-2022'
+__date__ = '07-04-2022'
 __status__ = 'Testing'
 
 #imports
@@ -38,6 +38,50 @@ import statistics_lib.special_functions as test_module
 FLOAT_CHECK_PRECISION = 5 #digits after comma, mostly due to precision of
 #+ the reference tables + internal Python implementation of the special
 #+ functions
+
+# regularized incomplete beta function values
+#+ https://keisan.casio.com/exec/system/1180573396
+
+RIBF_Z = (0.1, 0.3, 0.5, 0.7, 0.9)
+
+RIBFZ_X_Y = (0.5, 1, 1.5, 2, 2.5, 3, 3.5)
+
+RIBF = (
+    ((0.204833, 0.051317, 0.013847, 0.003883, 0.001114, 0.000325, 0.000096),
+    (0.316228, 0.1, 0.031623, 0.01, 0.003162, 0.001, 0.000316),
+    (0.395819, 0.146185, 0.052044, 0.018113, 0.006207, 0.002104, 0.000707),
+    (0.45853, 0.19, 0.074314, 0.028, 0.010277, 0.0037, 0.001312),
+    (0.51041, 0.231567, 0.097881, 0.039458, 0.015375, 0.005839, 0.002174),
+    (0.554584, 0.271, 0.122341, 0.0523, 0.021484, 0.00856, 0.003329),
+    (0.592916, 0.30841, 0.147384, 0.066353, 0.028576, 0.011891, 0.004814)),
+    ((0.36901, 0.16334, 0.077274, 0.037841, 0.018927, 0.009604, 0.004924),
+    (0.547723, 0.3, 0.164317, 0.09, 0.049295, 0.027, 0.014789),
+    (0.660746, 0.414338, 0.252316, 0.15079, 0.088944, 0.05196, 0.03013),
+    (0.739425, 0.51, 0.336849, 0.216, 0.135561, 0.0837, 0.05102),
+    (0.796889, 0.590037, 0.415688, 0.282564, 0.186967, 0.121141, 0.077181),
+    (0.840069, 0.657, 0.487815, 0.3483, 0.241238, 0.16308, 0.108086),
+    (0.87313, 0.713026, 0.55292, 0.411703, 0.296753, 0.208309, 0.143053)),
+    ((0.5, 0.292893, 0.18169, 0.116117, 0.075587, 0.049825, 0.033146),
+    (0.707107, 0.5, 0.353553, 0.25, 0.176777, 0.125, 0.088388),
+    (0.81831, 0.646447, 0.5, 0.381282, 0.287793, 0.215553, 0.160469),
+    (0.883883, 0.75, 0.618718, 0.5, 0.397748, 0.3125, 0.243068),
+    (0.924413, 0.823223, 0.712207, 0.602252, 0.5, 0.408903, 0.330235),
+    (0.950175, 0.875, 0.784447, 0.6875, 0.591097, 0.5, 0.417083),
+    (0.966854, 0.911612, 0.839531, 0.756932, 0.669765, 0.582917, 0.5)),
+    ((0.63099, 0.452277, 0.339254, 0.260575, 0.203111, 0.159931, 0.12687),
+    (0.83666, 0.7, 0.585662, 0.49, 0.409963, 0.343, 0.286974),
+    (0.922726, 0.835683, 0.747684, 0.663151, 0.584312, 0.512185, 0.44708),
+    (0.962159, 0.91, 0.84921, 0.784, 0.717436, 0.6517, 0.588297),
+    (0.981073, 0.950705, 0.911056, 0.864439, 0.813033, 0.758762, 0.703247),
+    (0.990396, 0.973, 0.94804, 0.9163, 0.878859, 0.83692, 0.791691),
+    (0.995076, 0.985211, 0.96987, 0.94898, 0.922819, 0.891914, 0.856947)),
+    ((0.795167, 0.683772, 0.604181, 0.54147, 0.48959, 0.445416, 0.407084),
+    (0.948683, 0.9, 0.853815, 0.81, 0.768433, 0.729, 0.69159),
+    (0.986153, 0.968377, 0.947956, 0.925686, 0.902119, 0.877659, 0.852616),
+    (0.996117, 0.99, 0.981887, 0.972, 0.960542, 0.9477, 0.933647),
+    (0.998886, 0.996838, 0.993793, 0.989723, 0.984625, 0.978516, 0.971424),
+    (0.999675, 0.999, 0.997896, 0.9963, 0.994161, 0.99144, 0.988109),
+    (0.999904, 0.999684, 0.999293, 0.998687, 0.997826, 0.996671, 0.995186)))
 
 #classes
 
@@ -597,6 +641,234 @@ class Test_inv_erf(unittest.TestCase):
             self.assertIsInstance(TestResult, float)
             self.assertAlmostEqual(TestResult, Input)
 
+class Test_beta_incomplete_reg(unittest.TestCase):
+    """
+    Checks the implementation of the function
+    special_functions.beta_incomplete_reg().
+
+    Implements tests: TEST-T-500, TEST-T-501 and TEST-T-550.
+    Covers requirements: REQ-FUN-550, REQ-AWM-500 and REQ-AWM-501.
+
+    Version 1.0.0.0
+    """
+    
+    @classmethod
+    def setUpClass(cls) -> None:
+        """
+        Preparation for the test cases, done only once.
+        """
+        cls.TestFunction = staticmethod(test_module.beta_incomplete_reg)
+    
+    def test_TypeError(self):
+        """
+        Checks that sub-class TypeError is raised with non-integer argument.
+
+        Test ID: TEST-T-500
+        Requirement(s): REQ-AWM-500
+
+        Version 1.0.0.0
+        """
+        for Value in [int, float, [1, 2], '1', (1, 1), {1 : 1}, bool]:
+            with self.assertRaises(TypeError):
+                self.TestFunction(Value, 1, 1)
+            with self.assertRaises(TypeError):
+                self.TestFunction(0.5, Value, 1)
+            with self.assertRaises(TypeError):
+                self.TestFunction(0.5, 1, Value)
+            with self.assertRaises(TypeError):
+                self.TestFunction(Value, Value, 1)
+            with self.assertRaises(TypeError):
+                self.TestFunction(Value, 1, Value)
+            with self.assertRaises(TypeError):
+                self.TestFunction(0.5, Value, Value)
+            with self.assertRaises(TypeError):
+                self.TestFunction(Value, Value, Value)
+    
+    def test_ValueError(self):
+        """
+        Checks that sub-class ValueError is raised with wrong value argument.
+
+        Test ID: TEST-T-501
+        Requirement(s): REQ-AWM-501
+
+        Version 1.0.0.0
+        """
+        for _ in range(100):
+            ValueInt = - random.randint(1, 10)
+            ValueFloat = - (random.random() + 0.0000001)
+            ValueMix = ValueInt + ValueFloat
+            for Value in (ValueInt, ValueFloat, ValueMix): #negative values
+                with self.assertRaises(ValueError):
+                    self.TestFunction(Value, 1, 1)
+                with self.assertRaises(ValueError):
+                    self.TestFunction(0.5, Value, 1)
+                with self.assertRaises(ValueError):
+                    self.TestFunction(0.5, 1, Value)
+                with self.assertRaises(ValueError):
+                    self.TestFunction(Value, Value, 1)
+                with self.assertRaises(ValueError):
+                    self.TestFunction(0.5, Value, Value)
+                with self.assertRaises(ValueError):
+                    self.TestFunction(Value, 1, Value)
+                with self.assertRaises(ValueError):
+                    self.TestFunction(Value, Value, Value)
+            #special cases
+            #+ zero x or y
+            with self.assertRaises(ValueError):
+                self.TestFunction(- ValueFloat, 0, 1)
+            with self.assertRaises(ValueError):
+                self.TestFunction(- ValueFloat, 1, 0)
+            with self.assertRaises(ValueError):
+                self.TestFunction(- ValueFloat, 0, 0)
+            #+ z > 1
+            with self.assertRaises(ValueError):
+                self.TestFunction(- ValueMix, 0, 1)
+    
+    def test_OK(self):
+        """
+        Checks that the values are calculated properly. The pre-defined values
+        are obtained with help of an online calculator:
+
+        https://keisan.casio.com/exec/system/1180573396
+        
+        with adjustments for the precision of the table itself and of the
+        used inv_erf algorithm.
+
+        Test ID: TEST-T-550
+        Requirement(s): REQ-FUN-550.
+
+        Version 1.0.0.0
+        """
+        for IndZ, z in enumerate(RIBF_Z):
+            for IndY, y in enumerate(RIBFZ_X_Y):
+                for IndX, x in enumerate(RIBFZ_X_Y):
+                    Check = RIBF[IndZ][IndY][IndX]
+                    TestValue = self.TestFunction(z, x, y)
+                    strError = 'for I_{}({}, {})'.format(z, x, y)
+                    self.assertIsInstance(TestValue, float)
+                    self.assertAlmostEqual(TestValue, Check,
+                                                places = FLOAT_CHECK_PRECISION,
+                                                                msg = strError)
+        #special cases
+        for IndY, y in enumerate(RIBFZ_X_Y):
+            for IndX, x in enumerate(RIBFZ_X_Y):
+                TestValue = self.TestFunction(0, x, y)
+                self.assertIsInstance(TestValue, float)
+                self.assertAlmostEqual(TestValue, 0.0)
+                TestValue = self.TestFunction(1, x, y)
+                self.assertIsInstance(TestValue, float)
+                self.assertAlmostEqual(TestValue, 1.0)
+
+class Test_beta_incomplete(Test_beta_incomplete_reg):
+    """
+    Checks the implementation of the function
+    special_functions.beta_incomplete().
+
+    Implements tests: TEST-T-500, TEST-T-501 and TEST-T-550.
+    Covers requirements: REQ-FUN-550, REQ-AWM-500 and REQ-AWM-501.
+
+    Version 1.0.0.0
+    """
+    
+    @classmethod
+    def setUpClass(cls) -> None:
+        """
+        Preparation for the test cases, done only once.
+        """
+        cls.TestFunction = staticmethod(test_module.beta_incomplete)
+    
+    def test_OK(self):
+        """
+        Checks that the values are calculated properly, using the previously
+        tested functions.
+
+        Test ID: TEST-T-550
+        Requirement(s): REQ-FUN-550.
+
+        Version 1.0.0.0
+        """
+        for _ in range(1000):
+            z = random.random()
+            x = random.random() + random.randint(1, 10)
+            y = random.random() + random.randint(1, 10)
+            TestValue = self.TestFunction(z, x, y)
+            Check = test_module.beta_incomplete_reg(z, x, y)
+            Check *= test_module.beta(x, y)
+            self.assertIsInstance(TestValue, float)
+            self.assertAlmostEqual(TestValue, Check)
+        #special cases
+        for y in RIBFZ_X_Y:
+            for x in RIBFZ_X_Y:
+                TestValue = self.TestFunction(0, x, y)
+                self.assertIsInstance(TestValue, float)
+                self.assertAlmostEqual(TestValue, 0.0)
+                TestValue = self.TestFunction(1, x, y)
+                Check = test_module.beta(x, y)
+                self.assertIsInstance(TestValue, float)
+                self.assertAlmostEqual(TestValue, Check)
+
+class Test_log_beta_incomplete(Test_beta_incomplete_reg):
+    """
+    Checks the implementation of the function
+    special_functions.log_beta_incomplete().
+
+    Implements tests: TEST-T-500, TEST-T-501 and TEST-T-550.
+    Covers requirements: REQ-FUN-550, REQ-AWM-500 and REQ-AWM-501.
+
+    Version 1.0.0.0
+    """
+    
+    @classmethod
+    def setUpClass(cls) -> None:
+        """
+        Preparation for the test cases, done only once.
+        """
+        cls.TestFunction = staticmethod(test_module.log_beta_incomplete)
+    
+    def test_ValueError(self):
+        """
+        Checks that sub-class ValueError is raised with wrong value argument.
+
+        Test ID: TEST-T-501
+        Requirement(s): REQ-AWM-501
+
+        Version 1.0.0.0
+        """
+        for _ in range(1000):
+            z = random.random()
+            if z <= 0.0:
+                z = 0.000000001
+            x = random.random() + random.randint(1, 10)
+            y = random.random() + random.randint(1, 10)
+            TestValue = self.TestFunction(z, x, y)
+            Check = math.log(test_module.beta_incomplete(z, x, y))
+            self.assertIsInstance(TestValue, float)
+            self.assertAlmostEqual(TestValue, Check)
+        super().test_ValueError()
+        #special case - z is 0
+        for _ in range(100):
+            with self.assertRaises(ValueError):
+                self.TestFunction(0, random.random() + random.randint(1, 10),
+                                        random.random() + random.randint(1, 10))
+    
+    def test_OK(self):
+        """
+        Checks that the values are calculated properly, using the previously
+        tested functions.
+
+        Test ID: TEST-T-550
+        Requirement(s): REQ-FUN-550.
+
+        Version 1.0.0.0
+        """
+        #special cases
+        for y in RIBFZ_X_Y:
+            for x in RIBFZ_X_Y:
+                TestValue = self.TestFunction(1, x, y)
+                Check = test_module.log_beta(x, y)
+                self.assertIsInstance(TestValue, float)
+                self.assertAlmostEqual(TestValue, Check)
+
 #+ test suites
 
 TestSuite1 = unittest.TestLoader().loadTestsFromTestCase(Test_factorial)
@@ -607,10 +879,16 @@ TestSuite5 = unittest.TestLoader().loadTestsFromTestCase(Test_combination)
 TestSuite6 = unittest.TestLoader().loadTestsFromTestCase(Test_beta)
 TestSuite7 = unittest.TestLoader().loadTestsFromTestCase(Test_log_beta)
 TestSuite8 = unittest.TestLoader().loadTestsFromTestCase(Test_inv_erf)
+TestSuite9 = unittest.TestLoader().loadTestsFromTestCase(
+                                                    Test_beta_incomplete_reg)
+TestSuite10 = unittest.TestLoader().loadTestsFromTestCase(Test_beta_incomplete)
+TestSuite11 = unittest.TestLoader().loadTestsFromTestCase(
+                                                    Test_log_beta_incomplete)
 
 TestSuite = unittest.TestSuite()
 TestSuite.addTests([TestSuite1, TestSuite2, TestSuite3, TestSuite4, TestSuite5,
-                        TestSuite6, TestSuite7, TestSuite8])
+                        TestSuite6, TestSuite7, TestSuite8, TestSuite9,
+                        TestSuite10, TestSuite11])
 
 if __name__ == "__main__":
     sys.stdout.write(

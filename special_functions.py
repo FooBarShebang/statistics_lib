@@ -40,7 +40,7 @@ Functions:
 """
 
 __version__= '1.0.0.0'
-__date__ = '06-04-2022'
+__date__ = '07-04-2022'
 __status__ = 'Testing'
 
 #imports
@@ -935,9 +935,9 @@ def beta_incomplete(z: TReal, x: TReal, y : TReal) -> float:
     Version 1.0.0.0
     """
     _checkSanity4(z, x, y)
-    if z == 0:
-        Result = 0
-    elif z == 1:
+    if z < FPMIN:
+        Result = 0.0
+    elif (1 -z) < FPMIN:
         Result = beta(x, y)
     else:
         Factor = math.exp(x * math.log(z) + y * math.log(1 - z))
@@ -975,19 +975,24 @@ def log_beta_incomplete(z: TReal, x: TReal, y : TReal) -> float:
     Raises:
         Raises:
         UT_TypeError: either of the arguments is neither integer nor float
-        UT_ValueError: the first argument is not in the range [0, 1], OR either
+        UT_ValueError: the first argument is not in the range (0, 1], OR either
             of the other arguments is zero or negative
         Exception: maximum number of iteration is reached
     
     Version 1.0.0.0
     """
     _checkSanity4(z, x, y)
-    if z == 0:
+    if z <= 0:
         raise UT_ValueError(z, '> 0, z argument', SkipFrames = 1)
-    elif z == 1:
+    elif (1 - z) < FPMIN:
         Result = log_beta(x, y)
     else:
-        pass
+        Temp = beta_incomplete(z, x, y)
+        if Temp < FPMIN:
+            Result = - math.inf
+        else:
+            Result = math.log(Temp)
+    return Result
 
 def beta_incomplete_reg(z: TReal, x: TReal, y : TReal) -> float:
     """
@@ -1019,10 +1024,10 @@ def beta_incomplete_reg(z: TReal, x: TReal, y : TReal) -> float:
     Version 1.0.0.0
     """
     _checkSanity4(z, x, y)
-    if z == 0:
-        Result = 0
-    elif z == 1:
-        Result = 1
+    if z < FPMIN:
+        Result = 0.0
+    elif (1 - z) < FPMIN :
+        Result = 1.0
     else:
         Factor = math.exp(x * math.log(z) + y * math.log(1 - z) - log_beta(x,y))
         if z < (x + 1.0) / (x + y + 2.0):
