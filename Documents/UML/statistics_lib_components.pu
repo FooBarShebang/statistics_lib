@@ -10,6 +10,8 @@ $module(base_functions)
 
 $module(ordered_functions)
 
+$module(special_functions)
+
 !if $is_not_defined("$DATA_CLASSES")
     !include ./data_classes/data_classes_components.iuml
 !endif
@@ -17,5 +19,17 @@ $module(ordered_functions)
 base_functions <-- data_classes : uses
 
 ordered_functions <-- data_classes : uses
+
+!if $is_not_defined("$DISTRIBUTION_CLASSES")
+    !include ./distribution_classes/distribution_classes_components.iuml
+!endif
+
+special_functions <-- distribution_classes
+
+$module(statistics_tests)
+
+data_classes <-- statistics_tests
+
+distribution_classes <-- statistics_tests
 
 @enduml

@@ -1,0 +1,29 @@
+!$DISTRIBUTION_CLASSES = "v2"
+
+!if %not(%variable_exists("$COMPONENTS"))
+    !include ../Templates/Components2.cuml
+!endif
+
+$module(distribution_classes) {
+    $class(Z_Distribution)
+    
+    $class(Gaussian)
+
+    $class(Exponential)
+    
+    $class(Student)
+    
+    $class(ChiSquare)
+    
+    $class(Gamma)
+
+    $class(Erlang)
+
+    $class(Poisson)
+
+    $class(Binomial)
+
+    $class(Geometric)
+
+    $class(Hypergeometric)
+}

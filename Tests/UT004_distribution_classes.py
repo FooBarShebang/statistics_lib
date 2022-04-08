@@ -1,3 +1,4 @@
+#usr/bin/python3
 """
 Module statistics_lib.Tests.UT004_distribution_classes
 

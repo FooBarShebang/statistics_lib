@@ -14,8 +14,8 @@ Functions:
         int > 0 OR float > 0, int > 0 OR float > 0 -> float
     beta(x, y)
         int > 0 OR float > 0, int > 0 OR float > 0 -> float > 0
-    inv_erg(x)
-        -1 < int < 1 OR -1 < float < 1 -> float
+    inv_erf(x)
+        int = 0 OR -1 < float < 1 -> float
     lower_gamma(x, y)
         int > 0 OR float > 0, int >= 0 OR float > 0 -> float >= 0
     log_lower_gamma(x, y)
@@ -29,13 +29,13 @@ Functions:
     upper_gamma_reg(x, y)
         int > 0 OR float > 0, int >= 0 OR float > 0 -> 0 < float <= 1
     incomplete_beta(z, x, y)
-        0 <= int <= 1 OR 0 <= float <= 1, int > 0 OR float > 0,
+        0 <= int <= 1 OR 0 < float < 1, int > 0 OR float > 0,
             int > 0 OR float > 0 -> float >= 0
     log_incomplete_beta(z, x, y)
-        int = 1 OR 0 < float <= 1, int > 0 OR float > 0,
+        int = 1 OR 0 < float < 1, int > 0 OR float > 0,
             int > 0 OR float > 0 -> float
     incomplete_beta_reg(z, x, y)
-        0 <= int <= 1 OR 0 <= float <= 1, int > 0 OR float > 0,
+        0 <= int <= 1 OR 0 < float < 1, int > 0 OR float > 0,
             int > 0 OR float > 0 -> 0 <= float <= 1
 """
 
@@ -476,7 +476,8 @@ def _checkSanity3(x: TReal, y: TReal) -> None:
     
     Raises:
         UT_TypeError: either of the arguments is neither integer nor float
-        UT_ValueError: either of the arguments is zero or negative
+        UT_ValueError: either of the arguments is negative, OR the first
+            argument is zero
     
     Version 1.0.0.0
     """
@@ -496,7 +497,7 @@ def _checkSanity4(z: TReal, x: TReal, y: TReal) -> None:
     real numbers.
     
     Signature:
-        0 <= int <= 1 OR 0 <= float <= 1, int > 0 OR float > 0,
+        0 <= int <= 1 OR 0 < float < 1, int > 0 OR float > 0,
             int > 0 OR float > 0 -> None
     
     Raises:
@@ -585,8 +586,8 @@ def log_beta(x: TReal, y: TReal) -> float:
         int > 0 OR float > 0, int > 0 OR float > 0 -> float
     
     Args:
-        x: int >0 OR float > 0; any real number first argument
-        y: int >0 OR float > 0; any real number second argument
+        x: int > 0 OR float > 0; any real number first argument
+        y: int > 0 OR float > 0; any real number second argument
     
     Raises:
         UT_TypeError: either of the arguments is not integer or float
@@ -606,8 +607,8 @@ def beta(x: TReal, y: TReal) -> float:
         int > 0 OR float > 0, int > 0 OR float > 0 -> float > 0
     
     Args:
-        x: int >0 OR float > 0; any real number first argument
-        y: int >0 OR float > 0; any real number second argument
+        x: int > 0 OR float > 0; any real number first argument
+        y: int > 0 OR float > 0; any real number second argument
     
     Raises:
         UT_TypeError: either of the arguments is not integer or float
@@ -633,10 +634,7 @@ def inv_erf(x: TReal) -> float:
     (7th power polynomials).
     
     Signature:
-        -1 < int < 1 OR -1 < float < 1 -> float
-    
-    Args:
-        x: -1 < int < 1 OR -1 < float < 1; the function argument
+        int = 0 OR -1 < float < 1 -> float
     
     Raises:
         UT_TypeError: the argument is not integer or float
@@ -690,9 +688,9 @@ def lower_gamma(x: TReal, y : TReal) -> float:
             function
     
     Raises:
-        Raises:
         UT_TypeError: either of the arguments is neither integer nor float
-        UT_ValueError: either of the arguments is zero or negative
+        UT_ValueError: either of the arguments is negative, OR the first
+            argument is zero
         Exception: maximum number of iteration is reached
     
     Version 1.0.0.0
@@ -729,7 +727,6 @@ def log_lower_gamma(x: TReal, y : TReal) -> float:
             function
     
     Raises:
-        Raises:
         UT_TypeError: either of the arguments is neither integer nor float
         UT_ValueError: either of the arguments is zero or negative
         Exception: maximum number of iteration is reached
@@ -766,9 +763,9 @@ def lower_gamma_reg(x: TReal, y : TReal) -> float:
             function
     
     Raises:
-        Raises:
         UT_TypeError: either of the arguments is neither integer nor float
-        UT_ValueError: either of the arguments is zero or negative
+        UT_ValueError: either of the arguments is negative, OR the first
+            argument is zero
         Exception: maximum number of iteration is reached
     
     Version 1.0.0.0
@@ -806,7 +803,6 @@ def upper_gamma(x: TReal, y : TReal) -> float:
             function
     
     Raises:
-        Raises:
         UT_TypeError: either of the arguments is neither integer nor float
         UT_ValueError: either of the arguments is zero or negative
         Exception: maximum number of iteration is reached
@@ -845,7 +841,6 @@ def log_upper_gamma(x: TReal, y : TReal) -> float:
             function
     
     Raises:
-        Raises:
         UT_TypeError: either of the arguments is neither integer nor float
         UT_ValueError: either of the arguments is zero or negative
         Exception: maximum number of iteration is reached
@@ -884,7 +879,6 @@ def upper_gamma_reg(x: TReal, y : TReal) -> float:
             function
     
     Raises:
-        Raises:
         UT_TypeError: either of the arguments is neither integer nor float
         UT_ValueError: either of the arguments is zero or negative
         Exception: maximum number of iteration is reached
@@ -916,17 +910,16 @@ def beta_incomplete(z: TReal, x: TReal, y : TReal) -> float:
     2nd Ed. Cambridge University Press (1992), pp. 226-228. ISBN: 0-521-43108-5
     
     Signature:
-        0 <= int <= 1 OR 0 <= float <= 1, int > 0 OR float > 0,
+        0 <= int <= 1 OR 0 < float < 1, int > 0 OR float > 0,
             int > 0 OR float > 0 -> float >= 0
     
     Args:
-        z: 0 <= int <= 1 OR 0 <= float <= 1; the integeral boundary parameter of
+        z: 0 <= int <= 1 OR 0 < float < 1; the integeral boundary parameter of
             the function
         x: int > 0 OR float > 0; the first power parameter of the function
         y: int > 0 OR float > 0; the second power parameter of the function
     
     Raises:
-        Raises:
         UT_TypeError: either of the arguments is neither integer nor float
         UT_ValueError: the first argument is not in the range [0, 1], OR either
             of the other arguments is zero or negative
@@ -963,7 +956,7 @@ def log_beta_incomplete(z: TReal, x: TReal, y : TReal) -> float:
     2nd Ed. Cambridge University Press (1992), pp. 226-228. ISBN: 0-521-43108-5
     
     Signature:
-        int = 1 OR 0 < float <= 1, int > 0 OR float > 0,
+        int = 1 OR 0 < float < 1, int > 0 OR float > 0,
             int > 0 OR float > 0 -> float >= 0
     
     Args:
@@ -973,7 +966,6 @@ def log_beta_incomplete(z: TReal, x: TReal, y : TReal) -> float:
         y: int > 0 OR float > 0; the second power parameter of the function
     
     Raises:
-        Raises:
         UT_TypeError: either of the arguments is neither integer nor float
         UT_ValueError: the first argument is not in the range (0, 1], OR either
             of the other arguments is zero or negative
@@ -1005,17 +997,16 @@ def beta_incomplete_reg(z: TReal, x: TReal, y : TReal) -> float:
     2nd Ed. Cambridge University Press (1992), pp. 226-228. ISBN: 0-521-43108-5
     
     Signature:
-        0 <= int <= 1 OR 0 <= float <= 1, int > 0 OR float > 0,
+        0 <= int <= 1 OR 0 < float < 1, int > 0 OR float > 0,
             int > 0 OR float > 0 -> 0<= float <= 1
     
     Args:
-        z: 0 <= int <= 1 OR 0 <= float <= 1; the integeral boundary parameter of
+        z: 0 <= int <= 1 OR 0 < float < 1; the integeral boundary parameter of
             the function
         x: int > 0 OR float > 0; the first power parameter of the function
         y: int > 0 OR float > 0; the second power parameter of the function
     
     Raises:
-        Raises:
         UT_TypeError: either of the arguments is neither integer nor float
         UT_ValueError: the first argument is not in the range [0, 1], OR either
             of the other arguments is zero or negative

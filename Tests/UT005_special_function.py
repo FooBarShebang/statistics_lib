@@ -1,3 +1,4 @@
+#usr/bin/python3
 """
 Module statistics_lib.Tests.UT005_special_functions
 
