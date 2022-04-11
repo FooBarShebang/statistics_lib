@@ -19,8 +19,8 @@ Classes:
 """
 
 __version__= '1.0.0.0'
-__date__ = '05-04-2022'
-__status__ = 'Development'
+__date__ = '11-04-2022'
+__status__ = 'Testing'
 
 #imports
 
@@ -1383,7 +1383,7 @@ class Student(ContinuousDistributionABC):
             z = Degree / (Degree + x * x)
             x = 0.5 * Degree
             y = 0.5
-            Value = 0 #TODO call Iz(x,y) = B(z; x, y) / B(x, y)
+            Value = sf.beta_incomplete_reg(z, x, y)
             return Value
         #---
         if x > 0:
@@ -1690,7 +1690,8 @@ class ChiSquare(Student):
         
         1.0.0.0
         """
-        Result = 0 #call regularized lower incomplete gamma function P(k/2, x/2)
+        k = self.Degree
+        Result = sf.lower_gamma_reg(0.5 * k, 0.5 * x)
         return Result
     
     def _qf(self, p: float) -> sf.TReal:
@@ -1902,8 +1903,9 @@ class Gamma(ContinuousDistributionABC):
         
         1.0.0.0
         """
-        Result = 0 #call regularized lower incomplete gamma function
-        #+ P(Shape, x * Rate)
+        Shape = self._Parameters['Shape']
+        Rate = self._Parameters['Rate']
+        Result = sf.beta_incomplete_reg(Shape, x * Rate)
         return Result
     
     #public properties
@@ -2258,8 +2260,8 @@ class Poisson(DiscreteDistributionABC):
         
         1.0.0.0
         """
-        Result = 0 #call regularized upper incomplete gamma function
-        #+ Q(floor(k + 1), Rate)
+        Rate = self._Parameters['Rate']
+        Result = sf.upper_gamma_reg(math.floor(x + 1), Rate)
         return Result
 
     #public properties
@@ -2454,8 +2456,9 @@ class Binomial(DiscreteDistributionABC):
         
         1.0.0.0
         """
-        Result = 0 #call regularized incomplete beta function
-        #+ I(1-p)(n-x, 1 + x)
+        Prob = self._Parameters['Probability']
+        N = self._Cached['Draws']
+        Result = sf.beta_incomplete_reg(1 - Prob, N - x, 1 + x)
         return Result
 
     #public properties
