@@ -153,7 +153,7 @@ ___
 * Instantiation of the classes and changing the distribution parameters via setter properties
   * Gaussian - mean or sigma are not **int** or **float**
   * Student's - degrees of freedom is not **int** or **float**
-  * Chi-square - degrees of freedom is not **int**
+  * Chi-square - degrees of freedom is not **int** or **float**
   * F - either of the degress of freedom is not **int** or **float**
   * Exponential - rate is not **int** or **float**
   * Gamma - either shape or rate are not **int** or **float**

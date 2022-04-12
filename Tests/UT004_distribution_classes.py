@@ -60,6 +60,25 @@ TD_CR = ((3.078, 6.314, 12.706, 31.821, 63.657, 318.313),
             (1.299, 1.676, 2.009, 2.403, 2.678, 3.261),
             (1.290, 1.660, 1.984, 2.364, 2.626, 3.174))
 
+#++ Chi-squared distribution - with minor corrections for 1 degree of freedom
+#++ and extremely propability level of < 0.05
+#++ https://www.itl.nist.gov/div898/handbook/eda/section3/eda3674.htm
+
+CHS_1_A = (0.9, 0.95, 0.975, 0.99, 0.999, 0.10, 0.05, 0.01, 0.001)
+
+CHS_NU = (1, 2, 3, 4, 5, 10, 50, 100)
+
+CHS_CR =(
+    (2.706, 3.841, 5.024, 6.635, 10.828, 0.0158, 0.00393, 0.000157, 0.000001),
+    (4.605, 5.991, 7.378, 9.210, 13.816, 0.211, 0.103, 0.020, 0.002),
+    (6.251, 7.815, 9.348, 11.345, 16.266, 0.584, 0.352, 0.115, 0.024),
+    (7.779, 9.488, 11.143, 13.277, 18.467, 1.064, 0.711, 0.297, 0.091),
+    (9.236, 11.070, 12.833, 15.086, 20.515, 1.610, 1.145, 0.554, 0.210),
+    (15.987, 18.307, 20.483, 23.209, 29.588, 4.865, 3.940, 2.558, 1.479),
+    (63.167, 67.505, 71.420, 76.154, 86.661, 37.689, 34.764, 29.707, 24.674),
+    (118.498, 124.342, 129.561, 135.807, 149.449, 82.358, 77.929, 70.065, 61.918
+    ))
+
 #classes
 
 #+ test cases
@@ -1378,6 +1397,267 @@ class Test_Student(Test_Z_Distribution):
                 Degree -= random.random()
             objTest.Degree = Degree
         del objTest
+    
+    def test_Properties(self) -> None:
+        """
+        Checks that the class has all required properties, and they are
+        read-only unless the statistical property is also a parameter of the
+        distribution. Also checks that all statistical properties are real
+        numbers.
+        
+        Test ID: TEST-T-403
+        Requirements: REQ-FUN-403
+        """
+        Degree = self.DefArguments[0]
+        objTest = self.TestClass(Degree)
+        for Name in self.Properties:
+            if (Name in ['Var', 'Sigma', 'Mean']) and (Degree <= 1):
+                self.assertIsNone(getattr(objTest, Name))
+            elif (Name == 'Skew') and (Degree <= 3):
+                self.assertIsNone(getattr(objTest, Name))
+            elif (Name == 'Kurt') and (Degree <= 2):
+                self.assertIsNone(getattr(objTest, Name))
+            else:
+                self.assertIsInstance(getattr(objTest, Name), (int, float))
+            with self.assertRaises(AttributeError):
+                delattr(objTest, Name)
+            if not (Name in self.Parameters):
+                with self.assertRaises(AttributeError):
+                    setattr(objTest, Name, 1)
+        del objTest
+
+class Test_ChiSquared(Test_Student):
+    """
+    Unittests for ChiSquared class from the module
+    statistics_lib.distribution_classes.
+    
+    Version 1.0.0.0
+    """
+    
+    @classmethod
+    def setUpClass(cls) -> None:
+        """
+        Preparation for the test cases, done only once.
+        """
+        super().setUpClass()
+        cls.TestClass = test_module.ChiSquared
+    
+    def test_init(self) -> None:
+        """
+        Checks that the class can be instantiated, and the parameters of the
+        distribution are properly assigned
+        
+        Test ID: TEST-T-400
+        Requirements: REQ-FUN-401
+        """
+        for _ in range(100):
+            Degree = random.randint(1, 100)
+            if random.random() > 0.5:
+                Degree -= random.random()
+            objTest = self.TestClass(Degree)
+            self.assertEqual(objTest.Mean, Degree)
+            self.assertAlmostEqual(objTest.Sigma, math.sqrt(2 * Degree),
+                                                places = FLOAT_CHECK_PRECISION)
+            self.assertAlmostEqual(objTest.Var, 2 * Degree,
+                                                places = FLOAT_CHECK_PRECISION)
+            self.assertAlmostEqual(objTest.Skew,  math.sqrt(8 / Degree),
+                                                places = FLOAT_CHECK_PRECISION)
+            self.assertAlmostEqual(objTest.Kurt, 12 / Degree,
+                                                places = FLOAT_CHECK_PRECISION)
+            self.assertAlmostEqual(objTest.Median, objTest.qf(0.5),
+                                                places = FLOAT_CHECK_PRECISION)
+            if Degree >= 2:
+                self.assertEqual(objTest.Min, 0)
+            else:
+                self.assertLess(objTest.Min, 3 * sys.float_info.min)
+                self.assertGreater(objTest.Min, sys.float_info.min)
+            self.assertEqual(objTest.Max, math.inf)
+            self.assertAlmostEqual(objTest.Q1, objTest.qf(0.25),
+                                                places = FLOAT_CHECK_PRECISION)
+            self.assertAlmostEqual(objTest.Q3, objTest.qf(0.75),
+                                                places = FLOAT_CHECK_PRECISION)
+            del objTest
+    
+    def test_Parameters(self) -> None:
+        """
+        Checks that the parameters of the distribution can be changed at any
+        time.
+        
+        Test ID: TEST-T-402
+        Requirements: REQ-FUN-402
+        """
+        objTest = self.TestClass(*self.DefArguments)
+        Degree = self.DefArguments[0]
+        self.assertEqual(objTest.Degree, Degree)
+        for _ in range(100):
+            Degree = random.randint(1, 100)
+            if random.random() > 0.5:
+                Degree -= random.random()
+            objTest.Degree = Degree
+            self.assertEqual(objTest.Degree, Degree)
+            self.assertEqual(objTest.Mean, Degree)
+            self.assertAlmostEqual(objTest.Sigma, math.sqrt(2 * Degree),
+                                                places = FLOAT_CHECK_PRECISION)
+            self.assertAlmostEqual(objTest.Var, 2 * Degree,
+                                                places = FLOAT_CHECK_PRECISION)
+            self.assertAlmostEqual(objTest.Skew,  math.sqrt(8 / Degree),
+                                                places = FLOAT_CHECK_PRECISION)
+            self.assertAlmostEqual(objTest.Kurt, 12 / Degree,
+                                                places = FLOAT_CHECK_PRECISION)
+            self.assertAlmostEqual(objTest.Median, objTest.qf(0.5),
+                                                places = FLOAT_CHECK_PRECISION)
+            if Degree >= 2:
+                self.assertEqual(objTest.Min, 0)
+            else:
+                self.assertLess(objTest.Min, 3 * sys.float_info.min)
+                self.assertGreater(objTest.Min, sys.float_info.min)
+            self.assertEqual(objTest.Max, math.inf)
+            self.assertAlmostEqual(objTest.Q1, objTest.qf(0.25),
+                                                places = FLOAT_CHECK_PRECISION)
+            self.assertAlmostEqual(objTest.Q3, objTest.qf(0.75),
+                                                places = FLOAT_CHECK_PRECISION)
+        del objTest
+    
+    def test_pdf(self) -> None:
+        """
+        Checks the implementation of the pdf() method. The test values are
+        calculated using definition, see
+        
+        https://www.itl.nist.gov/div898/handbook/eda/section3/eda3666.htm
+        
+        Test ID: TEST-T-404
+        Requirements ID: REQ-FUN-404
+        """
+        objTest = self.TestClass(*self.DefArguments)
+        for _ in range(10):
+            Degree = objTest.Degree
+            LogFactor = - (0.5 * Degree * math.log(2) + math.lgamma(0.5*Degree))
+            for _ in range(100):
+                Value = random.randint(0, 10)
+                if random.random() > 0.5:
+                    Value += random.random()
+                if Value > 0:
+                    Temp = (0.5 * Degree - 1) * math.log(Value) - 0.5 * Value
+                    CheckValue = math.exp(Temp + LogFactor)
+                elif Degree == 2:
+                    CheckValue = 0.5
+                else:
+                    CheckValue = 0.0
+                TestResult = objTest.pdf(Value)
+                self.assertIsInstance(TestResult, (int, float))
+                self.assertGreaterEqual(TestResult, 0)
+                self.assertAlmostEqual(TestResult, CheckValue,
+                                                places = FLOAT_CHECK_PRECISION)
+            #special case
+            TestResult = objTest.pdf(0)
+            if Degree != 2:
+                self.assertAlmostEqual(TestResult, 0)
+            else:
+                self.assertAlmostEqual(TestResult, 0.5)
+            Degree = random.randint(1, 100)
+            if random.random() > 0.5:
+                Degree -= random.random()
+            objTest.Degree = Degree
+        del objTest
+    
+    def test_cdf(self) -> None:
+        """
+        Checks the implementation of the cdf() method. The tabulated values
+        are taken from NIST with 3 digits after comma.
+        
+        https://www.itl.nist.gov/div898/handbook/eda/section3/eda3674.htm
+        
+        Test ID: TEST-T-405
+        Requirements ID: REQ-FUN-405
+        """
+        objTest = self.TestClass(*self.DefArguments)
+        for _ in range(10):
+            Degree = objTest.Degree
+            for _ in range(100):
+                Value = random.randint(1, 10)
+                if random.random() > 0.5:
+                    Value -= random.random()
+                CheckValue = sf.lower_gamma_reg(0.5 * Degree, 0.5 * Value)
+                TestResult = objTest.cdf(Value)
+                self.assertIsInstance(TestResult, (float, int))
+                self.assertGreaterEqual(TestResult, 0)
+                self.assertAlmostEqual(TestResult, CheckValue,
+                                                places = FLOAT_CHECK_PRECISION)
+            Degree = random.randint(1, 100)
+            if random.random() > 0.5:
+                Degree -= random.random()
+            objTest.Degree = Degree
+        #check tabulated values
+        for DegreeIndex, Degree in enumerate(CHS_NU):
+            objTest.Degree = Degree
+            for ProbIndex, Prob in enumerate(CHS_1_A):
+                Temp = CHS_CR[DegreeIndex][ProbIndex]
+                TestResult = objTest.cdf(Temp)
+                self.assertAlmostEqual(TestResult, Prob, places = 3)
+        del objTest
+    
+    def test_qf(self) -> None:
+        """
+        Checks the implementation of the qf() method. The tabulated values
+        are taken from NIST with 3 digits after comma.
+        
+        https://www.itl.nist.gov/div898/handbook/eda/section3/eda3674.htm
+        
+        Test ID: TEST-T-406
+        Requirements ID: REQ-FUN-406
+        """
+        objTest = self.TestClass(*self.DefArguments)
+        for _ in range(10):
+            Degree = objTest.Degree
+            for _ in range(100):
+                Value = random.random()
+                if Value < 1.0E-11:
+                    Value = 1.0E-11
+                TestResult = objTest.cdf(objTest.qf(Value))
+                self.assertIsInstance(TestResult, float)
+                self.assertGreater(TestResult, objTest.Min)
+                self.assertLess(TestResult, objTest.Max)
+                self.assertAlmostEqual(TestResult, Value,
+                                                places = FLOAT_CHECK_PRECISION)
+            Degree = random.randint(1, 100)
+            if random.random() > 0.5:
+                Degree -= random.random()
+            objTest.Degree = Degree
+        #check tabulated values
+        for DegreeIndex, Degree in enumerate(CHS_NU):
+            objTest.Degree = Degree
+            for ProbIndex, Prob in enumerate(CHS_1_A):
+                CheckValue = CHS_CR[DegreeIndex][ProbIndex]
+                TestResult = objTest.qf(Prob)
+                if CheckValue > 1:
+                    Delta = CheckValue / 1000 #max relative error = 0.001= 0.1 %
+                self.assertAlmostEqual(TestResult, CheckValue, delta = Delta)
+            else:
+                self.assertAlmostEqual(TestResult, CheckValue, places = 3)
+        del objTest
+    
+    def test_Properties(self) -> None:
+        """
+        Checks that the class has all required properties, and they are
+        read-only unless the statistical property is also a parameter of the
+        distribution. Also checks that all statistical properties are real
+        numbers.
+        
+        Test ID: TEST-T-403
+        Requirements: REQ-FUN-403
+        """
+        if not (self.DefArguments is None):
+            objTest = self.TestClass(*self.DefArguments)
+        else:
+            objTest = self.TestClass()
+        for Name in self.Properties:
+            self.assertIsInstance(getattr(objTest, Name), (int, float))
+            with self.assertRaises(AttributeError):
+                delattr(objTest, Name)
+            if not (Name in self.Parameters):
+                with self.assertRaises(AttributeError):
+                    setattr(objTest, Name, 1)
+        del objTest
 
 #+ test suites
 
@@ -1390,10 +1670,11 @@ TestSuite3 = unittest.TestLoader().loadTestsFromTestCase(
 TestSuite4 = unittest.TestLoader().loadTestsFromTestCase(Test_Gaussian)
 TestSuite5 = unittest.TestLoader().loadTestsFromTestCase(Test_Exponential)
 TestSuite6 = unittest.TestLoader().loadTestsFromTestCase(Test_Student)
+TestSuite7 = unittest.TestLoader().loadTestsFromTestCase(Test_ChiSquared)
 
 TestSuite = unittest.TestSuite()
 TestSuite.addTests([TestSuite1, TestSuite2, TestSuite3, TestSuite4, TestSuite5,
-                        TestSuite6])
+                        TestSuite6, TestSuite7])
 
 if __name__ == "__main__":
     sys.stdout.write(

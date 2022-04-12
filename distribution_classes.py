@@ -9,7 +9,7 @@ Classes:
     Gaussian
     Exponential
     Student
-    ChiSquare
+    ChiSquared
     Gamma
     Erlang
     Poisson
@@ -185,6 +185,8 @@ class ContinuousDistributionABC(abc.ABC):
                     else:
                         Left = Point
                     Point = 0.5 * (Left + Right)
+                else:
+                    Result = Point
         return Result
     
     #+ special methods
@@ -1352,7 +1354,7 @@ class Student(ContinuousDistributionABC):
         if not isinstance(Degree, (int, float)):
             raise UT_TypeError(Degree, (int, float), SkipFrames = 1)
         if Degree <= 0:
-            raise UT_ValueError(Degree, '> 0 - rate parameter', SkipFrames = 1)
+            raise UT_ValueError(Degree, '> 0 - degree', SkipFrames = 1)
         self._Parameters = dict()
         self._Parameters['Degree'] = Degree
         self._Cached = dict()
@@ -1460,7 +1462,7 @@ class Student(ContinuousDistributionABC):
         if not isinstance(Value, (int, float)):
             raise UT_TypeError(Value, (int, float), SkipFrames = 1)
         if Value <= 0:
-            raise UT_ValueError(Value, '> 0 - rate parameter', SkipFrames = 1)
+            raise UT_ValueError(Value, '> 0 - degree parameter', SkipFrames = 1)
         self._Parameters['Degree'] = Value
         for Key in self._Cached.keys():
             self._Cached[Key] = None
@@ -1595,24 +1597,24 @@ class Student(ContinuousDistributionABC):
             Result = None
         return Result
 
-class ChiSquare(Student):
+class ChiSquared(ContinuousDistributionABC):
     """
     Implementation of the chi-square distribution. Must be instantiated with
-    a single positive integer number argument.
+    a single positive real number argument.
     
     Properties:
         Name: (read-only) str
         Min: (read-only) float >= 0
         Max: (read-only) float = math.inf
-        Mean: (read-only) int > 0
+        Mean: (read-only) int > 0 OR float > 0
         Median: (read-only) float > 0 OR int > 0
         Q1: (read-only) float > 0 OR int > 0
         Q2: (read-only) float > 0 OR int > 0
-        Var: (read-only) int > 0
+        Var: (read-only) int > 0 OR float > 0
         Sigma: (read-only) float > 0
         Skew: (read-only) float > 0
         Kurt: (read-only) float > 0
-        Degree: int > 0
+        Degree: int > 0 OR float > 0
     
     Methods:
         pdf(x)
@@ -1634,7 +1636,7 @@ class ChiSquare(Student):
     
     #class 'private' fields
     
-    _Min: ClassVar[sf.TReal] = 0
+    _Min: ClassVar[sf.TReal] = 0.0
     
     #special methods
     
@@ -1645,10 +1647,11 @@ class ChiSquare(Student):
         integer).
         
         Signature:
-            int > 0 -> None
+            int > 0 OR float > 0 -> None
         
         Args:
-            Degree: int > 0; the single parameter of the distribution
+            Degree: int > 0 OR float > 0; the single parameter of the
+                distribution
         
         Raises:
             UT_TypeError: the argument is neither int nor float
@@ -1656,19 +1659,19 @@ class ChiSquare(Student):
         
         Version 1.0.0.0
         """
-        if not isinstance(Degree, int):
-            raise UT_TypeError(Degree, int, SkipFrames = 1)
-        if Degree < 1:
-            raise UT_ValueError(Degree, '> 0 - rate parameter', SkipFrames = 1)
+        if not isinstance(Degree, (int, float)):
+            raise UT_TypeError(Degree, (int, float), SkipFrames = 1)
+        if Degree <= 0:
+            raise UT_ValueError(Degree, '> 0 - degree parameter', SkipFrames= 1)
         self._Parameters = dict()
         self._Parameters['Degree'] = Degree
         self._Cached = dict()
-        Temp = math.gamma(Degree / 2) * math.pow(2, Degree / 2)
-        self._Cached['Factor'] = 1 / Temp #correction factor for PDF
+        Temp = - (0.5 * Degree * math.log(2) + math.lgamma(0.5 * Degree))
+        self._Cached['Factor'] = Temp #correction factor for PDF
         self._Cached['Q1'] = None #cached first quartile
         self._Cached['Q3'] = None #cached third quartile
         self._Cached['Median'] = None
-        if Degree == 1: #override the class attribute, make open > 0 interval
+        if Degree < 2: #override the class attribute, make open > 0 interval
             self._Min = 2 * sys.float_info.min
     
     #private methods
@@ -1683,7 +1686,14 @@ class ChiSquare(Student):
         Version 1.0.0.0
         """
         k = self.Degree
-        Result=self._Cached['Factor'] * math.pow(x, 0.5*k - 1) * math.exp(- x/2)
+        LogFactor = self._Cached['Factor']
+        if x > 0:
+            Result = math.exp(LogFactor + (0.5 * k -1) * math.log(x) - 0.5 * x)
+        else:
+            if self.Degree != 2:
+                Result = 0
+            else:
+                Result = 0.5
         return Result
     
     def _cdf(self, x: sf.TReal) -> sf.TReal:
@@ -1699,61 +1709,49 @@ class ChiSquare(Student):
         Result = sf.lower_gamma_reg(0.5 * k, 0.5 * x)
         return Result
     
-    def _qf(self, p: float) -> sf.TReal:
-        """
-        The actual implementation of the ICDF / QF function using the default
-        bisection algorithm.
-        
-        Signature:
-           0 < float < 1 -> int OR float
-        
-        Version 1.0.0.0
-        """
-        return super()._qf(p)
-    
     #public properties
     
     @property
-    def Degree(self) -> int:
+    def Degree(self) -> sf.TReal:
         """
         Property for the number of degrees of freedom parameter of the
         distribution.
         
         Signature:
-            None -> int > 0
+            None -> int > 0 OR float > 0
         
         Version 1.0.0.0
         """
         return self._Parameters['Degree']
     
     @Degree.setter
-    def Degree(self, Value: int) -> None:
+    def Degree(self, Value: sf.TReal) -> None:
         """
         Setter method for the number of degrees of freedom parameter of the
         distribution.
         
         Signature:
-            int > 0 -> None
+            int > 0 OR float > 0 -> None
         
         Raises:
-            UT_TypeError: passed value is not an integer number
+            UT_TypeError: passed value is not a real number
             UT_ValueError: passed value is not positive
         
         Version 1.0.0.0
         """
-        if not isinstance(Value, int):
-            raise UT_TypeError(Value, int, SkipFrames = 1)
-        if Value < 1:
-            raise UT_ValueError(Value, '> 0 - rate parameter', SkipFrames = 1)
+        if not isinstance(Value, (int, float)):
+            raise UT_TypeError(Value, (int, float), SkipFrames = 1)
+        if Value <= 0:
+            raise UT_ValueError(Value, '> 0 - degree parameter', SkipFrames = 1)
         self._Parameters['Degree'] = Value
         for Key in self._Cached.keys():
             self._Cached[Key] = None
-        Temp = math.gamma(Value / 2) * math.pow(2, Value / 2)
-        self._Cached['Factor'] = 1 / Temp
-        if Value == 1: #override the class attribute, make open > 0 interval
+        Temp =  - (0.5 * Value * math.log(2) + math.lgamma(0.5 * Value))
+        self._Cached['Factor'] = Temp
+        if Value < 2: #override the class attribute, make open > 0 interval
             self._Min = 2 * sys.float_info.min
-        else: # > 1 - makes the interval closed
-            self._Min = 0
+        else: # makes the interval closed
+            self._Min = 0.0
     
     @property
     def Mean(self) -> int:
@@ -1761,7 +1759,7 @@ class ChiSquare(Student):
         Getter property for the arithmetic mean of the distribution.
         
         Signature:
-            None -> int > 0
+            None -> int > 0 OR float > 0
         
         Version 1.0.0.0
         """
@@ -1773,7 +1771,7 @@ class ChiSquare(Student):
         Getter property for the variance of the distribution.
         
         Signature:
-            None -> int > 0
+            None -> int > 0 OR float > 0
         
         Version 1.0.0.0
         """
@@ -1789,7 +1787,7 @@ class ChiSquare(Student):
         
         Version 1.0.0.0
         """
-        return math.sqrt(8) / self.Degree
+        return math.sqrt(8 / self.Degree)
     
     @property
     def Kurt(self) -> float:

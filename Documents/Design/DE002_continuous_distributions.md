@@ -232,9 +232,9 @@ $$
 
 ## Chi-squared distribution
 
-The *chi-square distribution* or $\chi^2$-*distribution* with $k \in \mathbb{N}$ degrees of freedom is the distribution of a sum of the squares of k independent standard normal random variables. It is a special case of the *gamma distribution*.
+The *chi-square distribution* or $\chi^2$-*distribution* with $k \in \mathbb{Z}, \; k > 0$ degrees of freedom is the distribution of a sum of the squares of k independent standard normal random variables. It is a special case of the *gamma distribution*.
 
-This distribution supports $x \in (0, + \infin)$ if *k=1*, and $x \in [0, + \infin)$ otherwise.
+This distribution supports $x \in (0, + \infin)$ if *k < 2*, and $x \in [0, + \infin)$ otherwise.
 
 Its PDF ans CDF are:
 
