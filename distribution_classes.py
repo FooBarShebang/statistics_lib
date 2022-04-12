@@ -19,7 +19,7 @@ Classes:
 """
 
 __version__= '1.0.0.0'
-__date__ = '11-04-2022'
+__date__ = '12-04-2022'
 __status__ = 'Testing'
 
 #imports
@@ -128,10 +128,21 @@ class ContinuousDistributionABC(abc.ABC):
         Version 1.0.0.0
         """
         Sigma = self.Sigma
+        if (Sigma is None) or (Sigma is math.inf):
+            Sigma = 1 #fallback for distrbutions w/o defined variance
         Min = self.Min
         Max = self.Max
         Precision = 1.0E-8
         Point = self.Mean #check self.Mean
+        if Point is None:
+            if (Min > (- math.inf)) and (Max < math.inf):
+                Point = 0.5 * (Min + Max)
+            elif (Min > (- math.inf)):
+                Point = Min + 3 * Sigma
+            elif Max < math.inf:
+                Point = Max - 3 * Sigma
+            else:
+                Point = 0
         y = self._cdf(Point)
         if abs(y - x) <= Precision: #instant hit
             Result = Point
@@ -593,8 +604,10 @@ class DiscreteDistributionABC(ContinuousDistributionABC):
         Version 1.0.0.0
         """
         Sigma = self.Sigma
-        Min = self.Min
-        Max = self.Max
+        if (Sigma is None) or (Sigma is math.inf):
+            Sigma = 1 #fallback for distrbutions w/o defined variance
+        Min = self.Min #should be integer
+        Max = self.Max #can be integer or math.inf
         Precision = 1.0E-8
         #check for x <= self.pdf(self.Min)
         y = self._pdf(Min)
@@ -1345,7 +1358,7 @@ class Student(ContinuousDistributionABC):
         self._Cached = dict()
         Temp = math.lgamma(0.5 * (Degree + 1)) - math.lgamma(0.5 * Degree)
         Temp -= 0.5 * math.log(Degree * math.pi)
-        self._Cached['Factor'] = math.exp(Temp) #correction factor for PDF
+        self._Cached['Factor'] = Temp #correction factor for PDF
         self._Cached['Q1'] = None #cached first quartile
         self._Cached['Q3'] = None #cached third quartile
     
@@ -1362,7 +1375,7 @@ class Student(ContinuousDistributionABC):
         """
         Degree = self.Degree
         Factor = self._Cached['Factor']
-        Result = Factor * math.pow(1 + x * x / Degree, - 0.5*(Degree + 1))
+        Result = math.exp(Factor - 0.5*(Degree + 1)*math.log(1 + x*x / Degree))
         return Result
     
     def _cdf(self, x: sf.TReal) -> sf.TReal:
@@ -1375,23 +1388,15 @@ class Student(ContinuousDistributionABC):
         1.0.0.0
         """
         Degree = self.Degree
-        #---
-        def inner(x: sf.TReal) -> float:
-            """
-            Closure to wrap a call to incomplete regularized beta function.
-            """
-            z = Degree / (Degree + x * x)
-            x = 0.5 * Degree
-            y = 0.5
-            Value = sf.beta_incomplete_reg(z, x, y)
-            return Value
-        #---
+        z = Degree / (Degree + x * x)
+        _x = 0.5 * Degree
+        y = 0.5
         if x > 0:
-            Result = 1 - inner(x)
+            Result = 1 - 0.5*sf.beta_incomplete_reg(z, _x, y)
         elif x < 0:
-            Result = inner(x)
+            Result = 0.5*sf.beta_incomplete_reg(z, _x, y)
         else:
-            Result = 0
+            Result = 0.5
         return Result
     
     def _qf(self, p: float) -> sf.TReal:
@@ -1404,16 +1409,16 @@ class Student(ContinuousDistributionABC):
         Version 1.0.0.0
         """
         if p == 0.5:
-            Result = 0
+            Result = 0.0
         else:
             Degree = self.Degree
             if Degree == 1:
                 Result = math.tan(math.pi * (p - 0.5))
             elif Degree == 2:
-                Result = math.sqrt(0.5 * (p * (1 -p)))
+                Result = 2* math.sqrt(0.5 / (p * (1 -p))) * (p - 0.5)
             elif Degree == 4:
                 a = math.sqrt(4 * p * (1 - p))
-                q = math.sqrt(math.cos(math.acos(a) / 3) / a - 1)
+                q =2 *  math.sqrt(math.cos(math.acos(a) / 3) / a - 1)
                 if p > 0.5:
                     Result = q
                 else:
@@ -1461,7 +1466,7 @@ class Student(ContinuousDistributionABC):
             self._Cached[Key] = None
         Temp = math.lgamma(0.5 * (Value + 1)) - math.lgamma(0.5 * Value)
         Temp -= 0.5 * math.log(Value * math.pi)
-        self._Cached['Factor'] = math.exp(Temp)
+        self._Cached['Factor'] = Temp
     
     @property
     def Mean(self) -> Union[int, None]:

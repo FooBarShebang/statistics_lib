@@ -182,7 +182,7 @@ The *Student's t-distribution* is a family of continuous probability distributio
 Its PDF ans CDF are:
 
 $$
-f(x) = \frac{\Gamma \left( \frac{\nu + 1}{2} \right)}{\sqrt{\nu \pi} \Gamma \left( \frac{\nu}{2} \right)} \left( 1 + \frac{x^2}{\nu} \right)^{- \frac{\nu + 1}{2}} \newline
+f(x) = \frac{\Gamma \left( \frac{\nu + 1}{2} \right)}{\sqrt{\nu \pi} \Gamma \left( \frac{\nu}{2} \right)} \left( 1 + \frac{x^2}{\nu} \right)^{- \frac{\nu + 1}{2}} \equiv \frac{1}{\sqrt{\nu} B \left( \frac{1}{2}, \frac{\nu}{2} \right)} \left( 1 + \frac{x^2}{\nu} \right)^{- \frac{\nu + 1}{2}}\newline
 \Phi(x) = \begin{cases}
     0.5, \; \mathtt{if} \; x =0 \\
     1 - \frac{1}{2} I_y \left( \frac{\nu}{2}, \frac{1}{2}\right), \; \mathtt{where} \; y = \frac{\nu}{x^2 + \nu}, \; \mathtt{if} \; x > 0 \\
@@ -190,7 +190,7 @@ f(x) = \frac{\Gamma \left( \frac{\nu + 1}{2} \right)}{\sqrt{\nu \pi} \Gamma \lef
 \end{cases}
 $$
 
-Where $\Gamma(z) = \int_0^{+ \infin} {x^{z-1} e^{-x} dx}$ is *gamma function*, which is implemented in the module *math* of the Standard Python Library. $I_y \left( \frac{\nu}{2}, \frac{1}{2} \right)$ is *regularized incomplete beta function* (see [DE03](./DE003_special_functions.md) for details).
+Where $\Gamma(z) = \int_0^{+ \infin} {x^{z-1} e^{-x} dx}$ is *gamma function*, which is implemented in the module *math* of the Standard Python Library. $B \left( \frac{1}{2}, \frac{\nu}{2} \right)$ is *beta function* and $I_y \left( \frac{\nu}{2}, \frac{1}{2} \right)$ is *regularized incomplete beta function* (see [DE03](./DE003_special_functions.md) for details).
 
 The ICDF / QF has simple analytical formulas only for $\nu$=1, 2, 4:
 
@@ -269,8 +269,6 @@ $$
 f(x) = \frac{\left( \frac{d_1}{d_2} \right)^{d_1/2} x^{d_1/2 - 1} \left( 1 + \frac{d_1}{d_2} x\right)^{-(d_1 + d_2) / 2}}{\mathtt{B} \left( \frac{d_1}{2}, \frac{d_2}{2} \right)} \newline
 \Phi(x) = I_{\frac{d_1 x}{d_1 x + d_2}} \left( \frac{d_1}{2}, \frac{d_2}{2} \right)
 $$
-
-where $B$() is *beta function* (see [DE03](./DE003_special_functions.md) for details).
 
 The ICDF / QF has no analitical expression and must be calculated using numerical methods from CDF. Concerning the statistical properties of the distribution:
 
