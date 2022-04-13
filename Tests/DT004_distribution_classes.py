@@ -7,7 +7,7 @@ REQ-FUN-407 and REQ-FUN-408.
 """
 
 __version__= '1.0.0.0'
-__date__ = '12-04-2022'
+__date__ = '13-04-2022'
 __status__ = 'Testing'
 
 #imports
@@ -39,9 +39,9 @@ from statistics_lib.data_classes import Statistics1D
 FILE_PATH = os.path.join(TEST_FOLDER, 'DT004_test_results.txt')
 
 TEST_CLASSES = (dc.Z_Distribution, dc.Gaussian, dc.Exponential, dc.Student,
-                dc.ChiSquared)
+                dc.ChiSquared, dc.F_Distribution)
 
-PARAMETERS = (None, (1.5, 0.5), (0.5, ), (5, ), (5, ))
+PARAMETERS = (None, (1.5, 0.5), (0.5, ), (5, ), (5, ), (7, 9))
 
 N_POINTS = 10000
 

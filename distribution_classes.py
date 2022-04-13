@@ -10,6 +10,7 @@ Classes:
     Exponential
     Student
     ChiSquared
+    F_Distribution
     Gamma
     Erlang
     Poisson
@@ -19,7 +20,7 @@ Classes:
 """
 
 __version__= '1.0.0.0'
-__date__ = '12-04-2022'
+__date__ = '13-04-2022'
 __status__ = 'Testing'
 
 #imports
@@ -1061,7 +1062,7 @@ class Exponential(ContinuousDistributionABC):
     
     Properties:
         Name: (read-only) str
-        Min: (read-only) float = 0
+        Min: (read-only) int = 0
         Max: (read-only) float = math.inf
         Mean: (read-only) float > 0
         Median: (read-only) float > 0
@@ -1093,7 +1094,7 @@ class Exponential(ContinuousDistributionABC):
     
     #class 'private' fields
     
-    _Min: ClassVar[sf.TReal] = 0
+    _Min: ClassVar[int] = 0
     
     #special methods
     
@@ -1636,11 +1637,11 @@ class ChiSquared(ContinuousDistributionABC):
     
     #class 'private' fields
     
-    _Min: ClassVar[sf.TReal] = 0.0
+    _Min: ClassVar[float] = 0.0
     
     #special methods
     
-    def __init__(self, Degree: int) -> None:
+    def __init__(self, Degree: sf.TReal) -> None:
         """
         Initialization. Set the single parameter of the distribution - the
         positive number as the number of degrees of freedom (not necessarily an
@@ -1800,6 +1801,341 @@ class ChiSquared(ContinuousDistributionABC):
         Version 1.0.0.0
         """
         return 12 / self.Degree
+
+class F_Distribution(ContinuousDistributionABC):
+    """
+    Implementation of the Student's t-distribution. Must be instantiated with
+    a single positive real number argument.
+    
+    Properties:
+        Name: (read-only) str
+        Min: (read-only) float >= 0
+        Max: (read-only) float = math.inf
+        Mean: (read-only) float > 0 OR None
+        Median: (read-only) float > 0
+        Q1: (read-only) float > 0
+        Q2: (read-only) float > 0
+        Var: (read-only) float > 0 OR None
+        Sigma: (read-only) float > 0 OR None
+        Skew: (read-only) flaot > 0 OR None
+        Kurt: (read-only) float > 0 OR None
+        Degree1: int > 0 OR float > 0
+        Degree2: int > 0 OR float > 0
+    
+    Methods:
+        pdf(x)
+            int OR float -> float >= 0
+        cdf(x)
+            int OR float -> 0 < float < 1
+        qf()
+            0 < float < 1 -> float
+        getQuantile(k, m)
+            int > 0, int > 0 -> float
+        getHistogram()
+            int OR float, int OR float, int > 1
+                -> tuple(tuple(int OR float, float >= 0))
+        random()
+            None -> float
+    
+    Version 1.0.0.0
+    """
+    
+    #class 'private' fields
+    
+    _Min: ClassVar[float] = 0.0
+    
+    #special methods
+    
+    def __init__(self, Degree1: sf.TReal, Degree2: sf.TReal) -> None:
+        """
+        Initialization. Set the both parameters of the distribution - the
+        positive numbers as the number of degrees of freedom (not necessarily an
+        integer).
+        
+        Signature:
+            int > 0 OR float > 0, int > 0 OR float > 0 -> None
+        
+        Args:
+            Degree1: int > 0 OR float > 0; the first parameter of the
+                distribution as degree of freedom
+            Degree2: int > 0 OR float > 0; the second parameter of the
+                distribution as degree of freedom
+        
+        Raises:
+            UT_TypeError: either of the arguments is neither int nor float
+            UT_ValueError: either of the arguments is zero or negative
+        
+        Version 1.0.0.0
+        """
+        if not isinstance(Degree1, (int, float)):
+            raise UT_TypeError(Degree1, (int, float), SkipFrames = 1)
+        if Degree1 <= 0:
+            raise UT_ValueError(Degree1, '> 0 - 1st degree parameter',
+                                                                SkipFrames= 1)
+        if not isinstance(Degree2, (int, float)):
+            raise UT_TypeError(Degree2, (int, float), SkipFrames = 1)
+        if Degree2 <= 0:
+            raise UT_ValueError(Degree2, '> 0 - 2nd degree parameter',
+                                                                SkipFrames= 1)
+        self._Parameters = dict()
+        self._Parameters['Degree1'] = Degree1
+        self._Parameters['Degree2'] = Degree2
+        self._Cached = dict()
+        Temp = 0.5 * (Degree1 * math.log(Degree1) + Degree2 * math.log(Degree2))
+        Temp -= sf.log_beta(0.5 * Degree1, 0.5 * Degree2)
+        self._Cached['Factor'] = Temp #correction factor for PDF
+        self._Cached['Q1'] = None #cached first quartile
+        self._Cached['Q3'] = None #cached third quartile
+        self._Cached['Median'] = None
+        if Degree1 < 2: #override the class attribute, make open > 0 interval
+            self._Min = 2 * sys.float_info.min
+    
+    #private methods
+    
+    def _pdf(self, x: sf.TReal) -> float:
+        """
+        The actual implementation of the PDF function.
+        
+        Signature
+            int OR float -> float >= 0
+        
+        Version 1.0.0.0
+        """
+        d1 = self.Degree1
+        d2 = self.Degree2
+        LogFactor = self._Cached['Factor']
+        if x > 0:
+            Temp = LogFactor + (0.5 * d1 -1) * math.log(x)
+            Temp -= 0.5 * (d1 + d2) * math.log(d1 * x + d2)
+            Result = math.exp(Temp)
+        else:
+            if d1 != 2:
+                Result = 0
+            else:
+                Result = 1
+        return Result
+    
+    def _cdf(self, x: sf.TReal) -> sf.TReal:
+        """
+        The actual implementation of the CDF function.
+        
+        Signature:
+            int OR float -> 0 < float < 1
+        
+        1.0.0.0
+        """
+        d1 = self.Degree1
+        d2 = self.Degree2
+        z = d1 * x / (d1 * x + d2)
+        Result = sf.beta_incomplete_reg(z, 0.5 * d1, 0.5 * d2)
+        return Result
+    
+    #public properties
+    
+    @property
+    def Degree1(self) -> sf.TReal:
+        """
+        Property for the first number of degrees of freedom parameter of the
+        distribution.
+        
+        Signature:
+            None -> int > 0 OR float > 0
+        
+        Version 1.0.0.0
+        """
+        return self._Parameters['Degree1']
+    
+    @Degree1.setter
+    def Degree1(self, Value: sf.TReal) -> None:
+        """
+        Setter method for the first number of degrees of freedom parameter of
+        the distribution.
+        
+        Signature:
+            int > 0 OR float > 0 -> None
+        
+        Raises:
+            UT_TypeError: passed value is not a real number
+            UT_ValueError: passed value is not positive
+        
+        Version 1.0.0.0
+        """
+        if not isinstance(Value, (int, float)):
+            raise UT_TypeError(Value, (int, float), SkipFrames = 1)
+        if Value <= 0:
+            raise UT_ValueError(Value, '> 0 - 1st degree parameter',
+                                                                SkipFrames = 1)
+        self._Parameters['Degree1'] = Value
+        for Key in self._Cached.keys():
+            self._Cached[Key] = None
+        Degree1 = Value
+        Degree2 = self._Parameters['Degree2']
+        Temp = 0.5 * (Degree1 * math.log(Degree1) + Degree2 * math.log(Degree2))
+        Temp -= sf.log_beta(0.5 * Degree1, 0.5 * Degree2)
+        self._Cached['Factor'] = Temp
+        if Value < 2: #override the class attribute, make open > 0 interval
+            self._Min = 2 * sys.float_info.min
+        else: # makes the interval closed
+            self._Min = 0.0
+    
+    @property
+    def Degree2(self) -> sf.TReal:
+        """
+        Property for the second number of degrees of freedom parameter of the
+        distribution.
+        
+        Signature:
+            None -> int > 0 OR float > 0
+        
+        Version 1.0.0.0
+        """
+        return self._Parameters['Degree2']
+    
+    @Degree2.setter
+    def Degree2(self, Value: sf.TReal) -> None:
+        """
+        Setter method for the second number of degrees of freedom parameter of
+        the distribution.
+        
+        Signature:
+            int > 0 OR float > 0 -> None
+        
+        Raises:
+            UT_TypeError: passed value is not a real number
+            UT_ValueError: passed value is not positive
+        
+        Version 1.0.0.0
+        """
+        if not isinstance(Value, (int, float)):
+            raise UT_TypeError(Value, (int, float), SkipFrames = 1)
+        if Value <= 0:
+            raise UT_ValueError(Value, '> 0 - 2nd degree parameter',
+                                                                SkipFrames = 1)
+        self._Parameters['Degree2'] = Value
+        for Key in self._Cached.keys():
+            self._Cached[Key] = None
+        Degree2 = Value
+        Degree1 = self._Parameters['Degree1']
+        Temp = 0.5 * (Degree1 * math.log(Degree1) + Degree2 * math.log(Degree2))
+        Temp -= sf.log_beta(0.5 * Degree1, 0.5 * Degree2)
+        self._Cached['Factor'] = Temp
+    
+    @property
+    def Mean(self) -> Union[float, None]:
+        """
+        Getter property for the arithmetic mean of the distribution.
+        
+        Signature:
+            None -> float > 0 OR None
+        
+        Returns:
+            float > 0: 2nd number of degrees of freedom > 2
+            None: 2nd number of degrees of freedom is in the interval <= 2
+        
+        Version 1.0.0.0
+        """
+        d1 = self.Degree1
+        d2 = self.Degree2
+        if d2 > 2:
+            Result = d2 / (d2 - 2)
+        else:
+            Result = None
+        return Result
+ 
+    @property
+    def Var(self) -> Union[float, None]:
+        """
+        Getter property for the variance of the distribution.
+        
+        Signature:
+            None -> float > 0 OR None
+        
+        Returns:
+            float > 0: 2nd number of degrees of freedom > 4
+            None: 2nd number of degrees of freedom is in the interval <= 4
+        
+        Version 1.0.0.0
+        """
+        d1 = self.Degree1
+        d2 = self.Degree2
+        if d2 > 4:
+            Var = 2 * d2 * d2 * (d1 + d2 - 2) / (d1 * (d2 - 4)*(d2 -2)*(d2 - 2))
+            Result = Var
+        else:
+            Result = None
+        return Result
+    
+    @property
+    def Sigma(self) -> Union[float, None]:
+        """
+        Getter property for the standard deviation of the distribution.
+        
+        Signature:
+            None -> float > 0 OR None
+        
+        Returns:
+            float > 0: 2nd number of degrees of freedom > 4
+            None: 2nd number of degrees of freedom is in the interval <= 4
+        
+        Version 1.0.0.0
+        """
+        d1 = self.Degree1
+        d2 = self.Degree2
+        if d2 > 4:
+            Var = 2 * d2 * d2 * (d1 + d2 - 2) / (d1 * (d2 - 4)*(d2 -2)*(d2 - 2))
+            Result = math.sqrt(Var)
+        else:
+            Result = None
+        return Result
+    
+    @property
+    def Skew(self) -> Union[float, None]:
+        """
+        Getter property for the skewness of the distribution.
+        
+        Signature:
+            None -> float > 0 OR None
+        
+        Returns:
+            float > 0: 2nd number of degrees of freedom > 6
+            None: 2nd number of degrees of freedom is in the interval <= 6
+        
+        Version 1.0.0.0
+        """
+        d1 = self.Degree1
+        d2 = self.Degree2
+        if d2 > 6:
+            Temp = math.sqrt(8 * (d2 - 4) / (d1 * (d1 + d2 - 2))) / (d2 - 6)
+            Result = Temp * (2 * d1 + d2 - 2)
+        else:
+            Result = None
+        return Result
+    
+    @property
+    def Kurt(self) -> Union[float, None]:
+        """
+        Getter property for the excess kurtosis of the distribution.
+        
+        Signature:
+            None -> float > 0 OR None
+        
+        Returns:
+            float > 0: 2nd number of degrees of freedom > 8
+            None: 2nd number of degrees of freedom is in the interval <= 8
+        
+        Version 1.0.0.0
+        """
+        d1 = self.Degree1
+        d2 = self.Degree2
+        if d2 > 8:
+            Temp = d1 * (5 * d2 - 22) * (d1 + d2 - 2)
+            Temp += (d2 - 4) * (d2 - 2) * (d2 - 2)
+            Temp *= 12 / d1
+            Temp /= (d2 - 6) * (d2 - 8) * (d1 + d2 - 2)
+            Result = Temp
+        else:
+            Result = None
+        return Result
 
 class Gamma(ContinuousDistributionABC):
     """

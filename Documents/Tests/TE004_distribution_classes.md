@@ -45,6 +45,10 @@ The verification method for a requirement is given by a single letter according 
 
 **Test steps:** Analyze the source code of the module [distribution\_classes](../../distribution_classes.py) as well as of the unit-test module [/Tests/UT004\_distribution\_classes](../../Tests/UT004_distribution_classes.py). Execute the mentioned unit-test module.
 
+The implementation of the PDF, CDF and QF of the distributions is checked against the NIST documentation - *Engineering Statistics Handbook* located at [NIST/SEMATECH e-Handbook of Statistical Methods, http://www.itl.nist.gov/div898/handbook/](http://www.itl.nist.gov/div898/handbook/), Digital Object Indentifier [https://doi.org/10.18434/M32189](https://doi.org/10.18434/M32189).
+
+The Student`s t-distribution, Chi-squared distribution and F-distributions are also verified in terms of CDF / QF vs the tabulated values listed therein.
+
 **Test result:** PASS / FAIL
 
 ## Tests definition (Test)

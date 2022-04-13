@@ -6,17 +6,18 @@ This document describes the intended usage, design and implementation of the fun
 
 The concerted functional elements are classes:
 
-* Z_Distribution
-* Gaussian
-* Exponential
-* Student
-* ChiSquare
-* Gamma
-* Erlang
-* Poisson
-* Binomial
-* Geometric
-* Hypergeometric
+* **Z_Distribution**
+* **Gaussian**
+* **Exponential**
+* **Student**
+* **ChiSquared**
+* **F_Distribution**
+* **Gamma**
+* **Erlang**
+* **Poisson**
+* **Binomial**
+* **Geometric**
+* **Hypergeometric**
 
 ## Intended Use and Functionality
 
@@ -32,7 +33,9 @@ The concerted functional elements are classes:
 
 ### Class Student
 
-### Class ChiSquare
+### Class ChiSquared
+
+### Class F_Distribution
 
 ### Class Gamma
 
