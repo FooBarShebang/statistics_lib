@@ -476,10 +476,61 @@ The following statistical properties are defined:
 
 * Mean is $n \frac{K}{N}$
 * Variance is $n \frac{K}{N} \frac{N-K}{N} \frac{N-n}{N-1}$
-* Skewness is $\frac{(N-2K) (N-1)^{1/2} (N - 2n)}{\lfloor nK(N-K)(N-n) \rfloor^{1/2} (N-2)}$
-* Excess kurtosis is $\frac{(N-1)N^2(N(N+1)-6K(N-K)-6n(N-n))+6nK(N-K)(N-n)(5N-6))}{nK(N-K)(N-n)(N-2)(N-3)}$
+* Skewness is $\frac{(N-2K) (N-1)^{1/2} (N - 2n)}{\lfloor n K (N-K) (N-n) \rfloor^{1/2} (N-2)}$
+* Excess kurtosis is $\frac{(N-1) N^2 \left( N (N+1) - 6 K (N-K) - 6 n (N-n) \right) + 6 n K (N-K) (N-n) (5N-6)}{n K (N-K) (N-n) (N-2) (N-3)}$
 
 All quantiles, including quartiles and median must be calculated from CDF using numerical methods.
+
+In the formulas above there are many possible situations causing *division by zero* error: K = 0, K = N, n = 0, n = N, N = 0, N = 1, N = 2 and N = 3. However, such situations are easily avoidable:
+
+* First of all, for the number of draws n = 0 the only possible number of successes is 0 regardless of the N and K values
+* Secondly, for the number of draws n = N there are always K successes (full set is drawn)
+* For K = 0 the number of successes is always 0 regardless of the number of draws n
+* Finally, for K = N, the number of successes is always n
+
+Thus, these trivial cases can be ignored by modifying the parameters requierements to $1 \leq K\; , \; n < N \; \Rightarrow \; N \geq 2$, which leaves only 5 possible problematic situations, when the requirement moments can be easily calculated.
+
+*Case 1*: N = 2, K = n = 1
+
+* $p(k = 0) = p(k = 1) = \frac{1}{2}$, hence $\mu = E[X] = 0 * \frac{1}{2} + 1 * \frac{1}{2} = \frac{1}{2}$
+* $Var(X) = E[(X - \mu)^2] = \left( - \frac{1}{2}\right)^2 * \frac{1}{2} + \left(\frac{1}{2}\right)^2 * \frac{1}{2} = \frac{1}{4}$, hence $\sigma = \frac{1}{2}$
+* $Skew = E \left[ \left( \frac{X - \mu}{\sigma} \right)^3 \right] = (-1)^3 * \frac{1}{2} + (1)^3 * \frac{1}{2} = 0$
+* $Kurt E \left[ \left( \frac{X - \mu}{\sigma} \right)^4 \right] = (-1)^4 * \frac{1}{2} + (1)^4 * \frac{1}{2} = 1$, hence *ExKurt = Kurt - 3 = - 2*
+
+*Case 2*: N = 3, K = 1, n = 1
+
+* $p(k = 0) = \frac{2}{3}$, $p(k = 1) = \frac{1}{3}$,  hence $\mu = E[X] = 0 * \frac{2}{3} + 1 * \frac{1}{3} = \frac{1}{3}$
+* $Var(X) = E[(X - \mu)^2] = \left( - \frac{1}{3}\right)^2 * \frac{2}{3} + \left(\frac{2}{3}\right)^2 * \frac{1}{3} = \frac{6}{27} = \frac{2}{9}$, hence $\sigma = \frac{\sqrt{2}}{3}$
+* $Skew = E \left[ \left( \frac{X - \mu}{\sigma} \right)^3 \right] = (-\frac{1}{\sqrt{2}})^3 * \frac{2}{3} + (\frac{2}{\sqrt{2}})^3 * \frac{1}{3} = \frac{1}{\sqrt{2}}$
+* $Kurt E \left[ \left( \frac{X - \mu}{\sigma} \right)^4 \right] = (-\frac{1}{\sqrt{2}})^4 * \frac{2}{3} + (\frac{2}{\sqrt{2}})^4 * \frac{1}{3} = \frac{2 + 16}{12} = \frac{3}{2} = 1.5$, hence *ExKurt = Kurt - 3 = - 1.5*
+
+*Case 3*: N = 3, K = 1, n = 2
+
+* $p(k = 0) = \frac{1}{3}$, $p(k = 1) = \frac{2}{3}$,  hence $\mu = E[X] = 0 * \frac{1}{3} + 1 * \frac{2}{3} = \frac{2}{3}$
+* $Var(X) = E[(X - \mu)^2] = \left( - \frac{2}{3}\right)^2 * \frac{1}{3} + \left(\frac{1}{3}\right)^2 * \frac{2}{3} = \frac{6}{27} = \frac{2}{9}$, hence $\sigma = \frac{\sqrt{2}}{3}$
+* $Skew = E \left[ \left( \frac{X - \mu}{\sigma} \right)^3 \right] = (-\frac{2}{\sqrt{2}})^3 * \frac{1}{3} + (\frac{1}{\sqrt{2}})^3 * \frac{2}{3} = - \frac{1}{\sqrt{2}}$
+* $Kurt E \left[ \left( \frac{X - \mu}{\sigma} \right)^4 \right] = (-\frac{2}{\sqrt{2}})^4 * \frac{1}{3} + (\frac{1}{\sqrt{2}})^4 * \frac{2}{3} = \frac{16 + 2}{12} = \frac{3}{2} = 1.5$, hence *ExKurt = Kurt - 3 = - 1.5*
+
+*Case 4*: N = 3, K = 2, n = 1
+
+* $p(k = 0) = \frac{1}{3}$, $p(k = 1) = \frac{2}{3}$,  hence $\mu = E[X] = 0 * \frac{1}{3} + 1 * \frac{2}{3} = \frac{2}{3}$
+* $Var(X) = E[(X - \mu)^2] = \left( - \frac{2}{3}\right)^2 * \frac{1}{3} + \left(\frac{1}{3}\right)^2 * \frac{2}{3} = \frac{6}{27} = \frac{2}{9}$, hence $\sigma = \frac{\sqrt{2}}{3}$
+* $Skew = E \left[ \left( \frac{X - \mu}{\sigma} \right)^3 \right] = (-\frac{2}{\sqrt{2}})^3 * \frac{1}{3} + (\frac{1}{\sqrt{2}})^3 * \frac{2}{3} = - \frac{1}{\sqrt{2}}$
+* $Kurt E \left[ \left( \frac{X - \mu}{\sigma} \right)^4 \right] = (-\frac{2}{\sqrt{2}})^4 * \frac{1}{3} + (\frac{1}{\sqrt{2}})^4 * \frac{2}{3} = \frac{16 + 2}{12} = \frac{3}{2} = 1.5$, hence *ExKurt = Kurt - 3 = - 1.5*
+
+*Case 5*: N = 3, K = 2, n = 2
+
+* $p(k = 1) = \frac{2}{3}$, $p(k = 2) = \frac{1}{3}$,  hence $\mu = E[X] = 1 * \frac{2}{3} + 2 * \frac{1}{3} = \frac{4}{3}$
+* $Var(X) = E[(X - \mu)^2] = \left( - \frac{1}{3}\right)^2 * \frac{2}{3} + \left(\frac{2}{3}\right)^2 * \frac{1}{3} = \frac{6}{27} = \frac{2}{9}$, hence $\sigma = \frac{\sqrt{2}}{3}$
+* $Skew = E \left[ \left( \frac{X - \mu}{\sigma} \right)^3 \right] = (-\frac{1}{\sqrt{2}})^3 * \frac{2}{3} + (\frac{2}{\sqrt{2}})^3 * \frac{1}{3} = \frac{1}{\sqrt{2}}$
+* $Kurt E \left[ \left( \frac{X - \mu}{\sigma} \right)^4 \right] = (-\frac{1}{\sqrt{2}})^4 * \frac{2}{3} + (\frac{2}{\sqrt{2}})^4 * \frac{1}{3} = \frac{2 + 16}{12} = \frac{3}{2} = 1.5$, hence *ExKurt = Kurt - 3 = - 1.5*
+
+To summarize:
+
+* N = 2: Var = 0.25, $\sigma$ = 0.5, Skew  = 0, ExKurt = -2
+* N = 2: Var = 2/9, $\sigma = \sqrt{2}/3$, ExKurt = -1.5, and
+  * Skew = 1 / $\sqrt{2}$ for K = n = 1 , 2
+  * Skew = - 1 / $\sqrt{2}$ for $1 \leq K \neq n \leq 2$
 
 ## General design patterns
 

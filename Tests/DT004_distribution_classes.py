@@ -39,9 +39,10 @@ from statistics_lib.data_classes import Statistics1D
 FILE_PATH = os.path.join(TEST_FOLDER, 'DT004_test_results.txt')
 
 TEST_CLASSES = (dc.Z_Distribution, dc.Gaussian, dc.Exponential, dc.Student,
-                dc.ChiSquared, dc.F_Distribution)
+                dc.ChiSquared, dc.F_Distribution, dc.Gamma, dc.Erlang)
 
-PARAMETERS = (None, (1.5, 0.5), (0.5, ), (5, ), (5, ), (7, 9))
+PARAMETERS = (None, (1.5, 0.5), (0.5, ), (5, ), (5, ), (7, 9), (7.5, 1.0),
+                (7, 2.0))
 
 N_POINTS = 10000
 

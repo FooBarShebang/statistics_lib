@@ -20,7 +20,7 @@ Classes:
 """
 
 __version__= '1.0.0.0'
-__date__ = '13-04-2022'
+__date__ = '15-04-2022'
 __status__ = 'Testing'
 
 #imports
@@ -2210,7 +2210,7 @@ class Gamma(ContinuousDistributionABC):
         self._Parameters['Shape'] = Shape
         self._Parameters['Rate'] = Rate
         self._Cached = dict()
-        Temp = math.exp(Shape * math.log(Rate) - math.lgamma(Shape))
+        Temp = Shape * math.log(Rate) - math.lgamma(Shape)
         self._Cached['Factor'] = Temp #correction factor for PDF
         self._Cached['Q1'] = None #cached first quartile
         self._Cached['Q3'] = None #cached third quartile
@@ -2230,7 +2230,8 @@ class Gamma(ContinuousDistributionABC):
         Shape = self._Parameters['Shape']
         Rate = self._Parameters['Rate']
         Factor = self._Cached['Factor']
-        Result= Factor * math.pow(x, Shape - 1) * math.exp(- Rate * x)
+        Temp = Factor + (Shape - 1) * math.log(x) - Rate * x
+        Result = math.exp(Temp)
         return Result
     
     def _cdf(self, x: sf.TReal) -> sf.TReal:
@@ -2244,7 +2245,7 @@ class Gamma(ContinuousDistributionABC):
         """
         Shape = self._Parameters['Shape']
         Rate = self._Parameters['Rate']
-        Result = sf.beta_incomplete_reg(Shape, x * Rate)
+        Result = sf.lower_gamma_reg(Shape, x * Rate)
         return Result
     
     #public properties
@@ -2282,12 +2283,10 @@ class Gamma(ContinuousDistributionABC):
         self._Parameters['Shape'] = Value
         Shape = Value
         Rate = self._Parameters['Rate']
-        Temp = math.exp(Shape * math.log(Rate) - math.lgamma(Shape))
+        Temp = Shape * math.log(Rate) - math.lgamma(Shape)
         for Key in self._Cached.keys():
             self._Cached[Key] = None
         self._Cached['Factor'] = Temp
-    
-    #public properties
     
     @property
     def Rate(self) -> sf.TReal:
@@ -2322,7 +2321,7 @@ class Gamma(ContinuousDistributionABC):
         self._Parameters['Rate'] = Value
         Rate = Value
         Shape = self._Parameters['Shape']
-        Temp = math.exp(Shape * math.log(Rate) - math.lgamma(Shape))
+        Temp = Shape * math.log(Rate) - math.lgamma(Shape)
         for Key in self._Cached.keys():
             self._Cached[Key] = None
         self._Cached['Factor'] = Temp
@@ -2457,26 +2456,49 @@ class Erlang(Gamma):
         self._Parameters['Shape'] = Shape
         self._Parameters['Rate'] = Rate
         self._Cached = dict()
-        Temp = math.exp(Shape * math.log(Rate) - math.lgamma(Shape))
+        Temp = math.pow(Rate, Shape) / math.factorial(Shape - 1)
         self._Cached['Factor'] = Temp #correction factor for PDF
         self._Cached['Q1'] = None #cached first quartile
         self._Cached['Q3'] = None #cached third quartile
         self._Cached['Median'] = None
     
+    #private methods
+    
+    def _pdf(self, x: sf.TReal) -> float:
+        """
+        The actual implementation of the PDF function.
+        
+        Signature
+            int OR float -> float >= 0
+        
+        Version 1.0.0.0
+        """
+        Shape = self._Parameters['Shape']
+        Rate = self._Parameters['Rate']
+        Factor = self._Cached['Factor']
+        if x > 0:
+            Result= Factor * math.pow(x, Shape - 1) * math.exp(- Rate * x)
+        else:
+            if Shape > 1:
+                Result = 0
+            else:
+                Result = Rate
+        return Result
+
     #public properties
     
     @property
-    def Shape(self) -> int:
+    def Shape(self) -> sf.TReal:
         """
         Property for the shape parameter of the distribution.
         
         Signature:
-            None -> int > 0
+            None -> int > 0 OR float > 0
         
         Version 1.0.0.0
         """
         return self._Parameters['Shape']
-    
+
     @Shape.setter
     def Shape(self, Value: int) -> None:
         """
@@ -2498,7 +2520,45 @@ class Erlang(Gamma):
         self._Parameters['Shape'] = Value
         Shape = Value
         Rate = self._Parameters['Rate']
-        Temp = math.exp(Shape * math.log(Rate) - math.lgamma(Shape))
+        Temp = math.pow(Rate, Shape) / math.factorial(Shape - 1)
+        for Key in self._Cached.keys():
+            self._Cached[Key] = None
+        self._Cached['Factor'] = Temp
+    
+    @property
+    def Rate(self) -> sf.TReal:
+        """
+        Property for the rate parameter of the distribution.
+        
+        Signature:
+            None -> int > 0 OR float > 0
+        
+        Version 1.0.0.0
+        """
+        return self._Parameters['Rate']
+
+    @Rate.setter
+    def Rate(self, Value: sf.TReal) -> None:
+        """
+        Setter method for the rate parameter of the distribution.
+        
+        Signature:
+            int > 0 OR float > 0 -> None
+        
+        Raises:
+            UT_TypeError: passed value is not a real number
+            UT_ValueError: passed value is not positive
+        
+        Version 1.0.0.0
+        """
+        if not isinstance(Value, (int, float)):
+            raise UT_TypeError(Value, (int, float), SkipFrames = 1)
+        if Value <= 0:
+            raise UT_ValueError(Value, '> 0 - rate parameter', SkipFrames = 1)
+        self._Parameters['Rate'] = Value
+        Rate = Value
+        Shape = self._Parameters['Shape']
+        Temp = math.pow(Rate, Shape) / math.factorial(Shape - 1)
         for Key in self._Cached.keys():
             self._Cached[Key] = None
         self._Cached['Factor'] = Temp

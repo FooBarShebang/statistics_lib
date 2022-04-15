@@ -13,7 +13,9 @@ $module(distribution_classes) {
     
     $class(Student)
     
-    $class(ChiSquare)
+    $class(ChiSquared)
+
+    $class(F_Distribution)
     
     $class(Gamma)
 
