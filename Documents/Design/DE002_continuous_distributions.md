@@ -417,12 +417,22 @@ The following statistical properties are defined:
 
 All quantiles, including quartiles must be calculated from CDF using numerical methods.
 
+Note the degenerative cases:
+
+* p = 0, when p(0) = 1 and p(k > 0) = 0
+* p = 1, when p(k = n) = 1 and p(k < n) = 0
+* n = 0, when p(0) = 1 and k = 0 is the only possible outcome
+
+These cases should not be supported, therefore the moments are always defined.
+
 ## Geometric distribution
 
 The *geometric distribution* is either of two discrete probability distributions describing:
 
 * the number *X* of Bernoulli trials (indendent draws with replacement and two possible outcomes) needed to get one success - supported on the $k \in \mathbb{N}$
 * the number *Y = X -1* of failures before the first success - supported on the $k \geq 0, \; k \in \mathbb{Z}$
+
+In the both cases the degenerative cases of p = 0 and p = 1 should be excluded, thus $p \in (0, 1)$ is the accepted range of the distribution`s parameter.
 
 Its PMF and CDF are defined as:
 

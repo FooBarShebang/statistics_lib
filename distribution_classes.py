@@ -20,7 +20,7 @@ Classes:
 """
 
 __version__= '1.0.0.0'
-__date__ = '15-04-2022'
+__date__ = '19-04-2022'
 __status__ = 'Testing'
 
 #imports
@@ -51,7 +51,7 @@ from introspection_lib.base_exceptions import UT_TypeError, UT_ValueError
 
 import statistics_lib.special_functions as sf
 
-#+ classes
+# classes
 
 class ContinuousDistributionABC(abc.ABC):
     """
@@ -148,30 +148,48 @@ class ContinuousDistributionABC(abc.ABC):
         if abs(y - x) <= Precision: #instant hit
             Result = Point
         else: #need to find an interval below or above self.Mean -> find a frame
-            #+ self.Sigma width at max, where the value lays
+            #+ where the value lays
             Result = None
+            Left = Point
+            Right = Point
             if y < x: #between self.Mean and self.Max
-                Left = Point
-                while Left < Max:
-                    Right = min(Left + Sigma, Max)
-                    z = self._cdf(Right)
+                while Right < Max:
+                    Left = Right
+                    if Max < math.inf:
+                        Right = 0.5 * (Right + Max)
+                    else:
+                        if Right > Sigma:
+                            Right = 2 * Right
+                        else:
+                            Right += Sigma
+                    if Right == Max:
+                        z = 1
+                    else:
+                        z = self._cdf(Right)
                     if abs(z - x) <= Precision: #found solution
                         Result = Right
                         break
                     elif z > x: #found frame
                         break
-                    Left = Right
             else: #between self.Min and self.Mean
-                Right = Point
-                while Right > Min:
-                    Left = max(Right - Sigma, Min)
-                    z = self._cdf(Left)
+                while Left > Min:
+                    Right = Left
+                    if Min > (-math.inf):
+                        Left = 0.5 * (Left + Min)
+                    else:
+                        if Left < - Sigma:
+                            Left = 2 * Left
+                        else:
+                            Left = Right - Sigma
+                    if Left == Min:
+                        z = 0.0
+                    else:
+                        z = self._cdf(Left)
                     if abs(z - x) <= Precision: #found solution
                         Result = Left
                         break
                     elif z < x: #found frame
                         break
-                    Right = Left
             if Result is None: #only frame is found, not the solution
                 #narrow it down by bisection until the difference in either
                 #+ probability or in the value (position) is below the precision
@@ -607,7 +625,7 @@ class DiscreteDistributionABC(ContinuousDistributionABC):
         Version 1.0.0.0
         """
         Sigma = self.Sigma
-        if (Sigma is None) or (Sigma is math.inf):
+        if (Sigma is None) or (Sigma is math.inf) or (Sigma < 1.0):
             Sigma = 1 #fallback for distrbutions w/o defined variance
         Min = self.Min #should be integer
         Max = self.Max #can be integer or math.inf
@@ -619,41 +637,63 @@ class DiscreteDistributionABC(ContinuousDistributionABC):
         elif y > x: #just below self.Min - use linear extrapolation
             Result = Min - 1 + x /y
         else: #between self.Min and self.Max
-            Point = round(self.Mean) #check self.Mean
-            y = self._cdf(Point) 
+            if Max < math.inf:
+                Point = round(0.5 * (Min + Max))
+            else:
+                Point = math.floor(self.Mean) #check self.Mean
+            if Point < Max and Point >= Min:
+                y = self._cdf(Point)
+            elif Point < Min:
+                Point = Min
+                y = self._pdf(Min)
+            else:
+                y = 1.0
+                Point = Max
             if abs(y - x) <= Precision: #instant hit
                 Result = Point
             else: # below or above self.Mean -> find a frame self.Sigma width
                 #+ at max, where the value lays
                 Result = None
+                Left = Point
+                Right = Point
                 if y < x: #shift towards self.Max
-                    Left = Point
-                    while Left < Max:
+                    while Right < Max:
+                        Left = Right
                         Right = min(round(Left + Sigma), Max)
-                        z = self._cdf(Right)
+                        if Right < Max:
+                            z = self._cdf(Right)
+                        else:
+                            z = 1.0
+                            Right = Max
                         if abs(z - x) <= Precision: #found solution
                             Result = Right
                             break
                         elif z > x: #found the frame
                             break
-                        Left = Right
                 else: #shift towards self.Min
-                    Right = Point
-                    while Right > Min:
+                    while Left > Min:
+                        Right = Left
                         Left = max(round(Right - Sigma), Min)
-                        z = self._cdf(Left)
+                        if Left > Min:
+                            z = self._cdf(Left)
+                        else:
+                            z = self._pdf(Min)
                         if abs(z - x) <= Precision: #found solution
                             Result = Left
                             break
                         elif z < x: #found the frame
                             break
-                        Right = Left
                 if Result is None:
                     #a frame with width <= self.Sigma is found - narrow it down
                     #+ to a single step = 1 using bisection
-                    Point = round(0.5 * (Left + Right))
                     while (Right - Left) > 1:
-                        y = self._cdf(Point)
+                        Point = round(0.5 * (Left + Right))
+                        if Point < Max:
+                            y = self._cdf(Point)
+                        else:
+                            y = 1
+                            Right = Max
+                            Left = Max - 1
                         if abs(y - x) <= Precision: #found solution
                             Result = Point
                             break
@@ -661,11 +701,14 @@ class DiscreteDistributionABC(ContinuousDistributionABC):
                             Right = Point
                         else:
                             Left = Point
-                        Point = round(0.5 * (Left + Right))
                     else: #solution is still not found
                         #+ use linear interpolation between two integer steps
                         LeftCDF = self._cdf(Left)
-                        Slope = self._cdf(Right) - LeftCDF
+                        if Right < Max:
+                            RightCDF = self._cdf(Right)
+                        else:
+                            RightCDF = 1.0
+                        Slope = RightCDF - LeftCDF
                         Result = Left + (x - LeftCDF) / Slope
         return Result
     
@@ -2842,7 +2885,7 @@ class Binomial(DiscreteDistributionABC):
         Version 1.0.0.0
         """
         Prob = self._Parameters['Probability']
-        N = self._Cached['Draws']
+        N = self._Parameters['Draws']
         Result= sf.combination(N, x)*math.pow(Prob, x)*math.pow((1-Prob), (N-x))
         return Result
     
@@ -2856,7 +2899,7 @@ class Binomial(DiscreteDistributionABC):
         1.0.0.0
         """
         Prob = self._Parameters['Probability']
-        N = self._Cached['Draws']
+        N = self._Parameters['Draws']
         Result = sf.beta_incomplete_reg(1 - Prob, N - x, 1 + x)
         return Result
 
@@ -2923,8 +2966,8 @@ class Binomial(DiscreteDistributionABC):
         
         Version 1.0.0.0
         """
-        if not isinstance(Value, float):
-            raise UT_TypeError(Value, float, SkipFrames = 1)
+        if not isinstance(Value, int):
+            raise UT_TypeError(Value, int, SkipFrames = 1)
         if Value <= 0:
             raise UT_ValueError(Value, '> 0 - draws parameter', SkipFrames = 1)
         self._Parameters['Draws'] = Value
