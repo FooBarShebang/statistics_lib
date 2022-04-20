@@ -20,7 +20,7 @@ Classes:
 """
 
 __version__= '1.0.0.0'
-__date__ = '19-04-2022'
+__date__ = '20-04-2022'
 __status__ = 'Testing'
 
 #imports
@@ -147,12 +147,11 @@ class ContinuousDistributionABC(abc.ABC):
         y = self._cdf(Point)
         if abs(y - x) <= Precision: #instant hit
             Result = Point
-        else: #need to find an interval below or above self.Mean -> find a frame
-            #+ where the value lays
+        else: # find an interval below or above 1st point where the value lays
             Result = None
             Left = Point
             Right = Point
-            if y < x: #between self.Mean and self.Max
+            if y < x: #between 1st and self.Max
                 while Right < Max:
                     Left = Right
                     if Max < math.inf:
@@ -162,7 +161,7 @@ class ContinuousDistributionABC(abc.ABC):
                             Right = 2 * Right
                         else:
                             Right += Sigma
-                    if Right == Max:
+                    if Right >= Max:
                         z = 1
                     else:
                         z = self._cdf(Right)
@@ -171,7 +170,7 @@ class ContinuousDistributionABC(abc.ABC):
                         break
                     elif z > x: #found frame
                         break
-            else: #between self.Min and self.Mean
+            else: #between 1st and self.Min
                 while Left > Min:
                     Right = Left
                     if Min > (-math.inf):
@@ -419,7 +418,7 @@ class ContinuousDistributionABC(abc.ABC):
         if not isinstance(x, (int, float)):
             raise UT_TypeError(x, (int, float), SkipFrames = 1)
         if x < self.Min or x >= self.Max:
-            Result = 0
+            Result = 0.0
         else:
             Result = self._pdf(x)
         return Result
@@ -443,9 +442,9 @@ class ContinuousDistributionABC(abc.ABC):
         if not isinstance(x, (int, float)):
             raise UT_TypeError(x, (int, float), SkipFrames = 1)
         if x <= self.Min:
-            Result = 0
+            Result = 0.0
         elif x >= self.Max:
-            Result = 1
+            Result = 1.0
         else:
             Result = self._cdf(x)
         return Result
@@ -632,84 +631,103 @@ class DiscreteDistributionABC(ContinuousDistributionABC):
         Precision = 1.0E-8
         #check for x <= self.pdf(self.Min)
         y = self._pdf(Min)
-        if abs(y - x) <= Precision: #instant hit
-            Result = Min
-        elif y > x: #just below self.Min - use linear extrapolation
-            Result = Min - 1 + x /y
+        if abs(y - x) <= Precision: #in vicinity!
+            Result = float(Min)
+        elif y > x: #just below self.Min
+            Result = Min - 1.0 + x / y
         else: #between self.Min and self.Max
-            if Max < math.inf:
+            if Max < math.inf: #max boundary is finite - get mid-point
                 Point = round(0.5 * (Min + Max))
+            else: #check self.Mean
+                Mean = self.Mean
+                if (Mean is None) or (Mean is math.inf):
+                    Point = round(Min + 3 * Sigma)
+                else:
+                    Point = math.ceil(Mean)
+            if Point > Min:
+                z = self._cdf(Point)
             else:
-                Point = math.floor(self.Mean) #check self.Mean
-            if Point < Max and Point >= Min:
-                y = self._cdf(Point)
-            elif Point < Min:
                 Point = Min
-                y = self._pdf(Min)
-            else:
-                y = 1.0
-                Point = Max
-            if abs(y - x) <= Precision: #instant hit
-                Result = Point
-            else: # below or above self.Mean -> find a frame self.Sigma width
-                #+ at max, where the value lays
+                z = self._pdf(Min)
+            if abs(z - x) <= Precision: #in vicinity!
+                Result = float(Point)
+            else: # find an interval below or above 1st point where the value is
                 Result = None
                 Left = Point
                 Right = Point
-                if y < x: #shift towards self.Max
+                if z < x: #shift towards self.Max
                     while Right < Max:
                         Left = Right
-                        Right = min(round(Left + Sigma), Max)
+                        if Max < math.inf:
+                            Right = math.ceil(0.5 * (Right + Max))
+                        else:
+                            if Right > Sigma:
+                                Right = round(2 * Right)
+                            else:
+                                Right += round(2 * Sigma)
                         if Right < Max:
                             z = self._cdf(Right)
                         else:
                             z = 1.0
                             Right = Max
-                        if abs(z - x) <= Precision: #found solution
-                            Result = Right
+                        if abs(z - x) <= Precision: #in vicinity!
+                            Result = float(Right)
                             break
                         elif z > x: #found the frame
                             break
                 else: #shift towards self.Min
                     while Left > Min:
                         Right = Left
-                        Left = max(round(Right - Sigma), Min)
+                        Left = math.floor(0.5 * (Left + Min))
                         if Left > Min:
                             z = self._cdf(Left)
                         else:
                             z = self._pdf(Min)
-                        if abs(z - x) <= Precision: #found solution
-                            Result = Left
+                            Left = Min
+                        if abs(z - x) <= Precision: #in vicinity!
+                            Result = float(Left)
                             break
                         elif z < x: #found the frame
                             break
-                if Result is None:
-                    #a frame with width <= self.Sigma is found - narrow it down
-                    #+ to a single step = 1 using bisection
+                if Result is None:#only frame is found, not the solution
+                    #+ narrow it down by bisection until the difference in
+                    #+ probability is below the precision or the frame width
+                    #+ is of unity width
+                    Point = round(0.5 * (Left + Right))
                     while (Right - Left) > 1:
-                        Point = round(0.5 * (Left + Right))
                         if Point < Max:
-                            y = self._cdf(Point)
+                            z = self._cdf(Point)
                         else:
-                            y = 1
                             Right = Max
                             Left = Max - 1
-                        if abs(y - x) <= Precision: #found solution
-                            Result = Point
+                            if self._pdf(Max) < Precision:
+                                Result = float(Left)
                             break
-                        elif y > x:
-                            Right = Point
+                        if abs(z - x) <= Precision: #in vicinity!
+                            Result = float(Point)
+                            break
+                        elif z > x:
+                            if Point > Left:
+                                Right = Point
+                                Point = math.ceil(0.5 * (Left + Right))
+                            else:
+                                Right = Left + 1
+                                break
                         else:
-                            Left = Point
-                    else: #solution is still not found
+                            if Point < Right:
+                                Left = Point
+                                Point = math.floor(0.5 * (Left + Right))
+                            else:
+                                Left = Right - 1
+                                break
+                    if Result is None: #solution is still not found
                         #+ use linear interpolation between two integer steps
-                        LeftCDF = self._cdf(Left)
-                        if Right < Max:
-                            RightCDF = self._cdf(Right)
+                        Delta = self._pdf(Right)
+                        if Delta >= Precision:
+                            LeftCDF = self._cdf(Left)
+                            Result = float(Left + (x - LeftCDF) / Delta)
                         else:
-                            RightCDF = 1.0
-                        Slope = RightCDF - LeftCDF
-                        Result = Left + (x - LeftCDF) / Slope
+                            Result = float(Left)
         return Result
     
     #public instance methods
@@ -733,9 +751,9 @@ class DiscreteDistributionABC(ContinuousDistributionABC):
         if not isinstance(x, (int, float)):
             raise UT_TypeError(x, (int, float), SkipFrames = 1)
         if x < self.Min or x > self.Max:
-            Result = 0
+            Result = 0.0
         elif not isinstance(x, int):
-            Result = 0
+            Result = 0.0
         else:
             Result = self._pdf(x)
         return Result
@@ -760,9 +778,9 @@ class DiscreteDistributionABC(ContinuousDistributionABC):
             raise UT_TypeError(x, (int, float), SkipFrames = 1)
         x_floor = int(math.floor(x))
         if x_floor >= self.Max:
-            Result = 1
+            Result = 1.0
         elif x_floor < self.Min:
-            Result = 0
+            Result = 0.0
         else:
             Result = self._cdf(x_floor)
         return Result

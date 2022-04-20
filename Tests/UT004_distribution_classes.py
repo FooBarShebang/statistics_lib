@@ -8,7 +8,7 @@ plan / report TE004_distribution_classes.md
 
 
 __version__= '1.0.0.0'
-__date__ = '19-04-2022'
+__date__ = '20-04-2022'
 __status__ = 'Testing'
 
 #imports
@@ -1737,8 +1737,8 @@ class Test_ChiSquared(Test_Student):
                 self.assertIsInstance(TestResult, float)
                 self.assertGreater(TestResult, objTest.Min)
                 self.assertLess(TestResult, objTest.Max)
-                self.assertAlmostEqual(TestResult, Value,
-                                                places = FLOAT_CHECK_PRECISION)
+                Delta = Value / 10
+                self.assertAlmostEqual(TestResult, Value, delta = Delta)
             Degree = random.randint(1, 100)
             if random.random() > 0.5:
                 Degree -= random.random()
@@ -3477,9 +3477,10 @@ class Test_Poisson(Test_DiscreteDistributionABC):
                 Delta = random.random()
                 Temp += Delta * objTest.pdf(Value + 1)
                 TestResult = objTest.qf(Temp)
+                msgError = '{} at {} + {}'.format(objTest, Value, Delta)
                 self.assertIsInstance(TestResult, (int, float))
                 self.assertAlmostEqual(TestResult, Value + Delta,
-                                                places = FLOAT_CHECK_PRECISION)
+                                                places = FLOAT_CHECK_PRECISION, msg = msgError)
             #special case
             Delta = random.random()
             Temp = Delta * objTest.pdf(0)
@@ -3522,7 +3523,7 @@ class Test_Poisson(Test_DiscreteDistributionABC):
             objTest.Rate = Rate
         del objTest
 
-class Test_Binomial(Test_DiscreteDistributionABC):
+class Test_Binomial(Test_Poisson):
     """
     Unittests for Binomial class from the module
     statistics_lib.distribution_classes.
@@ -3545,8 +3546,10 @@ class Test_Binomial(Test_DiscreteDistributionABC):
         """
         Draws = random.randint(1, 10)
         Probability = random.random()
-        if Probability < 0.01:
-            Probability = 0.01
+        if Probability < 0.1:
+            Probability = 0.1
+        elif Probability > 0.9:
+            Probability = 0.9
         self.DefArguments = (Probability, Draws)
     
     def test_init(self) -> None:
@@ -3560,8 +3563,10 @@ class Test_Binomial(Test_DiscreteDistributionABC):
         for _ in range(100):
             Draws = random.randint(1, 10)
             Probability = random.random()
-            if Probability < 0.01:
-                Probability = 0.01
+            if Probability < 0.1:
+                Probability = 0.1
+            elif Probability > 0.9:
+                Probability = 0.9
             objTest = self.TestClass(Probability, Draws)
             Mean = Draws * Probability
             self.assertAlmostEqual(objTest.Mean, Mean)
@@ -3640,8 +3645,10 @@ class Test_Binomial(Test_DiscreteDistributionABC):
         for _ in range(100):
             Draws = random.randint(1, 10)
             Probability = random.random()
-            if Probability < 0.01:
-                Probability = 0.01
+            if Probability < 0.1:
+                Probability = 0.1
+            elif Probability > 0.9:
+                Probability = 0.9
             objTest = self.TestClass(Probability, Draws)
             for Name in self.Properties:
                 self.assertTrue(hasattr(objTest, Name))
@@ -3667,14 +3674,16 @@ class Test_Binomial(Test_DiscreteDistributionABC):
         for _ in range(100):
             Draws = random.randint(1, 10)
             Probability = random.random()
-            if Probability < 0.01:
-                Probability = 0.01
+            if Probability < 0.1:
+                Probability = 0.1
+            elif Probability > 0.9:
+                Probability = 0.9
             objTest.Draws = Draws
             objTest.Probability = Probability
             self.assertAlmostEqual(objTest.Probability, Probability)
             self.assertEqual(objTest.Draws, Draws)
-            self.assertAlmostEqual(objTest.Mean, Mean)
             Mean = Draws * Probability
+            self.assertAlmostEqual(objTest.Mean, Mean)
             Var = Mean * (1 - Probability)
             self.assertAlmostEqual(objTest.Sigma, math.sqrt(Var))
             self.assertGreaterEqual(objTest.Median, math.floor(Mean) - 1)
@@ -3742,183 +3751,6 @@ class Test_Binomial(Test_DiscreteDistributionABC):
             objTest.Probability = 0.0
         del objTest
     
-    def test_pdf_TypeError(self) -> None:
-        """
-        Checks that TypeError or its sub-class exception is raised if the
-        function being tested recieves improper data type argument(s).
-        
-        Test ID: TEST-T-407
-        Requirements: REQ-AWM-400
-        """
-        objTest = self.TestClass(*self.DefArguments)
-        for Value in ('1', [1], (1, 2), {1: 1}, int, float, bool):
-            with self.assertRaises(TypeError):
-                objTest.pdf(Value)
-        del objTest
-    
-    def test_cdf_TypeError(self) -> None:
-        """
-        Checks that TypeError or its sub-class exception is raised if the
-        function being tested recieves improper data type argument(s).
-        
-        Test ID: TEST-T-407
-        Requirements: REQ-AWM-400
-        """
-        objTest = self.TestClass(*self.DefArguments)
-        for Value in ('1', [1], (1, 2), {1: 1}, int, float, bool):
-            with self.assertRaises(TypeError):
-                objTest.cdf(Value)
-        del objTest
-    
-    def test_qf_TypeError(self) -> None:
-        """
-        Checks that TypeError or its sub-class exception is raised if the
-        function being tested recieves improper data type argument(s).
-        
-        Test ID: TEST-T-407
-        Requirements: REQ-AWM-400
-        """
-        objTest = self.TestClass(*self.DefArguments)
-        for Value in ('1', [1], (1, 2), {1: 1}, int, float, bool, 1, 3, -2):
-            with self.assertRaises(TypeError):
-                objTest.qf(Value)
-        del objTest
-    
-    def test_qf_ValueError(self) -> None:
-        """
-        Checks that ValueError or its sub-class exception is raised if the
-        function being tested recieves improper value argument(s).
-        
-        Test ID: TEST-T-408
-        Requirements: REQ-AWM-401
-        """
-        objTest = self.TestClass(*self.DefArguments)
-        for _ in range(10):
-            Value = random.random() + random.randint(1, 10)
-            with self.assertRaises(ValueError):
-                objTest.qf(Value)
-            Value = random.random() - random.randint(1, 10)
-            with self.assertRaises(ValueError):
-                objTest.qf(Value)
-        with self.assertRaises(ValueError):
-            objTest.qf(0.0)
-        with self.assertRaises(ValueError):
-            objTest.qf(1.0)
-        del objTest
-    
-    def test_getQuantile_TypeError(self) -> None:
-        """
-        Checks that TypeError or its sub-class exception is raised if the
-        function being tested recieves improper data type argument(s).
-        
-        Test ID: TEST-T-407
-        Requirements: REQ-AWM-400
-        """
-        objTest = self.TestClass(*self.DefArguments)
-        for Value in ('1', [1], (1, 2), {1: 1}, int, float, bool, 1.0):
-            with self.assertRaises(TypeError):
-                objTest.getQuantile(Value, 1)
-            with self.assertRaises(TypeError):
-                objTest.getQuantile(1, Value)
-            with self.assertRaises(TypeError):
-                objTest.getQuantile(Value, Value)
-        del objTest
-    
-    def test_getQuantile_ValueError(self) -> None:
-        """
-        Checks that ValueError or its sub-class exception is raised if the
-        function being tested recieves improper value argument(s).
-        
-        Test ID: TEST-T-408
-        Requirements: REQ-AWM-401
-        """
-        objTest = self.TestClass(*self.DefArguments)
-        for _ in range(10):
-            Value = random.randint(1, 10)
-            with self.assertRaises(ValueError):
-                objTest.getQuantile(-Value, 1)
-            with self.assertRaises(ValueError):
-                objTest.getQuantile(1, -Value)
-            with self.assertRaises(ValueError):
-                objTest.getQuantile(-Value, -Value)
-            with self.assertRaises(ValueError):
-                objTest.getQuantile(2 + Value, 2)
-            with self.assertRaises(ValueError):
-                objTest.getQuantile(Value, Value)
-            with self.assertRaises(ValueError):
-                objTest.getQuantile(0, Value)
-            with self.assertRaises(ValueError):
-                objTest.getQuantile(Value, 0)
-        with self.assertRaises(ValueError):
-            objTest.getQuantile(0, 0)
-        del objTest
-    
-    def test_getHistogram_TypeError(self) -> None:
-        """
-        Checks that TypeError or its sub-class exception is raised if the
-        function being tested recieves improper data type argument(s).
-        
-        Test ID: TEST-T-407
-        Requirements: REQ-AWM-400
-        """
-        objTest = self.TestClass(*self.DefArguments)
-        for Value in ('1', [1], (1, 2), {1: 1}, int, float, bool):
-            with self.assertRaises(TypeError):
-                objTest.getHistogram(Value, 1, 4)
-            with self.assertRaises(TypeError):
-                objTest.getHistogram(1, Value, 4)
-            with self.assertRaises(TypeError):
-                objTest.getHistogram(Value, Value, 4)
-            with self.assertRaises(TypeError):
-                objTest.getHistogram(Value, Value, Value)
-            with self.assertRaises(TypeError):
-                objTest.getHistogram(1, 4, Value)
-        with self.assertRaises(TypeError):
-                objTest.getHistogram(1, 4, 2.0)
-        del objTest
-    
-    def test_getHistogram_ValueError(self) -> None:
-        """
-        Checks that ValueError or its sub-class exception is raised if the
-        function being tested recieves improper value argument(s).
-        
-        Test ID: TEST-T-408
-        Requirements: REQ-AWM-401
-        """
-        objTest = self.TestClass(*self.DefArguments)
-        for _ in range(10):
-            Value = random.random()
-            with self.assertRaises(ValueError):
-                objTest.getHistogram(Value, 1 + Value, 1)
-            with self.assertRaises(ValueError):
-                objTest.getHistogram(Value, 1 + Value, 0)
-            with self.assertRaises(ValueError):
-                objTest.getHistogram(Value, 1 + Value, - random.randint(1, 10))
-            with self.assertRaises(ValueError):
-                objTest.getHistogram(Value, Value, 20)
-            with self.assertRaises(ValueError):
-                objTest.getHistogram(Value + random.random() +0.0001, Value, 20)
-        del objTest
-    
-    def test_Properties(self) -> None:
-        """
-        Checks that the class has all required properties, and they are
-        read-only unless the statistical property is also a parameter of the
-        distribution. Also checks that all statistical properties are real
-        numbers.
-        
-        Test ID: TEST-T-403
-        Requirements: REQ-FUN-403
-        """
-        objTest = self.TestClass(*self.DefArguments)
-        for Name in self.Properties:
-            self.assertIsInstance(getattr(objTest, Name), (int, float))
-            with self.assertRaises(AttributeError):
-                delattr(objTest, Name)
-            if not (Name in self.Parameters):
-                with self.assertRaises(AttributeError):
-                    setattr(objTest, Name, 1)
-    
     def test_pdf(self) -> None:
         """
         Checks the implementation of the pdf() method.
@@ -3928,29 +3760,34 @@ class Test_Binomial(Test_DiscreteDistributionABC):
         """
         objTest = self.TestClass(*self.DefArguments)
         for _ in range(10):
-            Rate = objTest.Rate
+            Draws = objTest.Draws
+            Prob = objTest.Probability
             for _ in range(100):
-                Value = random.randint(0, 2 + 2 * math.floor(Rate))
+                Value = random.randint(0, Draws)
                 TestResult = objTest.pdf(Value)
                 self.assertIsInstance(TestResult, float)
                 self.assertGreater(TestResult, 0)
-                Temp = math.pow(Rate, Value) * math.exp(- Rate)
-                CheckValue = Temp / math.factorial(Value)
+                CheckValue= sf.combination(Draws, Value) * math.pow(Prob, Value)
+                CheckValue *= math.pow(1 - Prob, Draws - Value)
                 self.assertAlmostEqual(TestResult, CheckValue,
                                                 places = FLOAT_CHECK_PRECISION)
-                TestResult = objTest.pdf(- Value - 1)
+                TestResult = objTest.pdf(- Value - 1) #negative int
+                self.assertEqual(TestResult, 0)
+                TestResult = objTest.pdf(Draws + random.randint(1, 10)) #int>Max
                 self.assertEqual(TestResult, 0)
                 Value += random.random()
-                TestResult = objTest.pdf(Value)
+                TestResult = objTest.pdf(Value) #positive float
                 self.assertEqual(TestResult, 0)
-                TestResult = objTest.pdf(- Value - 1)
+                TestResult = objTest.pdf(- Value - 1) #negative float
                 self.assertEqual(TestResult, 0)
-            Rate = random.randint(1, 10)
-            if random.random() > 0.5:
-                Rate -= random.random()
-            if Rate < 0.1:
-                Rate = 0.1
-            objTest.Rate = Rate
+            Draws = random.randint(1, 10)
+            Probability = random.random()
+            if Probability < 0.1:
+                Probability = 0.1
+            elif Probability > 0.9:
+                Probability = 0.9
+            objTest.Draws = Draws
+            objTest.Probability = Probability
         del objTest
     
     def test_cdf(self) -> None:
@@ -3962,9 +3799,9 @@ class Test_Binomial(Test_DiscreteDistributionABC):
         """
         objTest = self.TestClass(*self.DefArguments)
         for _ in range(10):
-            Rate = objTest.Rate
+            Draws = objTest.Draws
             for _ in range(100):
-                Value = random.randint(0, 2 + 2 * math.floor(Rate))
+                Value = random.randint(0, Draws)
                 TestResult = objTest.cdf(Value)
                 self.assertIsInstance(TestResult, float)
                 self.assertGreater(TestResult, 0)
@@ -3973,20 +3810,24 @@ class Test_Binomial(Test_DiscreteDistributionABC):
                                                 for Item in range(0, Value + 1))
                 self.assertAlmostEqual(TestResult, CheckValue,
                                                 places = FLOAT_CHECK_PRECISION)
-                TestResult = objTest.cdf(- Value - 1)
+                TestResult = objTest.cdf(- Value - 1) #neg int
                 self.assertEqual(TestResult, 0)
+                TestResult = objTest.cdf(Draws + random.randint(1, 10)) #int>Max
+                self.assertEqual(TestResult, 1)
                 Value += random.random()
                 TestResult = objTest.cdf(Value)
                 self.assertAlmostEqual(TestResult, CheckValue,
                                                 places = FLOAT_CHECK_PRECISION)
-                TestResult = objTest.cdf(- Value - 1)
+                TestResult = objTest.cdf(- Value - 1) #negative float
                 self.assertEqual(TestResult, 0)
-            Rate = random.randint(1, 10)
-            if random.random() > 0.5:
-                Rate -= random.random()
-            if Rate < 0.1:
-                Rate = 0.1
-            objTest.Rate = Rate
+            Draws = random.randint(1, 10)
+            Probability = random.random()
+            if Probability < 0.1:
+                Probability = 0.1
+            elif Probability > 0.9:
+                Probability = 0.9
+            objTest.Draws = Draws
+            objTest.Probability = Probability
         del objTest
     
     def test_qf(self) -> None:
@@ -3998,33 +3839,42 @@ class Test_Binomial(Test_DiscreteDistributionABC):
         """
         objTest = self.TestClass(*self.DefArguments)
         for _ in range(10):
-            Rate = objTest.Rate
+            Draws = objTest.Draws
             for _ in range(100):
-                Value = random.randint(0, 2 + 2 * math.floor(Rate))
+                Value = random.randint(0, Draws - 1)
                 Temp = objTest.cdf(Value)
                 TestResult = objTest.qf(Temp)
                 self.assertIsInstance(TestResult, (int, float))
-                self.assertAlmostEqual(TestResult, Value,
+                if (1 - Temp) >= FLOAT_CHECK_PRECISION:
+                    self.assertAlmostEqual(TestResult, Value,
                                                 places = FLOAT_CHECK_PRECISION)
-                Delta = random.random()
-                Temp += Delta * objTest.pdf(Value + 1)
-                TestResult = objTest.qf(Temp)
-                self.assertIsInstance(TestResult, (int, float))
-                self.assertAlmostEqual(TestResult, Value + Delta,
+                    Delta = random.random()
+                    DeltaCDF = Delta * objTest.pdf(Value + 1)
+                    if DeltaCDF > 1.0E-8:
+                        Temp += Delta * objTest.pdf(Value + 1)
+                        TestResult = objTest.qf(Temp)
+                        self.assertIsInstance(TestResult, (int, float))
+                        self.assertAlmostEqual(TestResult, Value + Delta,
                                                 places = FLOAT_CHECK_PRECISION)
             #special case
             Delta = random.random()
             Temp = Delta * objTest.pdf(0)
             TestResult = objTest.qf(Temp)
             self.assertIsInstance(TestResult, float)
-            self.assertAlmostEqual(TestResult, -1 + Delta,
+            if Temp >= FLOAT_CHECK_PRECISION:
+                self.assertAlmostEqual(TestResult, -1 + Delta,
                                                 places = FLOAT_CHECK_PRECISION)
-            Rate = random.randint(1, 10)
-            if random.random() > 0.5:
-                Rate -= random.random()
-            if Rate < 0.1:
-                Rate = 0.1
-            objTest.Rate = Rate
+            else:
+                self.assertGreaterEqual(TestResult, objTest.Min - 1)
+                self.assertLessEqual(TestResult, objTest.Min)
+            Draws = random.randint(1, 10)
+            Probability = random.random()
+            if Probability < 0.1:
+                Probability = 0.1
+            elif Probability > 0.9:
+                Probability = 0.9
+            objTest.Draws = Draws
+            objTest.Probability = Probability
         del objTest
     
     def test_getQuantile(self) -> None:
@@ -4046,12 +3896,14 @@ class Test_Binomial(Test_DiscreteDistributionABC):
                 CheckValue = objTest.qf(k/m)
                 self.assertAlmostEqual(TestResult, CheckValue,
                                                 places = FLOAT_CHECK_PRECISION)
-            Rate = random.randint(1, 10)
-            if random.random() > 0.5:
-                Rate -= random.random()
-            if Rate < 0.1:
-                Rate = 0.1
-            objTest.Rate = Rate
+            Draws = random.randint(1, 10)
+            Probability = random.random()
+            if Probability < 0.1:
+                Probability = 0.1
+            elif Probability > 0.9:
+                Probability = 0.9
+            objTest.Draws = Draws
+            objTest.Probability = Probability
         del objTest
 
 #+ test suites
@@ -4075,8 +3927,8 @@ TestSuite12 = unittest.TestLoader().loadTestsFromTestCase(Test_Binomial)
 TestSuite = unittest.TestSuite()
 TestSuite.addTests([TestSuite1, TestSuite2, TestSuite3, TestSuite4, TestSuite5,
                         TestSuite6, TestSuite7, TestSuite8, TestSuite9,
-                        TestSuite10, TestSuite11])
-#TestSuite.addTests([TestSuite12])
+                        TestSuite10, TestSuite11, TestSuite12])
+#TestSuite.addTests([TestSuite13])
 
 if __name__ == "__main__":
     sys.stdout.write(
