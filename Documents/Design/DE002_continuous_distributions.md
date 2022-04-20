@@ -609,24 +609,42 @@ Naturally, f(x) is the CDF, where y is the specified cummulative propability *p*
 
 Furthermore, for the discrete distributions $\{ x_1, x_2, ...\}$ (infinite) or $\{ x_1, x_2, ..., x_N\}$ (finite) an additional check must be performed, if $cdf(x_1) > p$, in which case $a = x_1 - 1$ and $b = a + 1 = x_1$ are immediately the terminal bounds.
 
-Then, the following procedure should be used for the selection of the *initial guesses*:
+Then, the following procedure should be used for the selection of the *initial guesses*, since one or both boundaries of the values supported by the distribution can be infinite:
 
-* Calculate $cdf(Mean)$ for continuous distribution or $cdf(\lfloor Mean \rfloor)$ for discreate and compare it with the passed *p* value:
-  * = p - the solution is found
-  * \< p - shift to the left (towards Min) using frames of 1 *Sigma* width, until:
-    * for a continuous distribution such $k \in \mathbb{N}$ is found that
-      * either $cdf(Mean - k \times Sigma) \leq p < cdf(Mean - (k-1) \times Sigma)$, then select $a=Mean - k \times Sigma$ and $b=Mean - (k-1) \times Sigma$
-      * or $Mean - k \times Sigma < Min \rightarrow 0 < p < cdf(Mean - (k-1) \times Sigma)$, then select $a=Min$ and $b=Mean - (k-1) \times Sigma$
-    * for a discrete distribution such $k \in \mathbb{N}$ is found that
-      * either $cdf(\lfloor Mean - k \times Sigma \rfloor) \leq p < cdf(\lfloor Mean - (k-1) \times Sigma \rfloor)$, then select $a=\lfloor Mean - k \times Sigma \rfloor$ and $b=\lfloor Mean - (k-1) \times Sigma \rfloor$
-      * or $\lfloor Mean - k \times Sigma \rfloor < Min \rightarrow 0 < p < cdf(\lfloor Mean - (k-1) \times Sigma \rfloor)$, then select $a=Min$ and $b=\lfloor Mean - (k-1) \times Sigma \rfloor $
-  * \> p - shift to the right (towards Max) using frames of 1 *Sigma* width, until:
-    * for a continuous distribution such $k \in \mathbb{N}$ is found that:
-      * either $cdf(Mean + (k - 1) \times Sigma) \leq p < cdf(Mean + k \times Sigma)$, then select $a=Mean + (k - 1) \times Sigma$ and $b=Mean + k \times Sigma$
-      * or $Mean + k \times Sigma > Max \rightarrow cdf(Mean + (k-1) \times Sigma) < p  < 1$, then select $a = Mean + (k-1) \times Sigma$ and $b = Max$
-    * for a discrete distribution such $k \in \mathbb{N}$ is found that:
-      * either $cdf(\lfloor Mean + (k - 1) \times Sigma \rfloor ) \leq p < cdf(\lfloor Mean + k \times Sigma \rfloor)$, then select $a=\lfloor Mean + (k - 1) \times Sigma \rfloor$ and $b=\lfloor Mean + k \times Sigma \rfloor$
-      * or $\lfloor Mean + k \times Sigma \rfloor > Max \rightarrow cdf(\lfloor Mean + (k-1) \times Sigma \rfloor) < p  < 1$, then select $a = \lfloor Mean + (k-1) \times Sigma \rfloor$ and $b = Max$
+* Select an initial point $x_0$ between *Max* and *Min* boundaries of the values supported by the distibution:
+  * If both *Max* and *Min* are finite - select 0.5 * (Max + Min)
+  * Else:
+    * If *Mean* property is defined for the distribution - select it
+    * Otherwise:
+      * If *Min* is finite - select $Min + 3 * \sigma$
+      * Else if *Max* is finite - select $Max - 3 * \sigma*$
+      * Otherwise (both bounds are infinite) - select 0 (zero value)
+* Note that if the standard deviation is not defined for the distribution, or it is infinite, use $\sigma = 1$ value instead, also if actual standard deviation < 1 for a discrete distribution
+* Calculate $cdf(x_0)$ for continuous distribution or $cdf(\lfloor x_0 \rfloor)$ for discrete and compare it with the passed *p* value:
+  * $\approx$ p - the solution is found
+  * \< p - shift to the left (towards *Min*) using the following algorithm:
+    * set upper boundary $Right = x_0$
+    * select new lower boundary $Left = x_0$ and shift it as:
+      * if $Min > - \infin$ set $Left \rightarrow (Min + Left) / 2$
+      * else:
+        * if $Left \leq - \sigma$ set $Left \rightarrow 2 * Left$
+        * else set $Left \rightarrow Left - \sigma$
+    * compare $cdf(Left)$ with *p*
+      * if $cdf(Left) \approx p$ - *Left* is the solution
+      * else if $cdf(Left) < p$ - the boundaries *Left* and *Right* are found
+      * else set $Right \rightarrow Left$ and keep on shifting *Left* until a solution or the proper frame boundaries are found
+  * \> p - shift to the right (towards *Max*) using using the following algorithm:
+    * set lower boundary $Left = x_0$
+    * select new lower boundary $Right = x_0$ and shift it as:
+      * if $Max < \infin$ set $Right \rightarrow (Max + Right) / 2$
+      * else:
+        * if $Right \geq  \sigma$ set $Right \rightarrow 2 * Left$
+        * else set $Right \rightarrow Right + \sigma$
+    * compare $cdf(Right)$ with *p*
+      * if $cdf(Right) \approx p$ - *Right* is the solution
+      * else if $cdf(Right) > p$ - the boundaries *Left* and *Right* are found
+      * else set $Left \rightarrow Right$ and keep on shifting *Right* until a solution or the proper frame boundaries are found
+* In the case of a discrete distribution the *Left* boundary is *floored* to an integer, and *Right* boundary is *ceiled* to an integer
 
 The described modifications to the bisection method takes extend the method for the cases of:
 

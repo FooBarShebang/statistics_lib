@@ -40,10 +40,10 @@ FILE_PATH = os.path.join(TEST_FOLDER, 'DT004_test_results.txt')
 
 TEST_CLASSES = (dc.Z_Distribution, dc.Gaussian, dc.Exponential, dc.Student,
                 dc.ChiSquared, dc.F_Distribution, dc.Gamma, dc.Erlang,
-                dc.Poisson, dc.Binomial)
+                dc.Poisson, dc.Binomial, dc.Geometric)
 
 PARAMETERS = (None, (1.5, 0.5), (0.5, ), (5, ), (5, ), (7, 9), (7.5, 1.0),
-                (7, 2.0), (10.5, ), (0.4, 100))
+                (7, 2.0), (10.5, ), (0.4, 100), (0.1, ))
 
 N_POINTS = 10000
 
