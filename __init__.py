@@ -27,14 +27,24 @@ Modules:
         gamma functions; as well as wrappers for (Python v >= 3.8) / actual
         implementation (Python v < 3.8) of the combinatorics functions for
         permutation and combinations.
+    distribution_classes: Provides classes implementing a number of commonly
+        used discrete and continuous distributions. All classes have properties
+        returning the basic statistical properties of the distribution: mean,
+        median, the first and the third quartile, variance and standard
+        deviation, skewness and excess kurtosis. They also have methods to
+        calculate PDF / PMF and CDF for a given value, QF and a generic k-th of
+        m quantile, with 0 < k < m, as well as a histogram of the distribution
+        within specific bounds and with the specified number of bins. The
+        parameters of a distribution are defined during instantiation, and they
+        can be changed later via setter properties.
 
 """
 
 __project__ = 'Statistics of the measurements with experimental uncertainties'
-__version_info__= (0, 5, 0)
+__version_info__= (0, 6, 0)
 __version_suffix__= '-dev1'
 __version__= ''.join(['.'.join(map(str, __version_info__)), __version_suffix__])
-__date__ = '07-04-2022'
+__date__ = '21-04-2022'
 __status__ = 'Development'
 __author__ = 'Anton Azarov'
 __maintainer__ = 'a.azarov@diagnoptics.com'
@@ -42,4 +52,4 @@ __license__ = 'Public Domain'
 __copyright__ = 'Diagnoptics Technologies B.V.'
 
 __all__ = ['base_functions', 'ordered_functions', 'data_classes',
-            'special_functions']
+            'special_functions', 'distribution_classes']

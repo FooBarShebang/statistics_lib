@@ -2,6 +2,16 @@
 """
 Module statistics_lib.distribution_classes
 
+Provides classes implementing a number of commonly used discrete and continuous
+distributions. All classes have properties returning the basic statistical
+properties of the distribution: mean, median, the first and the third quartile,
+variance and standard deviation, skewness and excess kurtosis. They also have
+methods to calculate PDF / PMF and CDF for a given value, QF and a
+generic k-th of m quantile, with 0 < k < m, as well as a histogram of the
+distribution within specific bounds and with the specified number of bins. The
+parameters of a distribution are defined during instantiation, and they can be
+changed later via setter properties.
+
 Classes:
     ContinuousDistributionABC
     DiscreteDistributionABC
@@ -20,8 +30,8 @@ Classes:
 """
 
 __version__= '1.0.0.0'
-__date__ = '20-04-2022'
-__status__ = 'Testing'
+__date__ = '21-04-2022'
+__status__ = 'Production'
 
 #imports
 
@@ -3449,10 +3459,20 @@ class Hypergeometric(DiscreteDistributionABC):
         
         Version 1.0.0.0
         """
-        if not isinstance(Value, float):
-            raise UT_TypeError(Value, float, SkipFrames = 1)
+        if not isinstance(Value, int):
+            raise UT_TypeError(Value, int, SkipFrames = 1)
         if Value < 2:
             raise UT_ValueError(Value, '> 1 - size parameter', SkipFrames = 1)
+        Draws = self.Draws
+        Successes = self.Successes
+        if Value <= Draws:
+            strError= '> {} - size must be greater than draws'.format(
+                                                                        Draws)
+            raise UT_ValueError(Value, strError, SkipFrames = 1)
+        if Value <= Successes:
+            strError= '> {} - size must be greater than successes'.format(
+                                                                    Successes)
+            raise UT_ValueError(Value, strError, SkipFrames = 1)
         self._Parameters['Size'] = Value
         for Key in self._Cached.keys():
             self._Cached[Key] = None
@@ -3484,8 +3504,8 @@ class Hypergeometric(DiscreteDistributionABC):
         
         Version 1.0.0.0
         """
-        if not isinstance(Value, float):
-            raise UT_TypeError(Value, float, SkipFrames = 1)
+        if not isinstance(Value, int):
+            raise UT_TypeError(Value, int, SkipFrames = 1)
         if Value <= 0:
             raise UT_ValueError(Value, '> 0 - successes parameter',
                                                                 SkipFrames = 1)
@@ -3524,8 +3544,8 @@ class Hypergeometric(DiscreteDistributionABC):
         
         Version 1.0.0.0
         """
-        if not isinstance(Value, float):
-            raise UT_TypeError(Value, float, SkipFrames = 1)
+        if not isinstance(Value, int):
+            raise UT_TypeError(Value, int, SkipFrames = 1)
         if Value <= 0:
             raise UT_ValueError(Value, '> 0 - draws parameter', SkipFrames = 1)
         Size = self.Size
@@ -3608,8 +3628,8 @@ class Hypergeometric(DiscreteDistributionABC):
         if N > 2:
             Result = math.sqrt(N - 1) * (N - 2 * K) * (N - 2 * n) / (N - 2)
             Result /= math.sqrt(n * K *(N - K) * (N - n))
-        else:
-            Result = None
+        else: #N = 2
+            Result = 0
         return Result
     
     @property
@@ -3630,6 +3650,8 @@ class Hypergeometric(DiscreteDistributionABC):
             Result *= N * N * (N - 1)
             Result += 6 * n * K * (N - K) * (N - n) * (5 * N - 6)
             Result /= n * K * (N - K) * (N - n) * (N - 2) * (N - 3)
-        else:
-            Result = None
+        elif N == 3:
+            Result = -1.5
+        else: # N = 2
+            Result = -2.0
         return Result

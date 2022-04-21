@@ -49,7 +49,7 @@ The implementation of the PDF, CDF and QF of the distributions is checked agains
 
 The Student`s t-distribution, Chi-squared distribution and F-distributions are also verified in terms of CDF / QF vs the tabulated values listed therein.
 
-**Test result:** PASS / FAIL
+**Test result:** PASS
 
 ## Tests definition (Test)
 
@@ -65,7 +65,7 @@ The Student`s t-distribution, Chi-squared distribution and F-distributions are a
 
 **Test steps:** Instantiate the class being tested with random but proper values of the parameters. Check that no exception is raised. Check that the parameters of the distribution are properly assiged, and the statistical properties of the distribution are as expected for the given parametes. Repeat the process several time. This test should be performed with all implemented distribution classes.
 
-**Test result:** PASS / FAIL
+**Test result:** PASS
 
 ___
 
@@ -81,7 +81,7 @@ ___
 
 **Test steps:** Instantiate the class being tested with random but proper values of the parameters. Check that all requried attributes are present. Repeat the process several time. This test should be performed with all implemented distribution classes.
 
-**Test result:** PASS / FAIL
+**Test result:** PASS
 
 ___
 
@@ -97,7 +97,7 @@ ___
 
 **Test steps:** Instantiate the class being tested with random but proper values of the parameters. Assign new proper value to the all parameters of the distribution. Check that the parameters are changed, and the statistical properties are calculated as expected for the set parameters. Repeat several times with different (random) values of the parameters. This test should be performed with all implemented distribution classes, except for Z_Distribution.
 
-**Test result:** PASS / FAIL
+**Test result:** PASS
 
 ___
 
@@ -113,7 +113,7 @@ ___
 
 **Test steps:** Instantiate the class being tested with random but proper values of the parameters. Attemt to modify and to delete each of the properties, unless it is also a parameter of the distribution (e.g. mean and sigma for Gaussian). Check that AttributeError or its sub-class is raised each time. This test should be performed with all implemented distribution classes.
 
-**Test result:** PASS / FAIL
+**Test result:** PASS
 
 ___
 
@@ -138,7 +138,7 @@ ___
 
 This test should be performed with all implemented distribution classes.
 
-**Test result:** PASS / FAIL
+**Test result:** PASS
 
 ___
 
@@ -159,7 +159,7 @@ ___
 
 This test should be performed with all implemented distribution classes.
 
-**Test result:** PASS / FAIL
+**Test result:** PASS
 
 ___
 
@@ -188,7 +188,7 @@ If applicable (except Z-distribution), change the parameters of the distributio 
 
 This test should be performed with all implemented distribution classes.
 
-**Test result:** PASS / FAIL
+**Test result:** PASS
 
 ___
 
@@ -214,7 +214,7 @@ Concerning the assigment to the setter properties (parameters of the distributio
 
 Instantiate the class being tested with random but proper values of the parameters. Try to assign different improper data types values to the setter properties. Check that the expected exception is raised each time. Repeat with the different improper data types. Try to pass different improper data type argument(s) of the listed methods. Check that the expected exception is raised each time. Repeat with the different improper data types. This test should be performed with all implemented distribution classes.
 
-**Test result:** PASS / FAIL
+**Test result:** PASS
 
 ___
 
@@ -239,7 +239,7 @@ Concerning the assigment to the setter properties (parameters of the distributio
 
 Instantiate the class being tested with random but proper values of the parameters. Try to assign different improper values (but proper data type) to the setter properties. Check that the expected exception is raised each time. Repeat with the different improper values. Try to pass different improper values (but proper data type) argument(s) of the listed methods. Check that the expected exception is raised each time. Repeat with the different improper values. This test should be performed with all implemented distribution classes.
 
-**Test result:** PASS / FAIL
+**Test result:** PASS
 
 ## Tests definition (Demonstration)
 
@@ -269,7 +269,7 @@ Instantiate the class being tested with random but proper values of the paramete
 
  This test should be performed with all implemented distribution classes.
 
-**Test result:** PASS / FAIL
+**Test result:** PASS
 
 ## Traceability
 
@@ -277,18 +277,18 @@ For traceability the relation between tests and requirements is summarized in th
 
 | **Requirement ID** | **Covered in test(s)** | **Verified \[YES/NO\]**) |
 | :----------------- | :--------------------- | :----------------------- |
-| REQ-FUN-400        | TEST-A-400             | NO                       |
-| REQ-FUN-401        | TEST-T-400, TEST-T-401 | NO                       |
-| REQ-FUN-402        | TEST-T-402             | NO                       |
-| REQ-FUN-403        | TEST-T-403             | NO                       |
-| REQ-FUN-404        | TEST-T-404             | NO                       |
-| REQ-FUN-405        | TEST-T-405             | NO                       |
-| REQ-FUN-406        | TEST-T-406             | NO                       |
-| REQ-FUN-407        | TEST-D-400             | NO                       |
-| REQ-FUN-408        | TEST-D-400             | NO                       |
-| REQ-AWM-400        | TEST-T-407             | NO                       |
-| REQ-AWM-401        | TEST-T-408             | NO                       |
+| REQ-FUN-400        | TEST-A-400             | YES                      |
+| REQ-FUN-401        | TEST-T-400, TEST-T-401 | YES                      |
+| REQ-FUN-402        | TEST-T-402             | YES                      |
+| REQ-FUN-403        | TEST-T-403             | YES                      |
+| REQ-FUN-404        | TEST-T-404             | YES                      |
+| REQ-FUN-405        | TEST-T-405             | YES                      |
+| REQ-FUN-406        | TEST-T-406             | YES                      |
+| REQ-FUN-407        | TEST-D-400             | YES                      |
+| REQ-FUN-408        | TEST-D-400             | YES                      |
+| REQ-AWM-400        | TEST-T-407             | YES                      |
+| REQ-AWM-401        | TEST-T-408             | YES                      |
 
 | **Software ready for production \[YES/NO\]** | **Rationale**        |
 | :------------------------------------------: | :------------------- |
-| NO                                           | Under development    |
+| YES                                          | All tests are passed |

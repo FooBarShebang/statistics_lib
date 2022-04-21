@@ -7,7 +7,7 @@ REQ-FUN-407 and REQ-FUN-408.
 """
 
 __version__= '1.0.0.0'
-__date__ = '20-04-2022'
+__date__ = '21-04-2022'
 __status__ = 'Testing'
 
 #imports
@@ -40,10 +40,10 @@ FILE_PATH = os.path.join(TEST_FOLDER, 'DT004_test_results.txt')
 
 TEST_CLASSES = (dc.Z_Distribution, dc.Gaussian, dc.Exponential, dc.Student,
                 dc.ChiSquared, dc.F_Distribution, dc.Gamma, dc.Erlang,
-                dc.Poisson, dc.Binomial, dc.Geometric)
+                dc.Poisson, dc.Binomial, dc.Geometric, dc.Hypergeometric)
 
 PARAMETERS = (None, (1.5, 0.5), (0.5, ), (5, ), (5, ), (7, 9), (7.5, 1.0),
-                (7, 2.0), (10.5, ), (0.4, 100), (0.1, ))
+                (7, 2.0), (10.5, ), (0.4, 100), (0.1, ), (120, 50, 60))
 
 N_POINTS = 10000
 

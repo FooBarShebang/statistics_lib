@@ -1,5 +1,9 @@
 # Release log of library statistics_lib
 
+## 2022-04-21 v0.6.0-dev1
+
+Implemented and tested module *distribution_classes*, which provides implementation of the model distributions: continuous and discrete - from which some are used in the statistical tests, including Gaussian / Z-distribution, Student`s t-distribution, Chi-squared distribution and F-distribution.
+
 ## 2022-04-07 v0.5.0-dev1
 
 Implemented and tested module *special_functions*, which provides inverse error function, beta function, incomplete beta functions and incomplete gamma functions.

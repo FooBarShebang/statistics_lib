@@ -60,17 +60,17 @@
 | REQ-AWM-310        | TEST-T-313             | YES                      |
 | REQ-AWM-311        | TEST-T-314             | YES                      |
 | REQ-AWM-312        | TEST-T-315             | YES                      |
-| REQ-FUN-400        | TEST-A-400             | NO                       |
-| REQ-FUN-401        | TEST-T-400, TEST-T-401 | NO                       |
-| REQ-FUN-402        | TEST-T-402             | NO                       |
-| REQ-FUN-403        | TEST-T-403             | NO                       |
-| REQ-FUN-404        | TEST-T-404             | NO                       |
-| REQ-FUN-405        | TEST-T-405             | NO                       |
-| REQ-FUN-406        | TEST-T-406             | NO                       |
-| REQ-FUN-407        | TEST-D-400             | NO                       |
-| REQ-FUN-408        | TEST-D-400             | NO                       |
-| REQ-AWM-400        | TEST-T-407             | NO                       |
-| REQ-AWM-401        | TEST-T-408             | NO                       |
+| REQ-FUN-400        | TEST-A-400             | YES                      |
+| REQ-FUN-401        | TEST-T-400, TEST-T-401 | YES                      |
+| REQ-FUN-402        | TEST-T-402             | YES                      |
+| REQ-FUN-403        | TEST-T-403             | YES                      |
+| REQ-FUN-404        | TEST-T-404             | YES                      |
+| REQ-FUN-405        | TEST-T-405             | YES                      |
+| REQ-FUN-406        | TEST-T-406             | YES                      |
+| REQ-FUN-407        | TEST-D-400             | YES                      |
+| REQ-FUN-408        | TEST-D-400             | YES                      |
+| REQ-AWM-400        | TEST-T-407             | YES                      |
+| REQ-AWM-401        | TEST-T-408             | YES                      |
 | REQ-FUN-500        | TEST-A-500             | YES                      |
 | REQ-FUN-510        | TEST-T-510             | YES                      |
 | REQ-FUN-520        | TEST-T-520             | YES                      |
