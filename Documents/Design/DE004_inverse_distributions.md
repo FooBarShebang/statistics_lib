@@ -148,8 +148,8 @@ $$
 
 Its mean, variance and standard deviation are infinite, whereas its skewness and kurtosis are not defined. However, the following statistical properties - quartiles - have simple forms:
 
-* Median is $x_0$
-* The first quartile is $x_0 - \gamma$
-* The third quartile is $x_0 + \gamma$
+* Median is $\mu + \frac{\sigma}{2 (\mathtt{erf}^{-1}(0.5))^2} \approx \mu + \sigma * 2.198109338$
+* The first quartile is $\mu + \frac{\sigma}{2 (\mathtt{erf}^{-1}(0.75))^2} \approx \mu + \sigma * 0.75568443$
+* The third quartile is $\mu + \frac{\sigma}{2 (\mathtt{erf}^{-1}(0.25))^2} \approx \mu + \sigma * 9.849204322$
 
 The Levy distribution has applications in description of different stochastic processes in physics, e.g. as the limit case of the *inverse Gaussian distribution* describing the Brownian motion with zero drift speed. Furthermore, with a trivial substitution $x - \mu \rightarrow y$ it becomes a special case of the *inverse Gamma distribution* with $\alpha = \frac{1}{2}$ and $\beta = \frac{\sigma}{2}$. Also note that for a random variable $X \sim \mathbb{N}(\mu, \sigma_0)$ the values $(X - \mu)^{-2}$ follow Levy distribution with $x_0 = 0$ and $\sigma = 1 / \sigma_0^2$.
