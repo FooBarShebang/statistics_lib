@@ -6,5 +6,6 @@
 * Module [base_classes](./TE003_base_classes.md)
 * Module [distribution_classes](./TE004_distribution_classes.md)
 * Module [special_functions](./TE005_special_functions.md)
+* Module [inverse_distributions](./TE006_inverse_distributions.md)
 * Requirements and tests [traceability](./traceability.md)
 * Tested OSes [report](./tested_OS.md)

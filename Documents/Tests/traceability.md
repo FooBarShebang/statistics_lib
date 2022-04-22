@@ -8,6 +8,7 @@
 * module **data_classes** - 3xy
 * module **distribution_classes** - 40x
 * module **special_functions** - 5xy
+* module **inverse_distributions** - 60x
 
 ## Requirements vs Tests Traceability
 
@@ -80,6 +81,17 @@
 | REQ-FUN-560        | TEST-T-560             | YES                      |
 | REQ-AWM-500        | TEST-T-500             | YES                      |
 | REQ-AWM-501        | TEST-T-501             | YES                      |
+| REQ-FUN-600        | TEST-A-600             | NO                       |
+| REQ-FUN-601        | TEST-T-600, TEST-T-601 | NO                       |
+| REQ-FUN-602        | TEST-T-602             | NO                       |
+| REQ-FUN-603        | TEST-T-603             | NO                       |
+| REQ-FUN-604        | TEST-T-604             | NO                       |
+| REQ-FUN-605        | TEST-T-605             | NO                       |
+| REQ-FUN-606        | TEST-T-606             | NO                       |
+| REQ-FUN-607        | TEST-D-600             | NO                       |
+| REQ-FUN-608        | TEST-D-600             | NO                       |
+| REQ-AWM-600        | TEST-T-607             | NO                       |
+| REQ-AWM-601        | TEST-T-608             | NO                       |
 
 | **Software ready for production \[YES/NO\]** | **Rationale**                 |
 | :------------------------------------------: | :---------------------------- |

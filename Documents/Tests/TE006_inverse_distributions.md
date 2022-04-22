@@ -33,45 +33,41 @@ The verification method for a requirement is given by a single letter according 
 
 ## Tests definition (Analysis)
 
-**Test Identifier:** TEST-A-400
+**Test Identifier:** TEST-A-600
 
-**Requirement ID(s)**: REQ-FUN-400
+**Requirement ID(s)**: REQ-FUN-600
 
 **Verification method:** A
 
 **Test goal:** All required functionality is implemented and performs correctly.
 
-**Expected result:** All required classes implenting continuous and discrete random distributions are present and function as expected, i.e. all TEST-T-4xy tests defined in this document are passed.
+**Expected result:** All required classes implenting continuous random distributions are present and function as expected, i.e. all TEST-T-6xy tests defined in this document are passed.
 
-**Test steps:** Analyze the source code of the module [distribution\_classes](../../distribution_classes.py) as well as of the unit-test module [/Tests/UT004\_distribution\_classes](../../Tests/UT004_distribution_classes.py). Execute the mentioned unit-test module.
+**Test steps:** Analyze the source code of the module [inverse\_distrbutions](../../inverse_distributions.py) as well as of the unit-test module [/Tests/UT006\_inverse\_distributions](../../Tests/UT006_inverse_distributions.py). Execute the mentioned unit-test module.
 
-The implementation of the PDF, CDF and QF of the distributions is checked against the NIST documentation - *Engineering Statistics Handbook* located at [NIST/SEMATECH e-Handbook of Statistical Methods, http://www.itl.nist.gov/div898/handbook/](http://www.itl.nist.gov/div898/handbook/), Digital Object Indentifier [https://doi.org/10.18434/M32189](https://doi.org/10.18434/M32189).
-
-The Student`s t-distribution, Chi-squared distribution and F-distributions are also verified in terms of CDF / QF vs the tabulated values listed therein.
-
-**Test result:** PASS
+**Test result:** PASS / FAIL
 
 ## Tests definition (Test)
 
-**Test Identifier:** TEST-T-400
+**Test Identifier:** TEST-T-600
 
-**Requirement ID(s)**: REQ-FUN-401
+**Requirement ID(s)**: REQ-FUN-601
 
 **Verification method:** T
 
 **Test goal:** Instantiation of a class - assignment of parameters.
 
-**Expected result:** A class being tested can be instantiated, provided that the required number of the required data type and value's range attributes are passed into the initialization method (except for Z-distribution, which is w/o parameters). The passed arguments are properly assigned to the parameters of the distribution.
+**Expected result:** A class being tested can be instantiated, provided that the required number of the required data type and value's range attributes are passed into the initialization method. The passed arguments are properly assigned to the parameters of the distribution.
 
 **Test steps:** Instantiate the class being tested with random but proper values of the parameters. Check that no exception is raised. Check that the parameters of the distribution are properly assiged, and the statistical properties of the distribution are as expected for the given parametes. Repeat the process several time. This test should be performed with all implemented distribution classes.
 
-**Test result:** PASS
+**Test result:** PASS / FAIL
 
 ___
 
-**Test Identifier:** TEST-T-401
+**Test Identifier:** TEST-T-601
 
-**Requirement ID(s)**: REQ-FUN-401
+**Requirement ID(s)**: REQ-FUN-601
 
 **Verification method:** T
 
@@ -81,29 +77,29 @@ ___
 
 **Test steps:** Instantiate the class being tested with random but proper values of the parameters. Check that all requried attributes are present. Repeat the process several time. This test should be performed with all implemented distribution classes.
 
-**Test result:** PASS
+**Test result:** PASS / FAIL
 
 ___
 
-**Test Identifier:** TEST-T-402
+**Test Identifier:** TEST-T-602
 
-**Requirement ID(s)**: REQ-FUN-402
+**Requirement ID(s)**: REQ-FUN-602
 
 **Verification method:** T
 
 **Test goal:** Variability of the distribution parameters
 
-**Expected result:** The parameters of the distribution (except Z-distribution) can be modified at any time via the respective setter properties. The statistical properties of the distribution change accordingly.
+**Expected result:** The parameters of the distribution can be modified at any time via the respective setter properties. The statistical properties of the distribution change accordingly.
 
-**Test steps:** Instantiate the class being tested with random but proper values of the parameters. Assign new proper value to the all parameters of the distribution. Check that the parameters are changed, and the statistical properties are calculated as expected for the set parameters. Repeat several times with different (random) values of the parameters. This test should be performed with all implemented distribution classes, except for Z_Distribution.
+**Test steps:** Instantiate the class being tested with random but proper values of the parameters. Assign new proper value to the all parameters of the distribution. Check that the parameters are changed, and the statistical properties are calculated as expected for the set parameters. Repeat several times with different (random) values of the parameters. This test should be performed with all implemented distribution classes.
 
-**Test result:** PASS
+**Test result:** PASS / FAIL
 
 ___
 
-**Test Identifier:** TEST-T-403
+**Test Identifier:** TEST-T-603
 
-**Requirement ID(s)**: REQ-FUN-403
+**Requirement ID(s)**: REQ-FUN-603
 
 **Verification method:** T
 
@@ -113,13 +109,13 @@ ___
 
 **Test steps:** Instantiate the class being tested with random but proper values of the parameters. Attemt to modify and to delete each of the properties, unless it is also a parameter of the distribution (e.g. mean and sigma for Gaussian). Check that AttributeError or its sub-class is raised each time. This test should be performed with all implemented distribution classes.
 
-**Test result:** PASS
+**Test result:** PASS / FAIL
 
 ___
 
-**Test Identifier:** TEST-T-404
+**Test Identifier:** TEST-T-604
 
-**Requirement ID(s)**: REQ-FUN-404
+**Requirement ID(s)**: REQ-FUN-604
 
 **Verification method:** T
 
@@ -127,74 +123,62 @@ ___
 
 **Expected result:** The method pdf() accepts any real number as its single argument and returns a non-negative real number, which is:
 
-* for continuous distributions:
-  * the positive value of the probability density function at this value of the random variable as long as it is within the range of the accepted values (Min to Max) for the distibution
-  * zero (0) for the values outside the accepted range
-* for discrete distributions:
-  * the positive value of the probability mass function at this value of the random varibale as long as the value is an integer number within the range of accepted values (Min to Max)
-  * zero (0) for any real number value outside the accepted range, or any non-integer real number within the accepted range
+* a positive value of the probability density function at this value of the random variable as long as it is within the range of the accepted values (Min to Max) for the distibution
+* zero (0) for the values outside the accepted range
 
-**Test steps:** Instantiate the class being tested with random but proper values of the parameters. Call the method with different random values of its argument. Check that the returned results is as expected (see DE002 document). The returned values can be checked either against 'manually calculated' ones (for the simple formulas) or against the tabulated values, in which case the specific unittest method must provide reference to the source of data. If applicable (except Z-distribution), change the parameters of the distributio and repeat the test.
+**Test steps:** Instantiate the class being tested with random but proper values of the parameters. Call the method with different random values of its argument. Check that the returned results is as expected (see DE004 document). The returned values should be checked either against 'manually calculated' ones. Change the parameters of the distribution and repeat the test.
 
 This test should be performed with all implemented distribution classes.
 
-**Test result:** PASS
+**Test result:** PASS / FAIL
 
 ___
 
-**Test Identifier:** TEST-T-405
+**Test Identifier:** TEST-T-605
 
-**Requirement ID(s)**: REQ-FUN-405
+**Requirement ID(s)**: REQ-FUN-605
 
 **Verification method:** T
 
 **Test goal:** Proper implementation of cdf() method.
 
-**Expected result:** The method cdf() accepts any real number as its single argument and returns a non-negative real number, which is:
+**Expected result:** The method cdf() accepts any real number as its single argument and returns a non-negative real number, which is the value of the cummulative density function, which is a monotonically growing from 0 to 1 function for the values within the range of the accepted values (Min to Max) for the distibution, and strictly 0 for values <= Min.
 
-* for continuous distributions - the value of the cummulative density function, which is a monotonically growing from 0 to 1 function for the values within the range of the accepted values (Min to Max) for the distibution, and strictly 0 for values <= Min, and strictly 1 for values >= Max
-* for discrete distributions  - the value of the cummulative density function, which is a monotonically growing from 0 to 1 function for the values within the range of the accepted values (Min to Max) for the distibution, and strictly 0 for values < Min, and strictly 1 for values >= Max
-
-**Test steps:** Instantiate the class being tested with random but proper values of the parameters. Call the method with different random values of its argument. Check that the returned results is as expected (see DE002 document). The returned values can be checked either against 'manually calculated' ones (for the simple formulas) or against the tabulated values, in which case the specific unittest method must provide reference to the source of data. If applicable (except Z-distribution), change the parameters of the distributio and repeat the test.
+**Test steps:** Instantiate the class being tested with random but proper values of the parameters. Call the method with different random values of its argument. Check that the returned results is as expected (see DE004 document). The returned values should be checked either against 'manually calculated' ones. Change the parameters of the distributio and repeat the test.
 
 This test should be performed with all implemented distribution classes.
 
-**Test result:** PASS
+**Test result:** PASS / FAIL
 
 ___
 
-**Test Identifier:** TEST-T-406
+**Test Identifier:** TEST-T-606
 
-**Requirement ID(s)**: REQ-FUN-406
+**Requirement ID(s)**: REQ-FUN-606
 
 **Verification method:** T
 
 **Test goal:** Proper implementation of qf() and getQuantile() methods.
 
-**Expected result:** The method qf() accepts any floating point number p in the range (0, 1) and returns a real number x, for which the following relations are valied:
-
-* continuous distributions: Min < x < Max (returned value is within the range of the random variable) and cdf(x) = p
-* discrete distributions:
-  * Min <= x < Max if p >= pdf(Min), where $cdf(\lfloor x \rfloor) \leq p \leq cdf(\lfloor x \rfloor + 1)$
-  * Min -1 < x < Min if 0 < p < pdf(Min)
+**Expected result:** The method qf() accepts any floating point number p in the range (0, 1) and returns a real number x, for which the following relations are valid: Min < x < Max (returned value is within the range of the random variable) and cdf(x) = p.
 
 The method getQuantile(k, m) accepts two positive integer numbers 0 < k < m and returns the value equal to qf(k/m).
 
-**Test steps:** Instantiate the class being tested with random but proper values of the parameters. Call the qf() method with different random values of its argument. Check that the returned results is as expected (see DE002 document). The returned values can be checked either against 'manually calculated' ones (for the simple formulas) or against the tabulated values, in which case the specific unittest method must provide reference to the source of data.
+**Test steps:** Instantiate the class being tested with random but proper values of the parameters. Call the qf() method with different random values of its argument. Check that the returned results is as expected (see DE004 document). The returned values should be checked either against 'manually calculated' ones (for the simple formulas) or using the 'inverse' relation between QF and the already tested CDF.
 
 Call the method getQuantile(k, m) with different random values of the arguments and compare the returned value with the result of the call qf(k/m).
 
-If applicable (except Z-distribution), change the parameters of the distributio and repeat the test.
+Change the parameters of the distributio and repeat the test.
 
 This test should be performed with all implemented distribution classes.
 
-**Test result:** PASS
+**Test result:** PASS / FAIL
 
 ___
 
-**Test Identifier:** TEST-T-407
+**Test Identifier:** TEST-T-607
 
-**Requirement ID(s)**: REQ-AWM-400
+**Requirement ID(s)**: REQ-AWM-600
 
 **Verification method:** T
 
@@ -202,7 +186,7 @@ ___
 
 **Expected result:** TypeError or its sub-class exception is raised upon passing improper data type argument(s) to:
 
-* Initialization method - not a real number for all classes, not an integer for some (see DE002)
+* Initialization method - not a real number for all classes, not an integer or floating point
 * pdf() and cdf() methods - not a real number for all classes
 * qf() - not a floating point number for all classes
 * getQuantile() - not an integer (any of the two argument) - for all classes
@@ -214,13 +198,13 @@ Concerning the assigment to the setter properties (parameters of the distributio
 
 Instantiate the class being tested with random but proper values of the parameters. Try to assign different improper data types values to the setter properties. Check that the expected exception is raised each time. Repeat with the different improper data types. Try to pass different improper data type argument(s) of the listed methods. Check that the expected exception is raised each time. Repeat with the different improper data types. This test should be performed with all implemented distribution classes.
 
-**Test result:** PASS
+**Test result:** PASS / FAIL
 
 ___
 
-**Test Identifier:** TEST-T-408
+**Test Identifier:** TEST-T-608
 
-**Requirement ID(s)**: REQ-AWM-401
+**Requirement ID(s)**: REQ-AWM-601
 
 **Verification method:** T
 
@@ -228,10 +212,12 @@ ___
 
 **Expected result:** TypeError or its sub-class exception is raised upon passing proper data type argument(s) of inapproptiate values to:
 
-* Initialization method - depending on the distribution (see DE002)
-* qf() - not a floating point number within (0, 1) range - for all classes
-* getQuantile() - any of the arguments is not positive, or the first argument is greater than or equal to the second argument - for all classes
-* getHistogram() - the third argument is < 2 (integer), or the first argument is greater than or equal to the second argument - for all classes
+* Instantiation of the classes
+  * Levy and Cauchy distributions - scale parameter is not positive, i.e. <= 0
+  * Other distributions - any of the parameters is not positive, i.e. <= 0
+* qf() - the argument is not within (0, 1) range
+* getQuantile(k, m) - either of the arguments is <= 0, or k >= m
+* getHistogram(min, max, NBins) - min >= max , or NBins is <= 1
 
 Concerning the assigment to the setter properties (parameters of the distribution) the same rules are applied as for the instantiation of the class.
 
@@ -239,13 +225,13 @@ Concerning the assigment to the setter properties (parameters of the distributio
 
 Instantiate the class being tested with random but proper values of the parameters. Try to assign different improper values (but proper data type) to the setter properties. Check that the expected exception is raised each time. Repeat with the different improper values. Try to pass different improper values (but proper data type) argument(s) of the listed methods. Check that the expected exception is raised each time. Repeat with the different improper values. This test should be performed with all implemented distribution classes.
 
-**Test result:** PASS
+**Test result:** PASS / FAIL
 
 ## Tests definition (Demonstration)
 
-**Test Identifier:** TEST-D-400
+**Test Identifier:** TEST-D-600
 
-**Requirement ID(s)**: REQ-FUN-407, REQ-FUN-408
+**Requirement ID(s)**: REQ-FUN-607, REQ-FUN-608
 
 **Verification method:** T
 
@@ -262,14 +248,12 @@ Instantiate the class being tested with random but proper values of the paramete
 * Normalize the values (frequences) in each bin by the length of the sequence 10000
 * Determine the minimum and maximum central values of the bins and bin width
 * Generate the histrogram of the entire distribution (tested class) using the determined minimum and maximum central values and the number of bins - 20
-* For each bin with the cental value $x_k$ (and the same width *S*) manually calculate the value
-  * for a continuous distribution $S * [pdf(x_k - s/2) + pdf(x_k) + pdf(x_k + s/2)] / 3$
-  * for a discrete distribution $S * pdf(\mathbf{int}(\mathtt{round}(x_k)))$
+* For each bin with the cental value $x_k$ (and the same width *S*) manually calculate the value $S * [pdf(x_k - s/2) + pdf(x_k) + pdf(x_k + s/2)] / 3$
 * Print out the results of the calculation (3 histograms) on the screen as 6-columns table and compare
 
  This test should be performed with all implemented distribution classes.
 
-**Test result:** PASS
+**Test result:** PASS / FAIL
 
 ## Traceability
 
@@ -277,18 +261,18 @@ For traceability the relation between tests and requirements is summarized in th
 
 | **Requirement ID** | **Covered in test(s)** | **Verified \[YES/NO\]**) |
 | :----------------- | :--------------------- | :----------------------- |
-| REQ-FUN-400        | TEST-A-400             | YES                      |
-| REQ-FUN-401        | TEST-T-400, TEST-T-401 | YES                      |
-| REQ-FUN-402        | TEST-T-402             | YES                      |
-| REQ-FUN-403        | TEST-T-403             | YES                      |
-| REQ-FUN-404        | TEST-T-404             | YES                      |
-| REQ-FUN-405        | TEST-T-405             | YES                      |
-| REQ-FUN-406        | TEST-T-406             | YES                      |
-| REQ-FUN-407        | TEST-D-400             | YES                      |
-| REQ-FUN-408        | TEST-D-400             | YES                      |
-| REQ-AWM-400        | TEST-T-407             | YES                      |
-| REQ-AWM-401        | TEST-T-408             | YES                      |
+| REQ-FUN-600        | TEST-A-600             | NO                       |
+| REQ-FUN-601        | TEST-T-600, TEST-T-601 | NO                       |
+| REQ-FUN-602        | TEST-T-602             | NO                       |
+| REQ-FUN-603        | TEST-T-603             | NO                       |
+| REQ-FUN-604        | TEST-T-604             | NO                       |
+| REQ-FUN-605        | TEST-T-605             | NO                       |
+| REQ-FUN-606        | TEST-T-606             | NO                       |
+| REQ-FUN-607        | TEST-D-600             | NO                       |
+| REQ-FUN-608        | TEST-D-600             | NO                       |
+| REQ-AWM-600        | TEST-T-607             | NO                       |
+| REQ-AWM-601        | TEST-T-608             | NO                       |
 
 | **Software ready for production \[YES/NO\]** | **Rationale**        |
 | :------------------------------------------: | :------------------- |
-| YES                                          | All tests are passed |
+| NO                                           | Under development    |
