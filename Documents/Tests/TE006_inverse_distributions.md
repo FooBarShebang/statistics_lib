@@ -45,7 +45,7 @@ The verification method for a requirement is given by a single letter according 
 
 **Test steps:** Analyze the source code of the module [inverse\_distrbutions](../../inverse_distributions.py) as well as of the unit-test module [/Tests/UT006\_inverse\_distributions](../../Tests/UT006_inverse_distributions.py). Execute the mentioned unit-test module.
 
-**Test result:** PASS / FAIL
+**Test result:** PASS
 
 ## Tests definition (Test)
 
@@ -61,7 +61,7 @@ The verification method for a requirement is given by a single letter according 
 
 **Test steps:** Instantiate the class being tested with random but proper values of the parameters. Check that no exception is raised. Check that the parameters of the distribution are properly assiged, and the statistical properties of the distribution are as expected for the given parametes. Repeat the process several time. This test should be performed with all implemented distribution classes.
 
-**Test result:** PASS / FAIL
+**Test result:** PASS
 
 ___
 
@@ -77,7 +77,7 @@ ___
 
 **Test steps:** Instantiate the class being tested with random but proper values of the parameters. Check that all requried attributes are present. Repeat the process several time. This test should be performed with all implemented distribution classes.
 
-**Test result:** PASS / FAIL
+**Test result:** PASS
 
 ___
 
@@ -93,7 +93,7 @@ ___
 
 **Test steps:** Instantiate the class being tested with random but proper values of the parameters. Assign new proper value to the all parameters of the distribution. Check that the parameters are changed, and the statistical properties are calculated as expected for the set parameters. Repeat several times with different (random) values of the parameters. This test should be performed with all implemented distribution classes.
 
-**Test result:** PASS / FAIL
+**Test result:** PASS
 
 ___
 
@@ -109,7 +109,7 @@ ___
 
 **Test steps:** Instantiate the class being tested with random but proper values of the parameters. Attemt to modify and to delete each of the properties, unless it is also a parameter of the distribution (e.g. mean and sigma for Gaussian). Check that AttributeError or its sub-class is raised each time. This test should be performed with all implemented distribution classes.
 
-**Test result:** PASS / FAIL
+**Test result:** PASS
 
 ___
 
@@ -130,7 +130,7 @@ ___
 
 This test should be performed with all implemented distribution classes.
 
-**Test result:** PASS / FAIL
+**Test result:** PASS
 
 ___
 
@@ -148,7 +148,7 @@ ___
 
 This test should be performed with all implemented distribution classes.
 
-**Test result:** PASS / FAIL
+**Test result:** PASS
 
 ___
 
@@ -172,7 +172,7 @@ Change the parameters of the distributio and repeat the test.
 
 This test should be performed with all implemented distribution classes.
 
-**Test result:** PASS / FAIL
+**Test result:** PASS
 
 ___
 
@@ -198,7 +198,7 @@ Concerning the assigment to the setter properties (parameters of the distributio
 
 Instantiate the class being tested with random but proper values of the parameters. Try to assign different improper data types values to the setter properties. Check that the expected exception is raised each time. Repeat with the different improper data types. Try to pass different improper data type argument(s) of the listed methods. Check that the expected exception is raised each time. Repeat with the different improper data types. This test should be performed with all implemented distribution classes.
 
-**Test result:** PASS / FAIL
+**Test result:** PASS
 
 ___
 
@@ -225,7 +225,7 @@ Concerning the assigment to the setter properties (parameters of the distributio
 
 Instantiate the class being tested with random but proper values of the parameters. Try to assign different improper values (but proper data type) to the setter properties. Check that the expected exception is raised each time. Repeat with the different improper values. Try to pass different improper values (but proper data type) argument(s) of the listed methods. Check that the expected exception is raised each time. Repeat with the different improper values. This test should be performed with all implemented distribution classes.
 
-**Test result:** PASS / FAIL
+**Test result:** PASS
 
 ## Tests definition (Demonstration)
 
@@ -242,10 +242,10 @@ Instantiate the class being tested with random but proper values of the paramete
 **Test steps:** Perform the following procedure with all distributions to be tested.
 
 * Instantiate the respective class with arbitrary chosen parameters
-* Generate a sequence of 10000 random number with this instance
-* Instantiate 1D statistics class (module *data\_classes*) with that sequence
+* Generate 10000 random number with this instance. Because of the 'fat tails', store in a sequence only those values, which are in the range [1.5 * Q1 - 0.5 * Q3, 1.5 * Q3 - 0.5 * Q1], where Q1 and Q3 are the first and the third quartiles of the model distribution; and discard the other values
+* Instantiate 1D statistics class (module *data\_classes*) with that sequence, which can be less than the intented 10000 elements
 * Generate a histogram of the sample with the default 20 bins
-* Normalize the values (frequences) in each bin by the length of the sequence 10000
+* Normalize the values (frequences) in each bin by the intented length of the sequence 10000
 * Determine the minimum and maximum central values of the bins and bin width
 * Generate the histrogram of the entire distribution (tested class) using the determined minimum and maximum central values and the number of bins - 20
 * For each bin with the cental value $x_k$ (and the same width *S*) manually calculate the value $S * [pdf(x_k - s/2) + pdf(x_k) + pdf(x_k + s/2)] / 3$
@@ -253,7 +253,7 @@ Instantiate the class being tested with random but proper values of the paramete
 
  This test should be performed with all implemented distribution classes.
 
-**Test result:** PASS / FAIL
+**Test result:** PASS
 
 ## Traceability
 
@@ -261,18 +261,18 @@ For traceability the relation between tests and requirements is summarized in th
 
 | **Requirement ID** | **Covered in test(s)** | **Verified \[YES/NO\]**) |
 | :----------------- | :--------------------- | :----------------------- |
-| REQ-FUN-600        | TEST-A-600             | NO                       |
-| REQ-FUN-601        | TEST-T-600, TEST-T-601 | NO                       |
-| REQ-FUN-602        | TEST-T-602             | NO                       |
-| REQ-FUN-603        | TEST-T-603             | NO                       |
-| REQ-FUN-604        | TEST-T-604             | NO                       |
-| REQ-FUN-605        | TEST-T-605             | NO                       |
-| REQ-FUN-606        | TEST-T-606             | NO                       |
-| REQ-FUN-607        | TEST-D-600             | NO                       |
-| REQ-FUN-608        | TEST-D-600             | NO                       |
-| REQ-AWM-600        | TEST-T-607             | NO                       |
-| REQ-AWM-601        | TEST-T-608             | NO                       |
+| REQ-FUN-600        | TEST-A-600             | YES                      |
+| REQ-FUN-601        | TEST-T-600, TEST-T-601 | YES                      |
+| REQ-FUN-602        | TEST-T-602             | YES                      |
+| REQ-FUN-603        | TEST-T-603             | YES                      |
+| REQ-FUN-604        | TEST-T-604             | YES                      |
+| REQ-FUN-605        | TEST-T-605             | YES                      |
+| REQ-FUN-606        | TEST-T-606             | YES                      |
+| REQ-FUN-607        | TEST-D-600             | YES                      |
+| REQ-FUN-608        | TEST-D-600             | YES                      |
+| REQ-AWM-600        | TEST-T-607             | YES                      |
+| REQ-AWM-601        | TEST-T-608             | YES                      |
 
 | **Software ready for production \[YES/NO\]** | **Rationale**        |
 | :------------------------------------------: | :------------------- |
-| NO                                           | Under development    |
+| YES                                          | All tests are passed |

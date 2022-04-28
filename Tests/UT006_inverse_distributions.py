@@ -677,7 +677,7 @@ class Test_InverseGamma(Test_InverseGaussian):
                 Scale -= random.random()
             if Scale < 0.1:
                 Scale = 0.1
-            self.DefArguments = (Shape, Scale)
+            objTest= self.TestClass(Shape, Scale)
             if Shape > 1:
                 Mean = Scale / (Shape - 1)
                 self.assertAlmostEqual(objTest.Mean, Mean,
@@ -713,7 +713,7 @@ class Test_InverseGamma(Test_InverseGaussian):
                                                 places = FLOAT_CHECK_PRECISION)
             self.assertAlmostEqual(objTest.Q1, objTest.qf(0.25),
                                                 places = FLOAT_CHECK_PRECISION)
-            self.assertAlmostEqual(objTest.Q3, objTest.qf(0.25),
+            self.assertAlmostEqual(objTest.Q3, objTest.qf(0.75),
                                                 places = FLOAT_CHECK_PRECISION)
             del objTest
     
@@ -766,7 +766,7 @@ class Test_InverseGamma(Test_InverseGaussian):
                                                 places = FLOAT_CHECK_PRECISION)
             self.assertAlmostEqual(objTest.Q1, objTest.qf(0.25),
                                                 places = FLOAT_CHECK_PRECISION)
-            self.assertAlmostEqual(objTest.Q3, objTest.qf(0.25),
+            self.assertAlmostEqual(objTest.Q3, objTest.qf(0.75),
                                                 places = FLOAT_CHECK_PRECISION)
             Shape = random.randint(1, 5)
             if random.random() > 0.5:
@@ -972,7 +972,7 @@ class Test_InverseChiSquared(Test_InverseGaussian):
                 Degree -= random.random()
             if Degree < 0.5:
                 Degree = 0.5
-            self.DefArguments = (Degree, )
+            objTest = self.TestClass(Degree)
             if Degree > 2:
                 Mean = 1 / (Degree - 2)
                 self.assertAlmostEqual(objTest.Mean, Mean,
@@ -1008,7 +1008,7 @@ class Test_InverseChiSquared(Test_InverseGaussian):
                                                 places = FLOAT_CHECK_PRECISION)
             self.assertAlmostEqual(objTest.Q1, objTest.qf(0.25),
                                                 places = FLOAT_CHECK_PRECISION)
-            self.assertAlmostEqual(objTest.Q3, objTest.qf(0.25),
+            self.assertAlmostEqual(objTest.Q3, objTest.qf(0.75),
                                                 places = FLOAT_CHECK_PRECISION)
             del objTest
     
@@ -1078,7 +1078,7 @@ class Test_InverseChiSquared(Test_InverseGaussian):
             else:
                 self.assertIsNone(objTest.Skew)
             if Degree > 8:
-                Kurt = 12 * (5 * Degree - 22) / ((Degree - 6) * (Degree - 8))
+                Kurt = 12.0 * (5 * Degree - 22) / ((Degree - 6) * (Degree - 8))
                 self.assertAlmostEqual(objTest.Kurt, Kurt,
                                                 places = FLOAT_CHECK_PRECISION)
             else:
@@ -1091,7 +1091,7 @@ class Test_InverseChiSquared(Test_InverseGaussian):
                                                 places = FLOAT_CHECK_PRECISION)
             self.assertAlmostEqual(objTest.Q1, objTest.qf(0.25),
                                                 places = FLOAT_CHECK_PRECISION)
-            self.assertAlmostEqual(objTest.Q3, objTest.qf(0.25),
+            self.assertAlmostEqual(objTest.Q3, objTest.qf(0.75),
                                                 places = FLOAT_CHECK_PRECISION)
             Degree = random.randint(1, 40)
             if random.random() > 0.5:
@@ -1119,7 +1119,7 @@ class Test_InverseChiSquared(Test_InverseGaussian):
                     Value = 0.01
                 TestResult = objTest.pdf(Value)
                 Temp = - 0.5 * Degree * math.log(2) - math.lgamma(0.5 * Degree)
-                Temp -= (0.5 * Degree + 1) * math.log(Value) - 0.5 / Value
+                Temp -= (0.5 * Degree + 1) * math.log(Value) + 0.5 / Value
                 CheckValue = math.exp(Temp)
                 self.assertAlmostEqual(TestResult, CheckValue,
                                                 places = FLOAT_CHECK_PRECISION)
@@ -1271,7 +1271,7 @@ class Test_ScaledInverseChiSquared(Test_InverseGaussian):
                 Scale -= random.random()
             if Scale < 0.1:
                 Scale = 0.1
-            self.DefArguments = (Degree, Scale)
+            objTest = self.TestClass(Degree, Scale)
             if Degree > 2:
                 Mean = Degree * Scale / (Degree - 2)
                 self.assertAlmostEqual(objTest.Mean, Mean,
@@ -1308,7 +1308,7 @@ class Test_ScaledInverseChiSquared(Test_InverseGaussian):
                                                 places = FLOAT_CHECK_PRECISION)
             self.assertAlmostEqual(objTest.Q1, objTest.qf(0.25),
                                                 places = FLOAT_CHECK_PRECISION)
-            self.assertAlmostEqual(objTest.Q3, objTest.qf(0.25),
+            self.assertAlmostEqual(objTest.Q3, objTest.qf(0.75),
                                                 places = FLOAT_CHECK_PRECISION)
             del objTest
         
@@ -1362,7 +1362,7 @@ class Test_ScaledInverseChiSquared(Test_InverseGaussian):
                                                 places = FLOAT_CHECK_PRECISION)
             self.assertAlmostEqual(objTest.Q1, objTest.qf(0.25),
                                                 places = FLOAT_CHECK_PRECISION)
-            self.assertAlmostEqual(objTest.Q3, objTest.qf(0.25),
+            self.assertAlmostEqual(objTest.Q3, objTest.qf(0.75),
                                                 places = FLOAT_CHECK_PRECISION)
             Degree = random.randint(1, 40)
             if random.random() > 0.5:
@@ -1402,7 +1402,7 @@ class Test_ScaledInverseChiSquared(Test_InverseGaussian):
                 else:
                     Temp = 0.5 * Degree * math.log(0.5 * Scale * Degree)
                     Temp -= math.lgamma(0.5 * Degree)
-                    Temp -= (0.5 * Degree + 1) * math.log(Value) - z
+                    Temp -= (0.5 * Degree + 1) * math.log(Value) + z
                     CheckValue = math.exp(Temp)
                     self.assertAlmostEqual(TestResult, CheckValue,
                                                 places = FLOAT_CHECK_PRECISION)
@@ -1580,7 +1580,7 @@ class Test_Cauchy(Test_InverseGaussian):
                 Scale -= random.random()
             if Scale < 0.1:
                 Scale = 0.1
-            self.DefArguments = (Location, Scale)
+            objTest = self.TestClass(Location, Scale)
             self.assertIsNone(objTest.Mean)
             self.assertIsNone(objTest.Sigma)
             self.assertIsNone(objTest.Var)
@@ -1649,7 +1649,7 @@ class Test_Cauchy(Test_InverseGaussian):
         Location = self.DefArguments[0]
         Scale = self.DefArguments[1]
         for _ in range(100):
-            self.assertEqual(objTest,Location, Location)
+            self.assertEqual(objTest.Location, Location)
             self.assertEqual(objTest.Scale, Scale)
             self.assertIsNone(objTest.Mean)
             self.assertIsNone(objTest.Sigma)
@@ -1853,7 +1853,7 @@ class Test_Levy(Test_Cauchy):
                 Scale -= random.random()
             if Scale < 0.1:
                 Scale = 0.1
-            self.DefArguments = (Location, Scale)
+            objTest = self.TestClass(Location, Scale)
             self.assertEqual(objTest.Mean, math.inf)
             self.assertEqual(objTest.Sigma, math.inf)
             self.assertEqual(objTest.Var, math.inf)
@@ -2041,9 +2041,9 @@ TestSuite5 = unittest.TestLoader().loadTestsFromTestCase(Test_Cauchy)
 TestSuite6 = unittest.TestLoader().loadTestsFromTestCase(Test_Levy)
 
 TestSuite = unittest.TestSuite()
-#TestSuite.addTests([TestSuite1, TestSuite2, TestSuite3, TestSuite4, TestSuite5,
-#                        TestSuite6])
-TestSuite.addTests([TestSuite1])
+
+TestSuite.addTests([TestSuite1, TestSuite2, TestSuite3, TestSuite4, TestSuite5,
+                        TestSuite6])
 
 if __name__ == "__main__":
     sys.stdout.write(

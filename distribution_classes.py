@@ -882,7 +882,7 @@ class Z_Distribution(ContinuousDistributionABC):
         Signature:
             int OR float -> 0 < float < 1
         
-        1.0.0.0
+        Version 1.0.0.0
         """
         z = (x - self.Mean) / self.Sigma
         Result = 0.5 * (1 + math.erf(z / math.sqrt(2)))
@@ -1219,7 +1219,7 @@ class Exponential(ContinuousDistributionABC):
         Signature:
             int OR float -> 0 < float < 1
         
-        1.0.0.0
+        Version 1.0.0.0
         """
         Result = 1 - math.exp(- self.Rate * x)
         return Result
@@ -1463,7 +1463,7 @@ class Student(ContinuousDistributionABC):
         Signature:
             int OR float -> 0 < float < 1
         
-        1.0.0.0
+        Version 1.0.0.0
         """
         Degree = self.Degree
         z = Degree / (Degree + x * x)
@@ -1779,7 +1779,7 @@ class ChiSquared(ContinuousDistributionABC):
         Signature:
             int OR float -> 0 < float < 1
         
-        1.0.0.0
+        Version 1.0.0.0
         """
         k = self.Degree
         Result = sf.lower_gamma_reg(0.5 * k, 0.5 * x)
@@ -1997,7 +1997,7 @@ class F_Distribution(ContinuousDistributionABC):
         Signature:
             int OR float -> 0 < float < 1
         
-        1.0.0.0
+        Version 1.0.0.0
         """
         d1 = self.Degree1
         d2 = self.Degree2
@@ -2316,7 +2316,7 @@ class Gamma(ContinuousDistributionABC):
         Signature:
             int OR float -> 0 < float < 1
         
-        1.0.0.0
+        Version 1.0.0.0
         """
         Shape = self._Parameters['Shape']
         Rate = self._Parameters['Rate']
@@ -2732,7 +2732,7 @@ class Poisson(DiscreteDistributionABC):
         Signature:
             int >= 0 -> 0 < float < 1
         
-        1.0.0.0
+        Version 1.0.0.0
         """
         Rate = self._Parameters['Rate']
         Result = sf.upper_gamma_reg(math.floor(x + 1), Rate)
@@ -2928,7 +2928,7 @@ class Binomial(DiscreteDistributionABC):
         Signature:
             int >= 0 -> 0 < float <= 1
         
-        1.0.0.0
+        Version 1.0.0.0
         """
         Prob = self._Parameters['Probability']
         N = self._Parameters['Draws']
@@ -3163,7 +3163,7 @@ class Geometric(DiscreteDistributionABC):
         Signature:
             int >= 0 -> 0 < float <= 1
         
-        1.0.0.0
+        Version 1.0.0.0
         """
         Prob = self._Parameters['Probability']
         Result = 1 - math.pow((1-Prob), x)
@@ -3428,7 +3428,7 @@ class Hypergeometric(DiscreteDistributionABC):
         Signature:
             int >= 0 -> 0 < float <= 1
         
-        1.0.0.0
+        Version 1.0.0.0
         """
         Result = 0
         for k in range(self.Min, x + 1):

@@ -1,6 +1,10 @@
 # statistics_lib
 
-Python 3 implementation of a basic statistics on sequences of not only real numbers, but also the 'real life measurements', i.e. 2-tuple values of the most probale / mean value and asssociated uncertainty / standard error.
+Python 3 implementation of a basic statistics on sequences of not only real numbers, but also the 'real life measurements', i.e. 2-tuple values of the most probale / mean value and asssociated uncertainty / standard error. The statistical analysis can be performed with help of the implemented functions on such sequences directly , or using special classes, which encapsulate such sequences and provide the methods and propeties for the respective analisys.
+
+The library also implements a number of continuous and discrete distributions as classes with the similar API, which can be used for the analysis of the shape and comparison of the statististical properties of the data sequence distribution with the model expectactions.
+
+Finally, the library provides a number of functions to perform basic statistical hypothesis testing.
 
 ## Installation
 

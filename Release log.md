@@ -1,5 +1,9 @@
 # Release log of library statistics_lib
 
+## 2022-04-28 v0.7.0-dev1
+
+Implemented and tested module *inverse_distributions*, which provides implementation of a number of additional model distributions: inverse Gaussian, inverse Gamma, inverse Chi-squared, Cauchy and Levy distribution.
+
 ## 2022-04-21 v0.6.0-dev1
 
 Implemented and tested module *distribution_classes*, which provides implementation of the model distributions: continuous and discrete - from which some are used in the statistical tests, including Gaussian / Z-distribution, Student`s t-distribution, Chi-squared distribution and F-distribution.

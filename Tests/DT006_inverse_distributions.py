@@ -7,7 +7,7 @@ REQ-FUN-607 and REQ-FUN-608.
 """
 
 __version__= '1.0.0.0'
-__date__ = '22-04-2022'
+__date__ = '28-04-2022'
 __status__ = 'Testing'
 
 #imports
@@ -76,7 +76,17 @@ if __name__ == '__main__':
             print(strLine)
             fFile.write(strLine)
             fFile.write('\n')
-            lstRandom = [objTest.random() for _ in range(N_POINTS)]
+            Q3 = objTest.Q3
+            Q1 = objTest.Q1
+            IQD = 0.5 * (Q3 - Q1)
+            MinAcc = Q1 - IQD
+            MaxAcc = Q3 + IQD
+            Generated = 0
+            lstRandom = list()
+            for _ in range(N_POINTS):
+                Item = objTest.random()
+                if (MinAcc <= Item) and (MaxAcc >= Item):
+                    lstRandom.append(Item)
             objStat1D = Statistics1D(lstRandom)
             tupHistorgam = objStat1D.getHistogram(NBins = N_BINS)
             del objStat1D
