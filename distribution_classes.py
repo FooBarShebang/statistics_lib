@@ -1045,6 +1045,10 @@ class Gaussian(Z_Distribution):
         Signature:
             int OR float, int > 0 OR float > 0 -> None
         
+        Args:
+            Mean: int OR float; the mean parameter of the distribution
+            Sigma: int > 0 OR float > 0; the sigma parameter of the distribution
+        
         Raises:
             UT_TypeError: any of the passed value is not a real number
             UT_ValueError: sigma value is not positive
