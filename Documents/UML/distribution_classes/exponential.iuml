@@ -1,0 +1,30 @@
+!$EXPONENTIAL = "v2"
+
+!if %not(%variable_exists("$CLASSES"))
+    !include ../Templates/Classes2.cuml
+!endif
+
+class Exponential {
+     ..private class fields..
+    - $static_field(_Min) : int = 0
+    ..private instance fields..
+    - {field} _Parameters: dict(str -> float OR int)
+    ..getter / setter properties..
+    + Rate: float > 0  OR int > 0
+    ..getter properties..
+    # Mean: float > 0
+    # Median: float > 0
+    # Q1: float > 0
+    # Q3: float > 0
+    # Var: float > 0
+    # Sigma: float > 0
+    # Skew: float > 0
+    # Kurt: float > 0
+    __
+    ..special methods..
+    __init__(Rate): float > 0 OR int > 0 -> None
+    ..private methods..
+    - _pdf(x): float OR int -> float
+    - _cdf(x): float OR int -> float OR int
+    - _qf(p): float -> float OR int
+}

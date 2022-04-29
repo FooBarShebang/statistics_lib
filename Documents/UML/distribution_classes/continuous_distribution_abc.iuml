@@ -1,0 +1,38 @@
+!$CONTINUOUS_DISTRIBUTION_ABC = "v2"
+
+!if %not(%variable_exists("$CLASSES"))
+    !include ../Templates/Classes2.cuml
+!endif
+
+$prototype_class(ContinuousDistributionABC) {
+    ..private class fields..
+    - $static_field(_Min) : float = - math.inf
+    - $static_field(_Max) : float = math.inf
+    ..public getter properties..
+    # Name: str
+    # Min: float OR int
+    # Max: float OR int
+    # {abstract} Mean: float OR int
+    # Median: float OR int
+    # Q1: float OR int
+    # Q3: float OR int
+    # {abstract} Var: float > 0 OR int > 0
+    # Sigma: float > 0 OR int > 0
+    # {abstract} Skew: float OR int
+    # {abstract} Kurt: float OR int
+    __
+    ..special methods..
+    __str__(): None -> str
+    __repr__(): None -> str
+    ..private methods..
+    - $abstract_method(_pdf, "x"): float OR int -> float
+    - $abstract_method(_cdf, "x"): float OR int -> float OR int
+    - _qf(x): float -> float OR int
+    ..public methods..
+    + pdf(x): float OR int -> float
+    + cdf(x): float OR int -> float OR int
+    + qf(p): float -> float OR int
+    + getQuantle(k, m): int, int -> float OR int
+    + random(): None -> float OR int
+    + getHistogram(minb, maxb, NBins): float OR int, float OR int, int -> tuple(tuple(float OR int, float))
+}

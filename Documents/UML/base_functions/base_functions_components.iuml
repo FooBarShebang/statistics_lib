@@ -1,0 +1,39 @@
+!$BASE_FUNCTIONS = "v2"
+
+!if %not(%variable_exists("$COMPONENTS"))
+    !include ../Templates/Components2.cuml
+!endif
+
+$module(base_functions) {
+    $function(GetMean)
+
+    $function(GetVarianceP)
+
+    $function(GetVarianceS)
+
+    $function(GetStdevP)
+
+    $function(GetStdevS)
+
+    $function(GetSE)
+
+    $function(GetFullSE)
+
+    $function(GetMeanSqrSE)
+
+    $function(GetMoment)
+
+    $function(GetMoment2)
+
+    $function(GetSkewnessP)
+
+    $function(GetSkewnessS)
+
+    $function(GetKurtosisP)
+
+    $function(GetKurtosisS)
+
+    $function(GetCovariance)
+
+    $function(GetPearsonR)
+}

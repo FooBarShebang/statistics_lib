@@ -22,7 +22,7 @@ Classes:
 """
 
 __version__= '1.0.0.0'
-__date__ = '28-04-2022'
+__date__ = '29-04-2022'
 __status__ = 'Production'
 
 #imports
@@ -238,12 +238,12 @@ class InverseGaussian(BC):
             self._Cached[Key] = None
     
     @property
-    def Var(self) -> sf.TReal:
+    def Var(self) -> float:
         """
         Getter property for the variance of the distribution.
         
         Signature:
-            None -> float > 0 OR int > 0
+            None -> float > 0
         
         Version 1.0.0.0
         """
@@ -1262,6 +1262,42 @@ class Cauchy(BC):
         Version 1.0.0.0
         """
         return None
+    
+    @property
+    def Median(self) -> sf.TReal:
+        """
+        Getter property for the median value of the distribution.
+        
+        Signature:
+            None -> float OR int
+        
+        Version 1.0.0.0
+        """
+        return self.Location
+    
+    @property
+    def Q1(self) -> sf.TReal:
+        """
+        Getter property for the first quartile value of the distribution.
+        
+        Signature:
+            None -> float OR int
+        
+        Version 1.0.0.0
+        """
+        return self.Location - self.Scale
+    
+    @property
+    def Q3(self) -> sf.TReal:
+        """
+        Getter property for the third quartile value of the distribution.
+        
+        Signature:
+            None -> float OR int
+        
+        Version 1.0.0.0
+        """
+        return self.Location + self.Scale
 
     @property
     def Var(self) -> None:
@@ -1326,9 +1362,9 @@ class Levy(Cauchy):
         Min: (read-only) float OR int
         Max: (read-only) float = math.inf
         Mean: (read-only) float = math.inf
-        Median: (read-only) float OR int
-        Q1: (read-only) float OR int
-        Q2: (read-only) float OR int
+        Median: (read-only) float
+        Q1: (read-only) float
+        Q2: (read-only) float
         Var: (read-only) float  = math.inf
         Sigma: (read-only) float  = math.inf
         Skew: (read-only) None
@@ -1432,6 +1468,42 @@ class Levy(Cauchy):
         Version 1.0.0.0
         """
         return math.inf
+    
+    @property
+    def Median(self) -> float:
+        """
+        Getter property for the median value of the distribution.
+        
+        Signature:
+            None -> float
+        
+        Version 1.0.0.0
+        """
+        return self.Location + self.Scale * 2.198109338
+    
+    @property
+    def Q1(self) -> float:
+        """
+        Getter property for the first quartile value of the distribution.
+        
+        Signature:
+            None -> float
+        
+        Version 1.0.0.0
+        """
+        return self.Location + self.Scale * 0.75568443
+    
+    @property
+    def Q3(self) -> float:
+        """
+        Getter property for the third quartile value of the distribution.
+        
+        Signature:
+            None -> float
+        
+        Version 1.0.0.0
+        """
+        return self.Location + self.Scale * 9.849204322
 
     @property
     def Var(self) -> float:

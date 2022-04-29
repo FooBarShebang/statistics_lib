@@ -1,0 +1,35 @@
+!$SPECIAL_FUNCTIONS = "v2"
+
+!if %not(%variable_exists("$COMPONENTS"))
+    !include ../Templates/Components2.cuml
+!endif
+
+$module(special_functions) {
+    $function(permutation)
+
+    $function(combination)
+
+    $function(log_beta)
+
+    $function(beta)
+
+    $function(inv_erf)
+
+    $function(lower_gamma)
+
+    $function(log_lower_gamma)
+
+    $function(lower_gamma_reg)
+
+    $function(upper_gamma)
+
+    $function(log_upper_gamma)
+
+    $function(upper_gamma_reg)
+
+    $function(incomplete_beta)
+
+    $function(log_incomplete_beta)
+
+    $function(incompelete_beta_reg)
+}

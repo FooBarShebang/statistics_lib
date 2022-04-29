@@ -1,0 +1,95 @@
+@startuml distribution_classes_classes
+
+!if %not(%variable_exists("$COMPONENTS"))
+    !include ../Templates/Components2.cuml
+!endif
+
+title Class Diagram of the Module statistics_lib.distribution_classes. $generated()
+
+!if $is_not_defined("$CONTINUOUS_DISTRIBUTION_ABC")
+    !include ./continuous_distribution_abc.iuml
+!endif
+
+!if $is_not_defined("$DISCRETE_DISTRIBUTION_ABC")
+    !include ./discrete_distribution_abc.iuml
+!endif
+
+ContinuousDistributionABC <|- DiscreteDistributionABC
+
+!if $is_not_defined("$EXPONENTIAL")
+    !include ./exponential.iuml
+!endif
+
+Exponential -|> ContinuousDistributionABC
+
+!if $is_not_defined("$STUDENT")
+    !include ./student.iuml
+!endif
+
+Exponential -[hidden]- Student
+
+ContinuousDistributionABC <|-- Student
+
+!if $is_not_defined("$Z_DISTRIBUTION")
+    !include ./z_distribution.iuml
+!endif
+
+ContinuousDistributionABC <|-- Z_Distribution
+
+!if $is_not_defined("$GAUSSIAN")
+    !include ./gaussian.iuml
+!endif
+
+Z_Distribution <|-- Gaussian
+
+!if $is_not_defined("$GAMMA")
+    !include ./gamma.iuml
+!endif
+
+ContinuousDistributionABC <|-- Gamma
+
+!if $is_not_defined("$ERLANG")
+    !include ./erlang.iuml
+!endif
+
+Gamma <|-- Erlang
+
+!if $is_not_defined("$CHI_SQUARED")
+    !include ./chi_squared.iuml
+!endif
+
+Student -[hidden]- ChiSquared
+
+ContinuousDistributionABC <|--- ChiSquared
+
+!if $is_not_defined("$F_DISTRIBUTION")
+    !include ./f_distribution.iuml
+!endif
+
+ContinuousDistributionABC <|---F_Distribution
+
+!if $is_not_defined("$POISSON")
+    !include ./poisson.iuml
+!endif
+
+DiscreteDistributionABC <|- Poisson
+
+!if $is_not_defined("$BINOMIAL")
+    !include ./binomial.iuml
+!endif
+
+DiscreteDistributionABC <|-- Binomial
+
+!if $is_not_defined("$HYPERGEOMETRIC")
+    !include ./hypergeometric.iuml
+!endif
+
+DiscreteDistributionABC <|--- Hypergeometric
+
+!if $is_not_defined("$GEOMETRIC")
+    !include ./geometric.iuml
+!endif
+
+DiscreteDistributionABC <|-- Geometric
+
+@enduml

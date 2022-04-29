@@ -1,0 +1,51 @@
+@startuml inverse_distributions_classes
+
+!if %not(%variable_exists("$COMPONENTS"))
+    !include ../Templates/Components2.cuml
+!endif
+
+title Class Diagram of the Module statistics_lib.inverse_distributions. $generated()
+
+namespace distribution_classes {
+    !if $is_not_defined("$CONTINUOUS_DISTRIBUTION_ABC")
+        !include ../distribution_classes/continuous_distribution_abc.iuml
+    !endif
+}
+
+!if $is_not_defined("$INVERSE_CHI_SQUARED")
+    !include ./inverse_chi_squared.iuml
+!endif
+
+!if $is_not_defined("$SCALED_INVERSE_CHI_SQUARED")
+    !include ./scaled_inverse_chi_squared.iuml
+!endif
+
+!if $is_not_defined("$INVERSE_GAUSSIAN")
+    !include ./inverse_gaussian.iuml
+!endif
+
+!if $is_not_defined("$INVERSE_GAMMA")
+    !include ./inverse_gamma.iuml
+!endif
+
+!if $is_not_defined("$CAUCHY")
+    !include ./cauchy.iuml
+!endif
+
+!if $is_not_defined("Levy")
+    !include ./levy.iuml
+!endif
+
+InverseChiSquared -|> distribution_classes.ContinuousDistributionABC
+
+distribution_classes.ContinuousDistributionABC <|- Cauchy
+
+distribution_classes.ContinuousDistributionABC <|-- InverseGaussian
+
+distribution_classes.ContinuousDistributionABC <|-- InverseGamma
+
+InverseChiSquared <|-- ScaledInverseChiSquared
+
+Cauchy <|-- Levy
+
+@enduml

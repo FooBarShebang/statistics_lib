@@ -6,30 +6,42 @@
 
 title Components Diagram of the Library statistics_lib. $generated()
 
-$module(base_functions)
+!if $is_not_defined("$BASE_FUNCTIONS")
+    !include ./base_functions/base_functions_components.iuml
+!endif
 
-$module(ordered_functions)
+!if $is_not_defined("$ORDERED_FUNCTIONS")
+    !include ./ordered_functions/ordered_functions_components.iuml
+!endif
 
-$module(special_functions)
+!if $is_not_defined("$SPECIAL_FUNCTIONS")
+    !include ./special_functions/special_functions_components.iuml
+!endif
 
 !if $is_not_defined("$DATA_CLASSES")
     !include ./data_classes/data_classes_components.iuml
 !endif
 
-base_functions <-- data_classes : uses
+base_functions <---- data_classes : uses
 
-ordered_functions <-- data_classes : uses
+ordered_functions <---- data_classes : uses
 
 !if $is_not_defined("$DISTRIBUTION_CLASSES")
     !include ./distribution_classes/distribution_classes_components.iuml
 !endif
 
-special_functions <-- distribution_classes
+special_functions <-- distribution_classes : uses
 
 $module(statistics_tests)
 
-data_classes <-- statistics_tests
+data_classes <-- statistics_tests : uses
 
-distribution_classes <-- statistics_tests
+distribution_classes <- statistics_tests : uses
+
+!if $is_not_defined("$INVERSE_DISTRIBUTIONS")
+    !include ./inverse_distributions/inverse_distributions_components.iuml
+!endif
+
+distribution_classes <|---- inverse_distributions : extends
 
 @enduml

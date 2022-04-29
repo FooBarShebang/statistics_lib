@@ -1,0 +1,25 @@
+!$BINOMIAL = "v2"
+
+!if %not(%variable_exists("$CLASSES"))
+    !include ../Templates/Classes2.cuml
+!endif
+
+class Binomial {
+    ..private instance fields..
+    - {field} _Parameters: dict(str -> float OR int)
+    - {field} _Cached: dict(str -> float OR int)
+    ..getter / setter properties..
+    + Probability: 0 < float < 1
+    + Draws: int > 0
+    ..getter properties..
+    # Mean: float > 0
+    # Var: float > 0
+    # Skew: float
+    # Kurt: floa
+    __
+    ..special methods..
+    __init__(Probability, Draws): 0 < float < 1, int > 0 -> None
+    ..private methods..
+    - _pdf(x): int >= 0 -> float > 0
+    - _cdf(x): int >= 0 -> 0 < float <= 1
+}

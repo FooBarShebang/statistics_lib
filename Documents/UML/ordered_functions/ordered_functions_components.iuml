@@ -1,0 +1,27 @@
+!$ORDERED_FUNCTIONS = "v2"
+
+!if %not(%variable_exists("$COMPONENTS"))
+    !include ../Templates/Components2.cuml
+!endif
+
+$module(ordered_functions) {
+    $function(GetMin)
+
+    $function(GetMax)
+
+    $function(GetMedian)
+
+    $function(GetFirstQuartile)
+
+    $function(GetThirdQuartile)
+
+    $function(GetQuantile)
+
+    $function(GetHistogram)
+
+    $function(GetModes)
+
+    $function(GetSpearman)
+
+    $function(GetKendall)
+}

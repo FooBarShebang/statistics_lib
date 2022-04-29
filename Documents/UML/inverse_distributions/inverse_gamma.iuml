@@ -1,0 +1,28 @@
+!$INVERSE_GAMMA = "v2"
+
+!if %not(%variable_exists("$CLASSES"))
+    !include ../Templates/Classes2.cuml
+!endif
+
+class InverseGamma {
+    ..private class fields..
+    - $static_field(_Min) : float = 2 * sys.float_info.min
+    ..private instance fields..
+    - {field} _Parameters: dict(str -> float OR int)
+    - {field} _Cached: dict(str -> float OR int)
+    ..getter / setter properties..
+    + Shape: float > 0 OR int > 0
+    + Scale: float > 0 OR int > 0
+    ..getter properties..
+    # Mean: float > 0 OR None
+    # Var: float > 0 OR None
+    # Sigma: float > 0 OR None
+    # Skew: float > 0 OR None
+    # Kurt: float > 0 OR None
+    __
+    ..special methods..
+    __init__(Shape, Scale): int > 0 OR float > 0, int > 0 OR float > 0 -> None
+    ..private methods..
+    - _pdf(x): float OR int -> float
+    - _cdf(x): float OR int -> float OR int
+}

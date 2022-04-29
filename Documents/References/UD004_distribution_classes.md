@@ -23,6 +23,10 @@ The concerted functional elements are classes:
 
 ## Design and Implementation
 
+The class diagram of the module is shown below.
+
+![Class diagram](../UML/distribution_classes/distribution_classes_classes.png)
+
 ## API Reference
 
 ### Class Z_Distribution

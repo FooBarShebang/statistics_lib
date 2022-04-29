@@ -1,0 +1,26 @@
+!$CHI_SQUARED = "v2"
+
+!if %not(%variable_exists("$CLASSES"))
+    !include ../Templates/Classes2.cuml
+!endif
+
+class ChiSquared {
+    ..private class fields..
+    - $static_field(_Min) : float = 0
+    ..private instance fields..
+    - {field} _Parameters: dict(str -> float OR int)
+    - {field} _Cached: dict(str -> float OR int)
+    ..getter / setter properties..
+    + Degree: float > 0 OR int > 0
+    ..getter properties..
+    # Mean: float > 0 OR int > 0
+    # Var: float > 0 OR int > 0 
+    # Skew: float > 0
+    # Kurt: float > 0
+    __
+    ..special methods..
+    __init__(Degree): float > 0 OR int > 0 -> None
+    ..private methods..
+    - _pdf(x): float OR int -> float
+    - _cdf(x): float OR int -> float OR int
+}

@@ -5,3 +5,4 @@
 * Module [data_classes](./UD003_data_classes.md)
 * Module [distribution_classes](./UD004_distribution_classes.md)
 * Module [special_functions](./UD005_special_functions.md)
+* Module [inverse_distributions](./UD006_inverse_distributions.md)

@@ -1,0 +1,28 @@
+!$HYPERGEOMETRIC = "v2"
+
+!if %not(%variable_exists("$CLASSES"))
+    !include ../Templates/Classes2.cuml
+!endif
+
+class Hypergeometric {
+    ..private instance fields..
+    - {field} _Parameters: dict(str -> float OR int)
+    - {field} _Cached: dict(str -> float OR int)
+    ..getter / setter properties..
+    + Size: int > 1
+    + Successes: int > 0
+    + Draws: int > 0
+    ..getter properties..
+    # Min: int >= 0
+    # Max: int > 0
+    # Mean: float > 0
+    # Var: float > 0
+    # Skew: float
+    # Kurt: float
+    __
+    ..special methods..
+    __init__(Size, Successes, Draws): int > 1, int > 0, int > 0 -> None
+    ..private methods..
+    - _pdf(x): int >= 0 -> float > 0
+    - _cdf(x): int >= 0 -> 0 < float <= 1
+}

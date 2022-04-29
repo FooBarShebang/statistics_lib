@@ -347,7 +347,7 @@ class ContinuousDistributionABC(abc.ABC):
     @property
     def Q3(self) -> sf.TReal:
         """
-        Getter property for the first quartile value of the distribution.
+        Getter property for the third quartile value of the distribution.
         
         Signature:
             None -> float OR int
@@ -617,8 +617,6 @@ class DiscreteDistributionABC(ContinuousDistributionABC):
     #class 'private' fields
     
     _Min: ClassVar[int] = 0
-    
-    _Max: ClassVar[sf.TReal] = math.inf
     
     #private instance methods
     
@@ -1382,10 +1380,10 @@ class Student(ContinuousDistributionABC):
         Median: (read-only) int = 0
         Q1: (read-only) float
         Q2: (read-only) float
-        Var: (read-only) float OR None
-        Sigma: (read-only) float OR None
+        Var: (read-only) float > 0 OR None
+        Sigma: (read-only) float > 0 OR None
         Skew: (read-only) int = 0 OR None
-        Kurt: (read-only) float OR None
+        Kurt: (read-only) float > 0 OR None
         Degree: int > 0 OR float > 0
     
     Methods:
@@ -1584,7 +1582,7 @@ class Student(ContinuousDistributionABC):
         Getter property for the variance of the distribution.
         
         Signature:
-            None -> float OR None
+            None -> float > 0 OR None
         
         Returns:
             float = 0.0: number of degrees of freedom > 2
@@ -1609,7 +1607,7 @@ class Student(ContinuousDistributionABC):
         Getter property for the standard deviation of the distribution.
         
         Signature:
-            None -> float OR None
+            None -> float > 0 OR None
         
         Returns:
             float = 0.0: number of degrees of freedom > 2
@@ -1654,7 +1652,7 @@ class Student(ContinuousDistributionABC):
         Getter property for the excess kurtosis of the distribution.
         
         Signature:
-            None -> float OR None
+            None -> float > 0  OR None
         
         Returns:
             float: number of degrees of freedom > 4
@@ -1675,7 +1673,7 @@ class Student(ContinuousDistributionABC):
 
 class ChiSquared(ContinuousDistributionABC):
     """
-    Implementation of the chi-square distribution. Must be instantiated with
+    Implementation of the chi-squared distribution. Must be instantiated with
     a single positive real number argument.
     
     Properties:
@@ -1830,7 +1828,7 @@ class ChiSquared(ContinuousDistributionABC):
             self._Min = 0.0
     
     @property
-    def Mean(self) -> int:
+    def Mean(self) -> sf.TReal:
         """
         Getter property for the arithmetic mean of the distribution.
         
@@ -1842,7 +1840,7 @@ class ChiSquared(ContinuousDistributionABC):
         return self.Degree
  
     @property
-    def Var(self) -> int:
+    def Var(self) -> sf.TReal:
         """
         Getter property for the variance of the distribution.
         
@@ -1879,8 +1877,8 @@ class ChiSquared(ContinuousDistributionABC):
 
 class F_Distribution(ContinuousDistributionABC):
     """
-    Implementation of the Student's t-distribution. Must be instantiated with
-    a single positive real number argument.
+    Implementation of the F-distribution. Must be instantiated with two
+    positive real number arguments - degrees of freedom.
     
     Properties:
         Name: (read-only) str
@@ -2563,12 +2561,12 @@ class Erlang(Gamma):
     #public properties
     
     @property
-    def Shape(self) -> sf.TReal:
+    def Shape(self) -> int:
         """
         Property for the shape parameter of the distribution.
         
         Signature:
-            None -> int > 0 OR float > 0
+            None -> int > 0
         
         Version 1.0.0.0
         """
@@ -2674,10 +2672,6 @@ class Poisson(DiscreteDistributionABC):
     
     Version 1.0.0.0
     """
-    
-     #class 'private' fields
-    
-    _Min: ClassVar[int] = 0
 
     #special methods
     
@@ -2861,10 +2855,6 @@ class Binomial(DiscreteDistributionABC):
     
     Version 1.0.0.0
     """
-    
-     #class 'private' fields
-    
-    _Min: ClassVar[int] = 0
 
     #special methods
     
@@ -3617,12 +3607,12 @@ class Hypergeometric(DiscreteDistributionABC):
         return Result
     
     @property
-    def Skew(self) -> Union[float, None]:
+    def Skew(self) -> float:
         """
         Property for the skewness of the distribution.
         
         Signature:
-            None -> float  OR None
+            None -> float
         
         Version 1.0.0.0
         """
@@ -3633,7 +3623,7 @@ class Hypergeometric(DiscreteDistributionABC):
             Result = math.sqrt(N - 1) * (N - 2 * K) * (N - 2 * n) / (N - 2)
             Result /= math.sqrt(n * K *(N - K) * (N - n))
         else: #N = 2
-            Result = 0
+            Result = 0.0
         return Result
     
     @property
