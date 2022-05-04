@@ -1,0 +1,75 @@
+@startuml discr_bisection
+
+!if %not(%variable_exists("$GENERAL"))
+    !include ../Templates/General2.cuml
+!endif
+
+title Activity Diagram of the Bi-Section Algorithm (Discrete Distributions). $generated()
+
+:p: 0 < float < 1 - cummulative probability value
+Left: int  - lower boundary such that cdf(Left) < p
+Right: int > Left - right boundary such that cdf(Right) > p<
+
+start
+
+:Point = round(0.5 * (Left + Right));
+
+while (while (Right - Left) > 1)
+    if (Point < Max?) then (True)
+        :PointCDF = _cdf(Point);
+        
+        if (abs(PointCDF - p) <= Precision) then (Yes)
+            :return float(Point)>
+            
+            stop
+        else (No)
+            if (PointCDF > p?) then (True)
+                if (Point > Left) then (Yes)
+                    :Right = Point;
+                    
+                    :Point = round(0.5 * (Left + Right));
+                else (No)
+                    :Right = Left + 1;
+                endif
+            else (False, < p)
+                if (Point < Right) then (Yes)
+                    :Left = Point;
+                    
+                    :Point = round(0.5 * (Left + Right));
+                else (No)
+                    :Left = Right - 1;
+                endif
+            endif
+        endif
+        
+        :Point = round(0.5 * (Left + Right));
+    
+        :PointCDF = _cdf(Point);
+    else (False)
+        :Right = Max;
+        
+        :Left = Max - 1;
+        
+        if (_pdf(Max) < Precision?) then (Yes)
+            :return float(Left)>
+            
+            stop
+        endif
+    endif
+end while (found final interval of width = 1)
+
+:Delta = _pdf(Right);
+
+if (Delta >= Precision ?) then (True)
+    :LeftCDF = _cdf(Left);
+    
+    :Point = float(Left + (p - LeftCDF) / Delta);
+else (False)
+    :Point = float(Left);
+endif
+
+:return Point>
+
+stop
+
+@enduml

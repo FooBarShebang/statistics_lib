@@ -1,0 +1,23 @@
+@startuml random_activity
+
+!if %not(%variable_exists("$GENERAL"))
+    !include ../Templates/General2.cuml
+!endif
+
+title Activity Diagram of the random() Method. $generated()
+
+start
+
+:generate random value p from a uniform distribution in the interval (0,1);
+
+if (continuous distribution?) then (True)
+    :Result = _qf(p)|
+else (False)
+    :Result = ceil(_qf(p))|
+endif
+
+:return Result>
+
+stop
+
+@enduml

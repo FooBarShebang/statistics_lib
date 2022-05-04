@@ -1,0 +1,26 @@
+@startuml qf_activity
+
+!if %not(%variable_exists("$GENERAL"))
+    !include ../Templates/General2.cuml
+!endif
+
+title Activity Diagram of the qf() Method. $generated()
+
+start
+:p: 0 < float < 1, expected - the value of the probability<
+
+if (p is not float?) then (True)
+    :raise exception;
+    
+    end
+elseif (p >= 1 OR p <= 0?) then (True)
+    :raise exception;
+    
+    end
+else (False)
+    :return _qf(p)|
+    
+    stop
+endif
+
+@enduml

@@ -1,0 +1,43 @@
+@startuml private_qf_activity
+
+!if %not(%variable_exists("$GENERAL"))
+    !include ../Templates/General2.cuml
+!endif
+
+title Activity Diagram of the Default _qf() Method. $generated()
+
+start
+
+:p: 0 < float < 1, expected - the cummulative probability value<
+
+if (discrete distribution?) then (Yes)
+    if (abs(_pdf(Min) - p) <= Precision?) then (True)
+        :return Min;
+        
+        stop
+    elseif (p < _pdf(Min)?) then (True)
+        :calculate Result using linear interpolation between Min - 1 and Min;
+        
+        :return Result;
+        
+        stop
+    endif
+endif
+
+:select starting point Start|
+
+if (abs(_cdf(Start) - p) <= Precision?) then (Yes)
+    :return Start;
+    
+    stop
+else (No)
+    :select starting interval|
+
+    :narrow down the inteval using bi-section and calculate Result|
+
+    :return Result>
+
+    stop
+endif
+
+@enduml

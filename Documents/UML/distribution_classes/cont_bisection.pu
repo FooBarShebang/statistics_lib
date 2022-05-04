@@ -1,0 +1,35 @@
+@startuml cont_bisection
+
+!if %not(%variable_exists("$GENERAL"))
+    !include ../Templates/General2.cuml
+!endif
+
+title Activity Diagram of the Bi-Section Algorithm (Continous Distributions). \n $generated()
+
+:p: 0 < float < 1 - cummulative probability value
+Left: int OR float - lower boundary such that cdf(Left) < p
+Right: (int OR float) > Left - right boundary such that cdf(Right) > p<
+
+start
+
+:Point = 0.5 * (Left + Right);
+
+:PointCDF = _cdf(Point);
+
+while (while (Right - Left) <= Precision AND abs(PointCDF - p) <= Precision)
+    if (PointCDF > p?) then (True)
+        :Right = Point;
+    else (False, < p)
+        :Left = Point;
+    endif
+    
+    :Point = 0.5 * (Left + Right);
+    
+    :PointCDF = _cdf(Point);
+end while (found solution)
+
+:return Point>
+
+stop
+
+@enduml

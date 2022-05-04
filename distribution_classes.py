@@ -75,7 +75,7 @@ class ContinuousDistributionABC(abc.ABC):
         Mean: (read-only) int OR float
         Median: (read-only) int OR float
         Q1: (read-only) int OR float
-        Q2: (read-only) int OR float
+        Q3: (read-only) int OR float
         Var: (read-only) int > 0 OR float > 0
         Sigma: (read-only) int > 0 OR float > 0
         Skew: (read-only) int OR float
@@ -189,8 +189,8 @@ class ContinuousDistributionABC(abc.ABC):
                         if Left < - Sigma:
                             Left = 2 * Left
                         else:
-                            Left = Right - Sigma
-                    if Left == Min:
+                            Left -= Sigma
+                    if Left <= Min:
                         z = 0.0
                     else:
                         z = self._cdf(Left)
@@ -433,13 +433,13 @@ class ContinuousDistributionABC(abc.ABC):
             Result = self._pdf(x)
         return Result
     
-    def cdf(self, x: sf.TReal) -> sf.TReal:
+    def cdf(self, x: sf.TReal) -> float:
         """
         Calculates the cummulative distribution function for the given value x
         of the random variable X, i.e. Pr[X <= x].
         
         Signature:
-            int OR float -> 0 < float < 1 OR 0 <= int <= 1
+            int OR float -> 0.0 <= float < 1.0
         
         Args:
             x: int OR float; value of the random variable
@@ -496,8 +496,9 @@ class ContinuousDistributionABC(abc.ABC):
             m: int > 0; the total number of quantiles
         
         Raises:
-            UT_TypeError: the argument is not a floating point number
-            UT_ValueError: the argument is not in the range (0, 1)
+            UT_TypeError: either of the arguments is not an integer number
+            UT_ValueError: first argument is not positive, OR it is greater than
+                or equal to the second argument
         
         Version 1.0.0.0
         """
@@ -543,7 +544,8 @@ class ContinuousDistributionABC(abc.ABC):
             maxb: int OR float; the cental value of the maximal values bin
             NBins: int > 1; the number of bins
         
-        tuple(tuple(int OR float, float >= 0)): the calculated histogram as
+        Returns:
+            tuple(tuple(int OR float, float >= 0)): the calculated histogram as
                 tuple of pairs (nested tuples) of the central value and the
                 associated frequency
         
@@ -590,7 +592,7 @@ class DiscreteDistributionABC(ContinuousDistributionABC):
         Mean: (read-only) int OR float
         Median: (read-only) int OR float
         Q1: (read-only) int OR float
-        Q2: (read-only) int OR float
+        Q3: (read-only) int OR float
         Var: (read-only) int > 0 OR float > 0
         Sigma: (read-only) int > 0 OR float > 0
         Skew: (read-only) int OR float
@@ -766,13 +768,13 @@ class DiscreteDistributionABC(ContinuousDistributionABC):
             Result = self._pdf(x)
         return Result
     
-    def cdf(self, x: sf.TReal) -> sf.TReal:
+    def cdf(self, x: sf.TReal) -> float:
         """
         Calculates the cummulative distribution function for the given value x
         of the random variable X, i.e. Pr[X <= x].
         
         Signature:
-            int OR float -> 0 < float < 1 OR 0 <= int <= 1
+            int OR float -> 0.0 <= float <= 1.0
         
         Args:
             x: int OR float; value of the random variable
@@ -820,7 +822,7 @@ class Z_Distribution(ContinuousDistributionABC):
         Mean: (read-only) float = 0
         Median: (read-only) float = 0
         Q1: (read-only) float < 0
-        Q2: (read-only) float > 0
+        Q3: (read-only) float > 0
         Var: (read-only) float = 1.0
         Sigma: (read-only) float = 1.0
         Skew: (read-only) float = 0.0
@@ -1010,7 +1012,7 @@ class Gaussian(Z_Distribution):
         Mean: float OR int
         Median: (read-only) float OR int
         Q1: (read-only) float
-        Q2: (read-only) float
+        Q3: (read-only) float
         Var: (read-only) float > 0 OR int > 0
         Sigma: float > 0 OR int > 0
         Skew: (read-only) float = 0.0
@@ -1048,7 +1050,7 @@ class Gaussian(Z_Distribution):
             Sigma: int > 0 OR float > 0; the sigma parameter of the distribution
         
         Raises:
-            UT_TypeError: any of the passed value is not a real number
+            UT_TypeError: any of the passed values is not a real number
             UT_ValueError: sigma value is not positive
         
         Version 1.0.0.0
@@ -1140,7 +1142,7 @@ class Exponential(ContinuousDistributionABC):
         Mean: (read-only) float > 0
         Median: (read-only) float > 0
         Q1: (read-only) float > 0
-        Q2: (read-only) float > 0
+        Q3: (read-only) float > 0
         Var: (read-only) float > 0
         Sigma: (read-only) float > 0
         Skew: (read-only) float > 0
@@ -1378,8 +1380,8 @@ class Student(ContinuousDistributionABC):
         Max: (read-only) float = math.inf
         Mean: (read-only) int = 0 OR None
         Median: (read-only) int = 0
-        Q1: (read-only) float
-        Q2: (read-only) float
+        Q1: (read-only) float < 0
+        Q3: (read-only) float > 0
         Var: (read-only) float > 0 OR None
         Sigma: (read-only) float > 0 OR None
         Skew: (read-only) int = 0 OR None
@@ -1683,7 +1685,7 @@ class ChiSquared(ContinuousDistributionABC):
         Mean: (read-only) int > 0 OR float > 0
         Median: (read-only) float > 0 OR int > 0
         Q1: (read-only) float > 0 OR int > 0
-        Q2: (read-only) float > 0 OR int > 0
+        Q3: (read-only) float > 0 OR int > 0
         Var: (read-only) int > 0 OR float > 0
         Sigma: (read-only) float > 0
         Skew: (read-only) float > 0
@@ -1887,10 +1889,10 @@ class F_Distribution(ContinuousDistributionABC):
         Mean: (read-only) float > 0 OR None
         Median: (read-only) float > 0
         Q1: (read-only) float > 0
-        Q2: (read-only) float > 0
+        Q3: (read-only) float > 0
         Var: (read-only) float > 0 OR None
         Sigma: (read-only) float > 0 OR None
-        Skew: (read-only) flaot > 0 OR None
+        Skew: (read-only) float > 0 OR None
         Kurt: (read-only) float > 0 OR None
         Degree1: int > 0 OR float > 0
         Degree2: int > 0 OR float > 0
@@ -1930,9 +1932,9 @@ class F_Distribution(ContinuousDistributionABC):
         
         Args:
             Degree1: int > 0 OR float > 0; the first parameter of the
-                distribution as degree of freedom
+                distribution as the degree of freedom
             Degree2: int > 0 OR float > 0; the second parameter of the
-                distribution as degree of freedom
+                distribution as the degree of freedom
         
         Raises:
             UT_TypeError: either of the arguments is neither int nor float
@@ -2222,7 +2224,7 @@ class Gamma(ContinuousDistributionABC):
         Mean: (read-only) float > 0
         Median: (read-only) float > 0
         Q1: (read-only) float > 0
-        Q2: (read-only) float > 0
+        Q3: (read-only) float > 0
         Var: (read-only) float > 0
         Sigma: (read-only) float > 0
         Skew: (read-only) float > 0
@@ -2468,7 +2470,7 @@ class Erlang(Gamma):
         Mean: (read-only) float > 0
         Median: (read-only) float > 0
         Q1: (read-only) float > 0
-        Q2: (read-only) float > 0
+        Q3: (read-only) float > 0
         Var: (read-only) float > 0
         Sigma: (read-only) float > 0
         Skew: (read-only) float > 0
@@ -2512,7 +2514,8 @@ class Erlang(Gamma):
             Rate: int > 0 OR float > 0; the rate parameter of the distribution
         
         Raises:
-            UT_TypeError: either of the arguments is neither int nor float
+            UT_TypeError: the first argument is not an integer, OR the second
+                argument is neither integer nor float
             UT_ValueError: either of the arguments is zero or negative
         
         Version 1.0.0.0
@@ -2648,7 +2651,7 @@ class Poisson(DiscreteDistributionABC):
         Mean: (read-only) int > 0 OR float > 0
         Median: (read-only) float > 0
         Q1: (read-only) float > 0
-        Q2: (read-only) float > 0
+        Q3: (read-only) float > 0
         Var: (read-only) int > 0 OR float > 0
         Sigma: (read-only) float > 0
         Skew: (read-only) float > 0
@@ -2830,7 +2833,7 @@ class Binomial(DiscreteDistributionABC):
         Mean: (read-only) float > 0
         Median: (read-only) float > 0
         Q1: (read-only) float > 0
-        Q2: (read-only) float > 0
+        Q3: (read-only) float > 0
         Var: (read-only) float > 0
         Sigma: (read-only) float > 0
         Skew: (read-only) float
@@ -3072,7 +3075,7 @@ class Geometric(DiscreteDistributionABC):
         Mean: (read-only) float > 0
         Median: (read-only) float > 0
         Q1: (read-only) float > 0
-        Q2: (read-only) float > 0
+        Q3: (read-only) float > 0
         Var: (read-only) float > 0
         Sigma: (read-only) float > 0
         Skew: (read-only) float > 0
@@ -3311,11 +3314,11 @@ class Hypergeometric(DiscreteDistributionABC):
         Mean: (read-only) int > 0 OR float > 0
         Median: (read-only) float > 0
         Q1: (read-only) float > 0
-        Q2: (read-only) float > 0
+        Q3: (read-only) float > 0
         Var: (read-only) float > 0
         Sigma: (read-only) float > 0
-        Skew: (read-only) float OR None
-        Kurt: (read-only) float OR None
+        Skew: (read-only) float
+        Kurt: (read-only) float
         Size: int >= 2
         Successes: int > 0
         Draws: int > 0

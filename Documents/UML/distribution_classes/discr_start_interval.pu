@@ -1,0 +1,77 @@
+@startuml discr_start_interval
+
+!if %not(%variable_exists("$GENERAL"))
+    !include ../Templates/General2.cuml
+!endif
+
+title Activity Diagram of the Selection of the Starting Interval (Discrete Distributions). $generated()
+
+start
+
+:Start: int - starting point
+Sigma: (int OR float) > 0
+p: 0 < float < 1 - cummulative probability<
+
+:PointCDF = _cdf(Start);
+
+:Left = Start;
+
+:Right = Start;
+
+if (PointCDF < p?) then (Yes)
+    while (while Right < Max AND PointCDF < p)
+        :Left = Right;
+        
+        if (Max is finite?) then (True)
+            :Right = ceil(0.5 * (Right + Max));
+        elseif (Right > Sigma?) then (True)
+            :Right = round(2 * Right);
+        else (False)
+            :Right = round(Right + 2 * Sigma);
+        endif
+        
+        if (Right >= Max) then (True)
+            :PointCDF = 1;
+            
+            :Right = Max;
+        else (False)
+            :PointCDF = _cdf(Right);
+        endif
+        
+        if (abs(PointCDF - p) <= Precision?) then (Yes)
+            :found solution, stop algorithm;
+            
+            :return float(Right)>
+            
+            end
+        endif
+    end while (found interval)
+else (No, > p)
+    while (while Left > Min AND PointCDF > p)
+        :Right = Left;
+        
+        :Left = floor(0.5 * (Left + Min));
+        
+        if (Left <= Min) then (True)
+            :PointCDF = 0;
+        else (False)
+            :PointCDF = _cdf(Left);
+            
+            :Left = Min;
+        endif
+        
+        if (abs(PointCDF - p) <= Precision?) then (Yes)
+            :found solution, stop algorithm;
+            
+            :return float(Left)>
+            
+            end
+        endif
+    end while (found interval)
+endif
+
+:Left, Right>
+
+stop
+
+@enduml

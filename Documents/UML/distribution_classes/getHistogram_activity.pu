@@ -1,0 +1,53 @@
+@startuml getHistogram_activity
+
+!if %not(%variable_exists("$GENERAL"))
+    !include ../Templates/General2.cuml
+!endif
+
+title Activity Diagram of the getHistogram() Method. $generated()
+
+start
+
+:minb: int OR float, expected - central value of the minimal values bin
+maxb: (int OR float) > minb, expected - central value of the maximal values bin
+NBins: int >= 2, expected - number of bins<
+
+:do sanity checks on the input values|
+
+if (checks fail?) then (True)
+    :raise exception;
+    
+    end
+else (False)
+    :calculate bin width S = (maxb - minb) / (NBins - 1);
+    
+    :Right = minb - S / 2;
+    
+    :RightCDF = cdf(Right);
+    
+    :instantiate Result as an empty list;
+    
+    :k = 0;
+    
+    while (k < NBins?)
+        :LeftCDF = RightCDF;
+        
+        :Right = minb + (k + 0.5) * S;
+        
+        :RightCDF = cdf(Right);
+        
+        :Center = mindb + k * S;
+        
+        :append tuple (Center, RightCDF - LeftCD) into Result list;
+        
+        :k++;
+    end while (all bins are calcualted)
+    
+    :convert Result to a tuple;
+    
+    :return Result>
+    
+    stop
+endif
+
+@enduml

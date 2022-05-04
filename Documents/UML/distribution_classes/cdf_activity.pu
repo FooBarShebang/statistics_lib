@@ -1,0 +1,40 @@
+@startuml cdf_activity
+
+!if %not(%variable_exists("$GENERAL"))
+    !include ../Templates/General2.cuml
+!endif
+
+title Activity Diagram of the cdf() Method. $generated()
+
+start
+:x: int OR float, expected - the value of a random variable<
+
+if (x is int OR float?) then (True)
+    if (x >= Max?) then (Yes)
+        :Result = 1.0;
+    else (No)
+        if (Continuous distribution?) then (True)
+            if (x <= Min?) then (Yes)
+                :Result = 0.0;
+            else (No)
+                :Result = _cdf(x)|
+            endif
+        else (False)
+            if (x < Min?) then (Yes)
+                :Result = 0.0;
+            else (No)
+                :Result = _cdf(floor(x))|
+            endif
+        endif
+    endif
+else (False)
+    :raise exception;
+    
+    end
+endif
+
+:return Result>
+
+stop
+
+@enduml

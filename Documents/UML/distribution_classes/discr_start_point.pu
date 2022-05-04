@@ -1,0 +1,29 @@
+@startuml discr_start_point
+
+!if %not(%variable_exists("$GENERAL"))
+    !include ../Templates/General2.cuml
+!endif
+
+title Activity Diagram of the Selection of the Starting Point (Discrete Distributions). \n $generated()
+
+start
+
+if (StDev is defined and finite and > 1?) then (True)
+    :Sigma = StDev;
+else (False)
+    :Sigma = 1;
+endif
+
+if (Max is finite?) then (True)
+    :Start = round((Min + Max) / 2);
+elseif (Mean is defined and finite?) then (True)
+    :Start = ceil(Mean);
+else (False)
+    :Start = round(Min + 3 * Sigma);
+endif
+
+:Sigma, Start>
+
+stop
+
+@enduml

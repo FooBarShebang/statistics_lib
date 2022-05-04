@@ -617,7 +617,7 @@ Then, the following procedure should be used for the selection of the *initial g
     * If *Mean* property is defined for the distribution - select it
     * Otherwise:
       * If *Min* is finite - select $Min + 3 * \sigma$
-      * Else if *Max* is finite - select $Max - 3 * \sigma*$
+      * Else if *Max* is finite - select $Max - 3 * \sigma$
       * Otherwise (both bounds are infinite) - select 0 (zero value)
 * Note that if the standard deviation is not defined for the distribution, or it is infinite, use $\sigma = 1$ value instead, also if actual standard deviation < 1 for a discrete distribution
 * Calculate $cdf(x_0)$ for continuous distribution or $cdf(\lfloor x_0 \rfloor)$ for discrete and compare it with the passed *p* value:

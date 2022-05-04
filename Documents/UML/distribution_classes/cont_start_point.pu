@@ -1,0 +1,31 @@
+@startuml cont_start_point
+
+!if %not(%variable_exists("$GENERAL"))
+    !include ../Templates/General2.cuml
+!endif
+
+title Activity Diagram of the Selection of the Starting Point (Continous Distributions). \n $generated()
+
+start
+
+if (StDev is defined and finite?) then (True)
+    :Sigma = StDev;
+else (False)
+    :Sigma = 1;
+endif
+
+if (Mean is defined?) then (True)
+    :Start = Mean;
+elseif (both Min and Max are finite?) then (True)
+    :Start = (Min + Max) / 2;
+elseif (Min is finite?) then (True)
+    :Start = Min + 3 * Sigma;
+else (False)
+    :Start = Max - 3 * Sigma;
+endif
+
+:Sigma, Start>
+
+stop
+
+@enduml

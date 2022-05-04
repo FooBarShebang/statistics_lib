@@ -1,0 +1,83 @@
+@startuml cont_start_interval
+
+!if %not(%variable_exists("$GENERAL"))
+    !include ../Templates/General2.cuml
+!endif
+
+title Activity Diagram of the Selection of the Starting Interval (Continous Distributions). $generated()
+
+start
+
+:Start: int OR float - starting point
+Sigma: (int OR float) > 0
+p: 0 < float < 1 - cummulative probability<
+
+:PointCDF = _cdf(Start);
+
+:Left = Start;
+
+:Right = Start;
+
+if (PointCDF < p?) then (Yes)
+    while (while Right < Max AND PointCDF < p)
+        :Left = Right;
+        
+        if (Max is finite?) then (True)
+            :Right = 0.5 * (Right + Max);
+        elseif (Right > Sigma?) then (True)
+            :Right = 2 * Right;
+        else (False)
+            :Right = Right + Sigma;
+        endif
+        
+        if (Right >= Max) then (True)
+            :PointCDF = 1;
+            
+            :Right = Max;
+        else (False)
+            :PointCDF = _cdf(Right);
+        endif
+        
+        if (abs(PointCDF - p) <= Precision?) then (Yes)
+            :found solution, stop algorithm;
+            
+            :return Right>
+            
+            end
+        endif
+    end while (found interval)
+else (No, > p)
+    while (while Left > Min AND PointCDF > p)
+        :Right = Left;
+        
+         if (Min is finite?) then (True)
+            :Left = 0.5 * (Left + Min);
+        elseif (Left < -Sigma?) then (True)
+            :Left = 2 * Left;
+        else (False)
+            :Left = Left - Sigma;
+        endif
+        
+        if (Left <= Min) then (True)
+            :PointCDF = 0;
+            
+            :Left = Min;
+        else (False)
+            :PointCDF = _cdf(Left);
+        endif
+        
+        if (abs(PointCDF - p) <= Precision?) then (Yes)
+            :found solution, stop algorithm;
+            
+            :return Left>
+            
+            end
+        endif
+    end while (found interval)
+endif
+
+:Left, Right>
+
+stop
+
+@enduml

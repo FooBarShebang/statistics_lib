@@ -61,12 +61,12 @@ class InverseGaussian(BC):
     
     Properties:
         Name: (read-only) str
-        Min: (read-only) float > 0
+        Min: (read-only) float >= 0
         Max: (read-only) float = math.inf
-        Mean: float > 0  OR int > 0
+        Mean: float > 0 OR int > 0
         Median: (read-only) float > 0
         Q1: (read-only) float > 0
-        Q2: (read-only) float > 0
+        Q3: (read-only) float > 0
         Var: (read-only) float > 0
         Sigma: (read-only) float > 0
         Skew: (read-only) float > 0
@@ -285,7 +285,7 @@ class InverseGamma(BC):
         Mean: (read-only) float > 0 OR None
         Median: (read-only) float > 0
         Q1: (read-only) float > 0
-        Q2: (read-only) float > 0
+        Q3: (read-only) float > 0
         Var: (read-only) float > 0 OR None
         Sigma: (read-only) float > 0 OR None
         Skew: (read-only) float > 0 OR None
@@ -580,7 +580,7 @@ class InverseChiSquared(BC):
         Mean: (read-only) float > 0 OR None
         Median: (read-only) float > 0
         Q1: (read-only) float > 0
-        Q2: (read-only) float > 0
+        Q3: (read-only) float > 0
         Var: (read-only) float > 0 OR None
         Sigma: (read-only) float > 0 OR None
         Skew: (read-only) float > 0 OR None
@@ -829,7 +829,7 @@ class ScaledInverseChiSquared(InverseChiSquared):
         Mean: (read-only) float > 0 OR None
         Median: (read-only) float > 0
         Q1: (read-only) float > 0
-        Q2: (read-only) float > 0
+        Q3: (read-only) float > 0
         Var: (read-only) float > 0 OR None
         Sigma: (read-only) float > 0 OR None
         Skew: (read-only) float > 0 OR None
@@ -1088,7 +1088,7 @@ class Cauchy(BC):
         Mean: (read-only) None
         Median: (read-only) float OR int
         Q1: (read-only) float OR int
-        Q2: (read-only) float OR int
+        Q3: (read-only) float OR int
         Var: (read-only) None
         Sigma: (read-only) None
         Skew: (read-only) None
@@ -1163,7 +1163,7 @@ class Cauchy(BC):
     
     def __init__(self, Location: sf.TReal, Scale: sf.TReal) -> None:
         """
-        Initialization. Sets the parameter of the distribution.
+        Initialization. Sets the parameters of the distribution.
         
         Signature:
             int OR float, int > 0 OR float > 0 -> None
@@ -1173,8 +1173,8 @@ class Cauchy(BC):
             Scale: int > 0 OR float > 0; the scale parameter of the distribution
 
         Raises:
-            UT_TypeError: the passed value is not a real number
-            UT_ValueError: the passed value is not positive
+            UT_TypeError: either of the passed values is not a real number
+            UT_ValueError: the second passed value is not positive
         
         Version 1.0.0.0
         """
@@ -1353,7 +1353,7 @@ class Cauchy(BC):
 
 class Levy(Cauchy):
     """
-    Implementation of the Cauchy distribution. Must be instantiated with two
+    Implementation of the Levy distribution. Must be instantiated with two
     real number arguments: location and scale, whereas the scale must be
     positive.
     
@@ -1364,7 +1364,7 @@ class Levy(Cauchy):
         Mean: (read-only) float = math.inf
         Median: (read-only) float
         Q1: (read-only) float
-        Q2: (read-only) float
+        Q3: (read-only) float
         Var: (read-only) float  = math.inf
         Sigma: (read-only) float  = math.inf
         Skew: (read-only) None
