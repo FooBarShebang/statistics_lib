@@ -7,3 +7,4 @@
 * Module [distribution_classes](./RE004_distribution_classes.md)
 * Module [special_functions](./RE005_special_functions.md)
 * Module [inverse_distributions](./RE006_inverse_distributions.md)
+* Module [stat_tests](./RE007_stat_tests.md)
