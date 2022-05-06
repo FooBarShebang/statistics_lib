@@ -36,7 +36,7 @@ The verification method for a requirement is given by a single letter according 
 * Chi-squared test on the sample's variance for the known population standard deviation / variance
 * unpaired t-test comparison of the means of two samples
 * paired t-test comparison of the means of two samples
-* Welsh's t-test comparison of the means of two samples
+* Welch's t-test comparison of the means of two samples
 * F-test comparison of the variances of two samples
 * ANOVA homoscedasticity F-test comparison of the variances of two samples
 * Levene test comparison of the variances of two samples
@@ -125,7 +125,7 @@ __
 
 **Requirement ID:** REQ-FUN-760
 
-**Title:** Welsh's t-test
+**Title:** Welch's t-test
 
 **Description:** The respective function should perform the statistical test, i.e. calculate the p-value and reject / fail to reject the null hypothesis at the given confidence level, for two data samples. Hence, the function must accept and expect the following arguments (in order):
 
