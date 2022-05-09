@@ -15,7 +15,6 @@ __status__ = 'Testing'
 
 #+ standard library
 
-from sre_constants import SUCCESS
 import sys
 import os
 import unittest

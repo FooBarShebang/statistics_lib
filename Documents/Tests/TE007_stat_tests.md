@@ -352,8 +352,8 @@ ___
 
 **Test steps:** Intantiate the respective class with arbitrary values for the string (descriptors) arguments, an arbitrary CDF value in the range (0.05, 0.95) and some arbitrary chosen critical values
 
-* (NULL, some value) - should be treated as 1-sided right-tailed, 'greater'
-* (some value, NULL) - should be treated as 1-sided left-tailed, 'less'
+* (None, some value) - should be treated as 1-sided right-tailed, 'greater'
+* (some value, None) - should be treated as 1-sided left-tailed, 'less'
 * (some value, some other greater value) - should be treated as 2-sided, 'not equal'
 * (some value, the same value) - should be treated as 1-sided right-tailed, 'not equal'
 
@@ -387,8 +387,8 @@ Check that the boolean test result and the floating point p-value are calculated
 
 **Test steps:** Instantiate the class in question with some arbitrary but proper values, emulating results of the testing functions. Specifically, check the following cases of the critical values tuple:
 
-* (NULL, some value) - should be treated as 1-sided right-tailed, 'greater'
-* (some value, NULL) - should be treated as 1-sided left-tailed, 'less'
+* (None, some value) - should be treated as 1-sided right-tailed, 'greater'
+* (some value, None) - should be treated as 1-sided left-tailed, 'less'
 * (some value, some other greater value) - should be treated as 2-sided, 'not equal'
 * (some value, the same value) - should be treated as 1-sided right-tailed, 'not equal'
 
