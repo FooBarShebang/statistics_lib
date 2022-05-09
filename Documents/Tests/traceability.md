@@ -9,6 +9,7 @@
 * module **distribution_classes** - 40x
 * module **special_functions** - 5xy
 * module **inverse_distributions** - 60x
+* module **stat_test** - 7xy
 
 ## Requirements vs Tests Traceability
 
@@ -92,6 +93,24 @@
 | REQ-FUN-608        | TEST-D-600             | YES                      |
 | REQ-AWM-600        | TEST-T-607             | YES                      |
 | REQ-AWM-601        | TEST-T-608             | YES                      |
+| REQ-FUN-700        | TEST-A-700             | NO                       |
+| REQ-FUN-710        | TEST-T-710             | NO                       |
+| REQ-FUN-720        | TEST-T-720             | NO                       |
+| REQ-FUN-730        | TEST-T-730             | NO                       |
+| REQ-FUN-740        | TEST-T-740             | NO                       |
+| REQ-FUN-750        | TEST-T-750             | NO                       |
+| REQ-FUN-760        | TEST-T-760             | NO                       |
+| REQ-FUN-770        | TEST-T-770             | NO                       |
+| REQ-FUN-780        | TEST-T-780             | NO                       |
+| REQ-FUN-790        | TEST-T-790             | NO                       |
+| REQ-FUN-7A0        | TEST-T-7A0             | NO                       |
+| REQ-FUN-7B0        | TEST-T-7B0, TEST-D-700 | NO                       |
+| REQ-FUN-7B1        | TEST-T-7B0, TEST-D-700 | NO                       |
+| REQ-SIO-700        | TEST-T-702             | NO                       |
+| REQ-SIO-701        | TEST-T-702             | NO                       |
+| REQ-SIO-702        | TEST-T-702             | NO                       |
+| REQ-AWM-700        | TEST-T-700             | NO                       |
+| REQ-AWM-701        | TEST-T-701             | NO                       |
 
 | **Software ready for production \[YES/NO\]** | **Rationale**                 |
 | :------------------------------------------: | :---------------------------- |

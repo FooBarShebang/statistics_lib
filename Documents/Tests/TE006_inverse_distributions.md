@@ -233,7 +233,7 @@ Instantiate the class being tested with random but proper values of the paramete
 
 **Requirement ID(s)**: REQ-FUN-607, REQ-FUN-608
 
-**Verification method:** T
+**Verification method:** D
 
 **Test goal:** Check implementation of the methods *random*() and *getHistogram*()
 
