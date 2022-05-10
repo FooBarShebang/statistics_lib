@@ -1,0 +1,90 @@
+Statistical test report.
+Name: Z-test at 90% confidence on sample`s mean vs population mean = 1.2 and sigma = 0.3
+Data: Some test data
+Type: 2-sided
+Model distribution: Z_Distribution()
+Null hypothesis: equal to
+Alternative hypothesis: not equal to
+Critical values: -1.65 and 1.65
+Test value: 1.42
+p-value: 0.15559999999999996
+Is null hypothesis rejected?: No
+
+Statistical test report.
+Name: Z-test at 90% confidence on sample`s mean vs population mean = 1.2 and sigma = 0.3
+Data: Some test data
+Type: 1-sided right-tailed
+Model distribution: Z_Distribution()
+Null hypothesis: less than or equal to
+Alternative hypothesis: greater than
+Critical value: 1.28
+Test value: 1.42
+p-value: 0.07779999999999998
+Is null hypothesis rejected?: Yes
+
+Statistical test report.
+Name: Z-test at 90% confidence on sample`s mean vs population mean = 1.2 and sigma = 0.3
+Data: Some test data
+Type: 1-sided left-tailed
+Model distribution: Z_Distribution()
+Null hypothesis: greater than or equal to
+Alternative hypothesis: less than
+Critical value: -1.28
+Test value: 1.42
+p-value: 0.9222
+Is null hypothesis rejected?: No
+
+Statistical test report.
+Name: F-test at 90% confidence on samples` variances equality
+Data: Some test data
+Type: 1-sided right-tailed
+Model distribution: F_Distribution(Degree1 = 10, Degree2 = 15)
+Null hypothesis: equal to
+Alternative hypothesis: not equal to
+Critical value: 1.28
+Test value: 1.42
+p-value: 0.07779999999999998
+Is null hypothesis rejected?: Yes
+
+----------------------------------------------------------
+Name:	test set 1
+N:	15
+Mean:	1.3973186378200784
+Median:	1.423355178037434
+Q1:	1.0727825187075761
+Q3:	1.772047408123228
+Min:	0.48450343391456485
+Max:	2.2651281431568466
+Var:	0.2520033042430861
+FullVar:	0.2520033042430861
+Skew:	-0.12547144062243784
+Kurt:	-0.806444946102955
+----------------------------------------------------------
+
+----------------------------------------------------------
+Name:	test set 2
+N:	15
+Mean:	2.452028809462873
+Median:	2.369312912219703
+Q1:	2.2347954318204577
+Q3:	2.657810382807216
+Min:	2.0385335963911424
+Max:	2.9957661404967135
+Var:	0.09451785626646363
+FullVar:	0.09451785626646363
+Skew:	0.3316821759789822
+Kurt:	-1.065354780764838
+----------------------------------------------------------
+
+Statistical test report.
+Name: Z-test at 95.0% confidence on the sample`s mean vs population mean = 1.5 and sigma = 0.5
+Data: test set 1
+Type: 2-sided
+Model distribution: Z_Distribution()
+Null hypothesis: equal to
+Alternative hypothesis: not equal to
+Critical values: -1.9599639845400538 and 1.9599639845400538
+Test value: -0.7953664113774572
+p-value: 0.4264003924286415
+Is null hypothesis rejected?: No
+

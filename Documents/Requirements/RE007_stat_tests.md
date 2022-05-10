@@ -318,6 +318,7 @@ __
 * The confidence level is not in the interval (0, 1) - all tests
 * Population standard deviation is not positive - Z-test and chi-squared test
 * Delta parameter of the generic F-test is not positive
+* Length of the data sample (any of two) is less than 2 elements
 
 This exception should also be raised by the paired Student's t-test if the data samples differ in length.
 

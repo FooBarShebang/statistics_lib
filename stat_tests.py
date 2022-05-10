@@ -10,7 +10,7 @@ Classes:
     TestResult
 
 Functions:
-    
+    z_test
 
 Constants:
     GT_TEST: enum(TestType) - indication for 1-sided right-tailed test
@@ -28,6 +28,7 @@ __status__ = 'Development'
 
 import sys
 import os
+import math
 
 from typing import Tuple, Union
 
@@ -45,6 +46,10 @@ if not (ROOT_FOLDER in sys.path):
 #++ actual import
 
 from introspection_lib.base_exceptions import UT_TypeError, UT_ValueError
+
+from statistics_lib.data_classes import Statistics1D as DC
+
+import statistics_lib.distribution_classes as MC
 
 #globals
 
@@ -279,3 +284,76 @@ class TestResult:
                     'p-value: {}'.format(self.p_Value),
                     'Is null hypothesis rejected?: {}'.format(IsRejected)])
         return Result
+
+#functions
+
+def z_test(Data: DC, Mean: T_REAL, Sigma: T_REAL, Type: TestTypes, *,
+                                        Confidence: float = 0.95) -> TestResult:
+    """
+    Implementation of the Z-test, comparing the sample's mean with the known
+    population mean. The actual population standard deviation must be known.
+    
+    Signature:
+        Statistics1D, int OR float, int > 0 OR float > 0, TestTypes
+            /, *, 0 < float < 1/ -> TestResult
+    
+    Args:
+        Data: Statistics1D; instance of, the sampled data stored in an instance
+            of specialized statistical class
+        Mean: int OR float; the mean of the population parameter of the model
+            distribution
+        Sigma: int > 0 OR float > 0; the standard deviation of the population
+            parameter of the model distribution
+        Type: TestTypes; an enumeration value indicating the 1- or 2-sided
+            nature of the test, use values GT_TEST, LT_TEST and NEQ_TEST defined
+            in this module
+        Confidence: (keyword) 0 < float < 1; the confidence level of test,
+            defaults to 0.95, i.e. 95%.
+    
+    Returns:
+        TestResult: instance of the class (defined in this module), which can
+            generate a human-readable report on the performed test
+    
+    Raises:
+        UT_TypeError: either of the arguments is of the improper data type
+        UT_ValueError: Sigma argument is zero or negative, OR Confidence
+            argument is not in the range (0, 1)
+    
+    Version 1.0.0.0
+    """
+    if not isinstance(Data, DC):
+        raise UT_TypeError(Data, DC, SkipFrames = 1)
+    if not isinstance(Mean, (int, float)):
+        raise UT_TypeError(Mean, (int, float), SkipFrames = 1)
+    if not isinstance(Sigma, (int, float)):
+        raise UT_TypeError(Sigma, (int, float), SkipFrames = 1)
+    if not isinstance(Type, TestTypes):
+        raise UT_TypeError(Type, TestTypes, SkipFrames = 1)
+    if not isinstance(Confidence, float):
+        raise UT_TypeError(Confidence, float, SkipFrames = 1)
+    if Sigma <= 0:
+        raise UT_ValueError(Sigma, '> 0 - population sigma', SkipFrames = 1)
+    if Confidence <= 0 or Confidence >= 1:
+        raise UT_ValueError(Sigma, 'in range (0, 1) - confidence', SkipFrames=1)
+    if Data.N < 2:
+        raise UT_ValueError(Data.N, '> 1 - data length', SkipFrames = 1)
+    TestValue = math.sqrt(Data.N) * (Data.Mean - Mean) / Sigma
+    Model = MC.Z_Distribution()
+    CDF_Value = Model.cdf(TestValue)
+    if Type is TestTypes.LEFT:
+        CritValue = Model.qf(1-Confidence)
+        CriticalValues = (CritValue, None)
+    elif Type is TestTypes.RIGHT:
+        CritValue = Model.qf(Confidence)
+        CriticalValues = (None, CritValue)
+    else:
+        CritValue = Model.qf(0.5 * (1 + Confidence))
+        CriticalValues = (-CritValue, CritValue)
+    TestName = ' '.join(['Z-test at {:.1f}%'.format(100 * Confidence),
+                        'confidence on the sample`s mean vs population',
+                        'mean = {} and sigma = {}'.format(Mean, Sigma)])
+    DataName = str(Data.Name)
+    ModelName = Model.Name
+    Result = TestResult(TestName, DataName, ModelName, TestValue, CDF_Value,
+                                                                CriticalValues)
+    return Result

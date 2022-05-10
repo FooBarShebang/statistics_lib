@@ -83,6 +83,7 @@ ___
 * The confidence level is a floating number bit not in the interval (0, 1) - all tests
 * Population standard deviation is an integer or floating point but not positive - Z-test and chi-squared test
 * Delta parameter of the generic F-test is an integer or floating point but not positive
+* Length of the data is less than 2 elements
 
 **Test steps:** This step is performed for each of the testing functions separately. Try to call the function is question with only one argument at the time violating the restrictions, repeat with the different unacceptable values of a proper data type for the same argument. Each concerned argument MUST be checked. Check, that the expected exception type is raised each time.
 
@@ -137,7 +138,7 @@ In each of the cases check the relation of the calculated test value to the crit
 
 Also perform the demonstration test TEST-D-700.
 
-**Test result:** PASS / FAIL
+**Test result:** PASS
 
 ___
 
@@ -425,7 +426,7 @@ For traceability the relation between tests and requirements is summarized in th
 | **Requirement ID** | **Covered in test(s)** | **Verified \[YES/NO\]**) |
 | :----------------- | :--------------------- | :----------------------- |
 | REQ-FUN-700        | TEST-A-700             | NO                       |
-| REQ-FUN-710        | TEST-T-710             | NO                       |
+| REQ-FUN-710        | TEST-T-710             | YES                      |
 | REQ-FUN-720        | TEST-T-720             | NO                       |
 | REQ-FUN-730        | TEST-T-730             | NO                       |
 | REQ-FUN-740        | TEST-T-740             | NO                       |
