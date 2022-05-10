@@ -220,7 +220,7 @@ __
 **Description:** Based on the values of the arguments of the initialization method, which should be stored as the class instance's state, the respective instance should be able to infer the type of the test (2- sided or 1-sided greater / less), calculate the associated p-value and if the null hypothesis is rejected. Thus, the class should implement the following 3 read-only properties:
 
 * boolean: rejection (True) or failure to reject (False) the null-hypothesis
-* floating point in range (0, 1): calculated p-value of the test
+* floating point in range [0, 1]: calculated p-value of the test
 * string: human readable, multi-line test report
 
 The format of the report should be comparable to the following examples.

@@ -2,15 +2,24 @@
 """
 Module statistics_lib.stat_tests
 
-???
+Implements statistical significance tests as functions returning a class
+instance, which can generate human-readable report.
 
 Classes:
+    TestTypes
     TestResult
 
+Functions:
+    
+
+Constants:
+    GT_TEST: enum(TestType) - indication for 1-sided right-tailed test
+    LT_TEST: enum(TestType) - indication for 1-sided left-tailed test
+    NEQ_TEST: enum(TestType) - indication for 2-sided test
 """
 
 __version__= '1.0.0.0'
-__date__ = '09-05-2022'
+__date__ = '10-05-2022'
 __status__ = 'Development'
 
 #imports
@@ -21,6 +30,8 @@ import sys
 import os
 
 from typing import Tuple, Union
+
+from enum import Enum
 
 #+ custom modules
 
@@ -47,8 +58,49 @@ T_CRIT_BOUNDS = Tuple[T_BOUND, T_BOUND]
 
 #classes
 
+class TestTypes(Enum):
+    """
+    Enumeration (meta-) class for the identification of the 1- / 2-sided
+    statistical significance tests. Each enumaration value is definced by two
+    strings - the null hypothesis and the alternative hypothesis, which will
+    be accessible via properties H0 and H1.
+    
+    Version 1.0.0.0
+    """
+    LEFT = ('greater than or equal to', 'less than')
+    RIGHT = ('less than or equal to', 'greater than')
+    TWO_SIDED = ('equal to', 'not equal to')
+    
+    def __init__(self, H0: str, H1: str):
+        self._ExtraData = {'H0' : H0, 'H1' : H1}
+    
+    @property
+    def H0(self) -> str:
+        return self._ExtraData['H0']
+    
+    @property
+    def H1(self) -> str:
+        return self._ExtraData['H1']
+
+#aliases
+
+GT_TEST = TestTypes.RIGHT
+LT_TEST = TestTypes.LEFT
+NEQ_TEST = TestTypes.TWO_SIDED
+
 class TestResult:
     """
+    Helper class to represent the results of the statistical significance tests.
+    The end-user is not supposed to instantiate this class manually, but only
+    to receive such an instance as the return value of the corresponding
+    function.
+    
+    Properties:
+        IsRejected: (read-only) bool
+        p_Value: (read-only) 0 <= float <= 1
+        Report: (read-only) str
+    
+    Version 1.0.0.0
     """
     
     #special methods
@@ -110,7 +162,8 @@ class TestResult:
             raise objError
         if CDF_Value >= 1.0 or CDF_Value <= 0.0:
             raise UT_ValueError(CDF_Value, 'in the range (0, 1)', SkipFrames= 1)
-        if CritValues[1] < CritValues[0]:
+        bCond = (not (CritValues[0] is None)) and (not (CritValues[1] is None))
+        if bCond and CritValues[1] < CritValues[0]:
             strError = 'second item must be greater then or equal to the first'
             raise UT_ValueError(CritValues, strError, SkipFrames = 1)
         self._Data = dict()
@@ -146,10 +199,83 @@ class TestResult:
         elif CritValues[0] is None: #1-sided right-tailed
             if TestValue >= CritValues[1]:
                 Result = True
-        elif CritValues[0] is CritValues[1]: #1-sided right-tailed
+        elif CritValues[0] is CritValues[1]: #1-sided right-tailed special
             if TestValue >= CritValues[1]:
                 Result = True
         else: #2-sided
             if TestValue >= CritValues[1] or TestValue <= CritValues[0]:
                 Result = True
+        return Result
+    
+    @property
+    def p_Value(self) -> float:
+        """
+        Getter (read-only) property to access the p_Value of the test.
+        
+        Signature:
+            None -> 0 <= float <= 1
+        
+        Version 1.0.0.0
+        """
+        CritValues = self._Data['CritValues']
+        TestValue = self._Data['CDF_Value']
+        if CritValues[1] is None: #1-sided left-tailed
+            Result = TestValue
+        elif CritValues[0] is None: #1-sided right-tailed
+            Result = 1.0 - TestValue
+        elif CritValues[0] is CritValues[1]: #1-sided right-tailed special
+            Result = 1.0 - TestValue
+        else: #2-sided
+            if TestValue >= 0.5:
+                Result = 2 * ( 1.0 - TestValue)
+            else:
+                Result = 2.0 * TestValue
+        return Result
+    
+    @property
+    def Report(self) -> str:
+        """
+        Getter (read-only) property to access the human-readable, multi-line
+        string report on the test.
+        
+        Signature:
+            None -> str
+        
+        Version 1.0.0.0
+        """
+        CritValues = self._Data['CritValues']
+        if CritValues[1] is None: #1-sided left-tailed
+            TestType = '1-sided left-tailed'
+            CritValueLine = 'Critical value: {}'.format(CritValues[0])
+            TestID = TestTypes.LEFT
+        elif CritValues[0] is None: #1-sided right-tailed
+            TestType = '1-sided right-tailed'
+            CritValueLine = 'Critical value: {}'.format(CritValues[1])
+            TestID = TestTypes.RIGHT
+        elif CritValues[0] is CritValues[1]: #1-sided right-tailed special
+            TestType = '1-sided right-tailed'
+            CritValueLine = 'Critical value: {}'.format(CritValues[1])
+            TestID = TestTypes.TWO_SIDED
+        else: #2-sided
+            TestType = '2-sided'
+            CritValueLine = 'Critical values: {} and {}'.format(CritValues[0],
+                                                                CritValues[1])
+            TestID = TestTypes.TWO_SIDED
+        H0 = TestID.H0
+        H1 = TestID.H1
+        if self.IsRejected:
+            IsRejected = 'Yes'
+        else:
+            IsRejected = 'No'
+        Result = '\n'.join(['Statistical test report.',
+                    'Name: {}'.format(self._Data['TestName']),
+                    'Data: {}'.format(self._Data['DataName']),
+                    'Type: {}'.format(TestType),
+                    'Model distribution: {}'.format(self._Data['ModelName']),
+                    'Null hypothesis: {}'.format(H0),
+                    'Alternative hypothesis: {}'.format(H1),
+                    CritValueLine,
+                    'Test value: {}'.format(self._Data['TestValue']),
+                    'p-value: {}'.format(self.p_Value),
+                    'Is null hypothesis rejected?: {}'.format(IsRejected)])
         return Result

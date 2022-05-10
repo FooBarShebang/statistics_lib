@@ -135,6 +135,8 @@ For each of the 1-sided / 2-sided test variant check the following situations:
 
 In each of the cases check the relation of the calculated test value to the critical values; of the p-value with respect to the selected confidence level; and the overal test result.
 
+Also perform the demonstration test TEST-D-700.
+
 **Test result:** PASS / FAIL
 
 ___
@@ -159,6 +161,8 @@ For each of the 1-sided / 2-sided test variant check the following situations:
   * Passed population's mean value closer to the actual sample's mean
 
 In each of the cases check the relation of the calculated test value to the critical values; of the p-value with respect to the selected confidence level; and the overal test result.
+
+Also perform the demonstration test TEST-D-700.
 
 **Test result:** PASS / FAIL
 
@@ -185,6 +189,8 @@ For each of the 1-sided / 2-sided test variant check the following situations:
 
 In each of the cases check the relation of the calculated test value to the critical values; of the p-value with respect to the selected confidence level; and the overal test result.
 
+Also perform the demonstration test TEST-D-700.
+
 **Test result:** PASS / FAIL
 
 ___
@@ -207,6 +213,8 @@ For each of the 1-sided / 2-sided test variant check the following situations:
 * Test passes (null hypothesis is rejected) with the lower confidence level
 
 In each of the cases check the relation of the calculated test value to the critical values; of the p-value with respect to the selected confidence level; and the overal test result.
+
+Also perform the demonstration test TEST-D-700.
 
 **Test result:** PASS / FAIL
 
@@ -232,6 +240,8 @@ For each of the 1-sided / 2-sided test variant check the following situations:
 
 In each of the cases check the relation of the calculated test value to the critical values; of the p-value with respect to the selected confidence level; and the overal test result.
 
+Also perform the demonstration test TEST-D-700.
+
 **Test result:** PASS / FAIL
 
 ___
@@ -254,6 +264,8 @@ For each of the 1-sided / 2-sided test variant check the following situations:
 * Test passes (null hypothesis is rejected) with the lower confidence level
 
 In each of the cases check the relation of the calculated test value to the critical values; of the p-value with respect to the selected confidence level; and the overal test result.
+
+Also perform the demonstration test TEST-D-700.
 
 **Test result:** PASS / FAIL
 
@@ -279,6 +291,8 @@ For each of the 1-sided / 2-sided test variant check the following situations:
 
 In each of the cases check the relation of the calculated test value to the critical values; of the p-value with respect to the selected confidence level; and the overal test result.
 
+Also perform the demonstration test TEST-D-700.
+
 **Test result:** PASS / FAIL
 
 ___
@@ -297,6 +311,8 @@ ___
 
 * If the test passes (null hypothesis is rejected) - choose higher confidence level based on the p-value for the test to fail, and re-run the test.
 * If the test fails (null hypothesis is not rejected) - chose lower confidence level based on the p-value for the test to pass, and re-run the test.
+
+Also perform the demonstration test TEST-D-700.
 
 **Test result:** PASS / FAIL
 
@@ -317,6 +333,8 @@ ___
 * If the test passes (null hypothesis is rejected) - choose higher confidence level based on the p-value for the test to fail, and re-run the test.
 * If the test fails (null hypothesis is not rejected) - chose lower confidence level based on the p-value for the test to pass, and re-run the test.
 
+Also perform the demonstration test TEST-D-700.
+
 **Test result:** PASS / FAIL
 
 ___
@@ -335,6 +353,8 @@ ___
 
 * If the test passes (null hypothesis is rejected) - choose higher confidence level based on the p-value for the test to fail, and re-run the test.
 * If the test fails (null hypothesis is not rejected) - chose lower confidence level based on the p-value for the test to pass, and re-run the test.
+
+Also perform the demonstration test TEST-D-700.
 
 **Test result:** PASS / FAIL
 
@@ -363,7 +383,7 @@ Considering the 2-sided test, make sure that CDF > 0.5 for the test value closer
 
 Check that the boolean test result and the floating point p-value are calculated correctly. Also perform the demonstration test TEST-D-700.
 
-**Test result:** PASS / FAIL
+**Test result:** PASS
 
 ## Tests definition (Demonstration)
 
