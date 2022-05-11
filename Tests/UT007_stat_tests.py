@@ -396,6 +396,8 @@ class Test_z_test(unittest.TestCase):
         """
         del cls.Data
         cls.Data = None
+        del cls.Model
+        cls.Model = None
     
     def test_TypeError(self):
         """
@@ -832,6 +834,8 @@ class Test_t_test(unittest.TestCase):
         """
         del cls.Data
         cls.Data = None
+        del cls.Model
+        cls.Model = None
     
     def test_TypeError(self):
         """
@@ -1171,6 +1175,8 @@ class Test_chi_squared_test(unittest.TestCase):
         """
         del cls.Data
         cls.Data = None
+        del cls.Model
+        cls.Model = None
     
     def test_TypeError(self):
         """
@@ -1516,6 +1522,8 @@ class Test_unpaired_t_test(unittest.TestCase):
         del cls.Data2
         cls.Data1 = None
         cls.Data2 = None
+        del cls.Model
+        cls.Model = None
     
     def test_TypeError(self):
         """
@@ -2123,6 +2131,8 @@ class Test_welch_t_test(Test_unpaired_t_test):
         del cls.Data2
         cls.Data1 = None
         cls.Data2 = None
+        del cls.Model
+        cls.Model = None
     
     def test_GreaterTest(self):
         """
