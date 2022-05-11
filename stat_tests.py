@@ -18,6 +18,13 @@ Functions:
     chi_squared_test(Data, Sigma, Type, *, Confidence = 0.95):
         Statistics1D, int > 0 OR float > 0, TestTypes
             /, *, 0 < float < 1/ -> TestResult
+    unpaired_t_test(Data1, Data2, Type, *, Confidence = 0.95):
+        Statistics1D, Statistics1D, TestTypes/, *, 0 < float < 1/ -> TestResult
+    paired_t_test(Data1, Data2, Type, *, Confidence = 0.95, Bias = 0.0):
+        Statistics1D, Statistics1D, TestTypes
+            /, *, 0 < float < 1, int OR float/ -> TestResult
+    welch_t_test(Data1, Data2, Type, *, Confidence = 0.95):
+        Statistics1D, Statistics1D, TestTypes/, *, 0 < float < 1/ -> TestResult
 
 Constants:
     GT_TEST: enum(TestType) - indication for 1-sided right-tailed test
@@ -40,6 +47,8 @@ import math
 from typing import Tuple, Union
 
 from enum import Enum
+
+from statistics_lib.base_functions import TReal
 
 #+ custom modules
 
@@ -445,9 +454,8 @@ def t_test(Data: DC, Mean: T_REAL, Type: TestTypes, *,
 def chi_squared_test(Data: DC, Sigma: T_REAL, Type: TestTypes, *,
                                         Confidence: float = 0.95) -> TestResult:
     """
-    Implementation of the one sample Student`s t-test, comparing the sample's
-    mean with the known population mean. The actual population standard
-    deviation is unknown.
+    Implementation of the chi-squared test, comparing the sample's standard
+    deviation with the known population standard deviation.
     
     Signature:
         Statistics1D, int > 0 OR float > 0, TestTypes
@@ -513,6 +521,251 @@ def chi_squared_test(Data: DC, Sigma: T_REAL, Type: TestTypes, *,
                             'on the sample`s standard deviation vs population',
                             'sigma = {}'.format(Sigma)])
     DataName = str(Data.Name)
+    ModelName = Model.Name
+    Result = TestResult(TestName, DataName, ModelName, TestValue, CDF_Value,
+                                                                CriticalValues)
+    return Result
+
+def unpaired_t_test(Data1: DC, Data2: DC, Type: TestTypes, *,
+                                        Confidence: float = 0.95) -> TestResult:
+    """
+    Implementation of the unpaired Student`s t-test, comparing the samples`
+    means. The samples`s variances are expected to differ no more by 2 times.
+    
+    Signature:
+        Statistics1D, Statistics1D, TestTypes/, *, 0 < float < 1/ -> TestResult
+    
+    Args:
+        Data1: Statistics1D; instance of, the sampled data stored in an instance
+            of specialized statistical class - the first sample
+        Data2: Statistics1D; instance of, the sampled data stored in an instance
+            of specialized statistical class - the second sample
+        Type: TestTypes; an enumeration value indicating the 1- or 2-sided
+            nature of the test, use values GT_TEST, LT_TEST and NEQ_TEST defined
+            in this module
+        Confidence: (keyword) 0 < float < 1; the confidence level of test,
+            defaults to 0.95, i.e. 95%.
+    
+    Returns:
+        TestResult: instance of the class (defined in this module), which can
+            generate a human-readable report on the performed test
+    
+    Raises:
+        UT_TypeError: either of the arguments is of the improper data type
+        UT_ValueError: Confidence argument is not in the range (0, 1), OR the
+            data sequence is less than 2 elements long for any of the samples
+    
+    Version 1.0.0.0
+    """
+    if not isinstance(Data1, DC):
+        raise UT_TypeError(Data1, DC, SkipFrames = 1)
+    if not isinstance(Data2, DC):
+        raise UT_TypeError(Data2, DC, SkipFrames = 1)
+    if not isinstance(Type, TestTypes):
+        raise UT_TypeError(Type, TestTypes, SkipFrames = 1)
+    if not isinstance(Confidence, float):
+        raise UT_TypeError(Confidence, float, SkipFrames = 1)
+    if Confidence <= 0 or Confidence >= 1:
+        raise UT_ValueError(Confidence, 'in range (0, 1) - confidence',
+                                                                SkipFrames = 1)
+    if Data1.N < 2:
+        raise UT_ValueError(Data1.N, '> 1 - data length, first sample',
+                                                                SkipFrames = 1)
+    if Data2.N < 2:
+        raise UT_ValueError(Data2.N, '> 1 - data length, second sample',
+                                                                SkipFrames = 1)
+    N1 = Data1.N
+    N2 = Data2.N
+    Temp = (N1 - 1) * Data1.FullVar + (N2 - 1) * Data2.FullVar
+    Temp /= N1 + N2 - 2
+    Temp *= (N1 + N2) / (N1 * N2)
+    TestValue = (Data1.Mean - Data2.Mean) / math.sqrt(Temp)
+    Model = MC.Student(Degree = N1 + N2 - 2)
+    CDF_Value = Model.cdf(TestValue)
+    if CDF_Value <= 0.0:
+        CDF_Value = 0.0000001
+    elif CDF_Value >= 1.0:
+        CDF_Value = 0.9999999
+    if Type is TestTypes.LEFT:
+        CritValue = Model.qf(1-Confidence)
+        CriticalValues = (CritValue, None)
+    elif Type is TestTypes.RIGHT:
+        CritValue = Model.qf(Confidence)
+        CriticalValues = (None, CritValue)
+    else:
+        CritValue = Model.qf(0.5 * (1 + Confidence))
+        CriticalValues = (-CritValue, CritValue)
+    TestName = ' '.join(['Unpaired Student`s t-test at {:.1f}%'.format(
+                                                            100 * Confidence),
+                            'confidence on the samples` means.'])
+    DataName = '{} vs {}'.format(Data1.Name, Data2.Name)
+    ModelName = Model.Name
+    Result = TestResult(TestName, DataName, ModelName, TestValue, CDF_Value,
+                                                                CriticalValues)
+    return Result
+
+def paired_t_test(Data1: DC, Data2: DC, Type: TestTypes, *,
+                    Confidence: float = 0.95, Bias: TReal = 0.0) -> TestResult:
+    """
+    Implementation of the paired Student`s t-test, comparing the samples` means.
+    The samples`s lengths MUST be equal.
+    
+    Signature:
+        Statistics1D, Statistics1D, TestTypes
+            /, *, 0 < float < 1, int OR float/ -> TestResult
+    
+    Args:
+        Data1: Statistics1D; instance of, the sampled data stored in an instance
+            of specialized statistical class - the first sample
+        Data2: Statistics1D; instance of, the sampled data stored in an instance
+            of specialized statistical class - the second sample
+        Type: TestTypes; an enumeration value indicating the 1- or 2-sided
+            nature of the test, use values GT_TEST, LT_TEST and NEQ_TEST defined
+            in this module
+        Confidence: (keyword) 0 < float < 1; the confidence level of test,
+            defaults to 0.95, i.e. 95%
+        Bias: (keyword) int OR float; the expected difference between means,
+            defaults to 0.0
+    
+    Returns:
+        TestResult: instance of the class (defined in this module), which can
+            generate a human-readable report on the performed test
+    
+    Raises:
+        UT_TypeError: either of the arguments is of the improper data type
+        UT_ValueError: Confidence argument is not in the range (0, 1), OR the
+            data sequence is less than 2 elements long for any of the samples,
+            OR the data samples have unequal lengths
+    
+    Version 1.0.0.0
+    """
+    if not isinstance(Data1, DC):
+        raise UT_TypeError(Data1, DC, SkipFrames = 1)
+    if not isinstance(Data2, DC):
+        raise UT_TypeError(Data2, DC, SkipFrames = 1)
+    if not isinstance(Type, TestTypes):
+        raise UT_TypeError(Type, TestTypes, SkipFrames = 1)
+    if not isinstance(Confidence, float):
+        raise UT_TypeError(Confidence, float, SkipFrames = 1)
+    if not isinstance(Bias, (int, float)):
+        raise UT_TypeError(Bias, (int, float), SkipFrames = 1)
+    if Confidence <= 0 or Confidence >= 1:
+        raise UT_ValueError(Confidence, 'in range (0, 1) - confidence',
+                                                                SkipFrames = 1)
+    if Data1.N < 2:
+        raise UT_ValueError(Data1.N, '> 1 - data length, first sample',
+                                                                SkipFrames = 1)
+    if Data2.N < 2:
+        raise UT_ValueError(Data2.N, '> 1 - data length, second sample',
+                                                                SkipFrames = 1)
+    if Data1.N != Data2.N:
+        raise UT_ValueError(Data1.N, '= {} - samples lengths'.format(Data2.N),
+                                                                SkipFrames = 1)
+    N = Data1.N
+    Temp = [Data1.Values[Index] - Data2.Values[Index] for Index in range(N)]
+    Data = DC(Temp)
+    TestValue = (Data.Mean - Bias) * math.sqrt(N - 1) / Data.FullSigma
+    Model = MC.Student(Degree = N - 1)
+    CDF_Value = Model.cdf(TestValue)
+    if CDF_Value <= 0.0:
+        CDF_Value = 0.0000001
+    elif CDF_Value >= 1.0:
+        CDF_Value = 0.9999999
+    if Type is TestTypes.LEFT:
+        CritValue = Model.qf(1-Confidence)
+        CriticalValues = (CritValue, None)
+    elif Type is TestTypes.RIGHT:
+        CritValue = Model.qf(Confidence)
+        CriticalValues = (None, CritValue)
+    else:
+        CritValue = Model.qf(0.5 * (1 + Confidence))
+        CriticalValues = (-CritValue, CritValue)
+    TestName = ' '.join(['Paired Student`s t-test at {:.1f}%'.format(
+                                                            100 * Confidence),
+                            'confidence on the samples` means with the',
+                            'expected difference = {}.'.format(Bias)])
+    DataName = '{} vs {}'.format(Data1.Name, Data2.Name)
+    ModelName = Model.Name
+    Result = TestResult(TestName, DataName, ModelName, TestValue, CDF_Value,
+                                                                CriticalValues)
+    del Data
+    return Result
+
+def welch_t_test(Data1: DC, Data2: DC, Type: TestTypes, *,
+                                        Confidence: float = 0.95) -> TestResult:
+    """
+    Implementation of the Welch t-test, comparing the samples` means. This test
+    is more reliable than the unpaired Student`s t-test when the samples`s
+    variances differ by more than 2 times.
+    
+    Signature:
+        Statistics1D, Statistics1D, TestTypes/, *, 0 < float < 1/ -> TestResult
+    
+    Args:
+        Data1: Statistics1D; instance of, the sampled data stored in an instance
+            of specialized statistical class - the first sample
+        Data2: Statistics1D; instance of, the sampled data stored in an instance
+            of specialized statistical class - the second sample
+        Type: TestTypes; an enumeration value indicating the 1- or 2-sided
+            nature of the test, use values GT_TEST, LT_TEST and NEQ_TEST defined
+            in this module
+        Confidence: (keyword) 0 < float < 1; the confidence level of test,
+            defaults to 0.95, i.e. 95%.
+    
+    Returns:
+        TestResult: instance of the class (defined in this module), which can
+            generate a human-readable report on the performed test
+    
+    Raises:
+        UT_TypeError: either of the arguments is of the improper data type
+        UT_ValueError: Confidence argument is not in the range (0, 1), OR the
+            data sequence is less than 2 elements long for any of the samples
+    
+    Version 1.0.0.0
+    """
+    if not isinstance(Data1, DC):
+        raise UT_TypeError(Data1, DC, SkipFrames = 1)
+    if not isinstance(Data2, DC):
+        raise UT_TypeError(Data2, DC, SkipFrames = 1)
+    if not isinstance(Type, TestTypes):
+        raise UT_TypeError(Type, TestTypes, SkipFrames = 1)
+    if not isinstance(Confidence, float):
+        raise UT_TypeError(Confidence, float, SkipFrames = 1)
+    if Confidence <= 0 or Confidence >= 1:
+        raise UT_ValueError(Confidence, 'in range (0, 1) - confidence',
+                                                                SkipFrames = 1)
+    if Data1.N < 2:
+        raise UT_ValueError(Data1.N, '> 1 - data length, first sample',
+                                                                SkipFrames = 1)
+    if Data2.N < 2:
+        raise UT_ValueError(Data2.N, '> 1 - data length, second sample',
+                                                                SkipFrames = 1)
+    NormVar1 = Data1.FullVar / (Data1.N - 1)
+    NormVar2 = Data2.FullVar / (Data2.N - 1)
+    NormVarSum = NormVar1 + NormVar2
+    Divident = math.pow(NormVarSum, 2)
+    Divisor = math.pow(NormVar1, 2) / (Data1.N - 1)
+    Divisor += math.pow(NormVar2, 2) / (Data2.N - 1)
+    Degree = Divident / Divisor
+    TestValue = (Data1.Mean - Data2.Mean) / math.sqrt(NormVarSum)
+    Model = MC.Student(Degree = Degree)
+    CDF_Value = Model.cdf(TestValue)
+    if CDF_Value <= 0.0:
+        CDF_Value = 0.0000001
+    elif CDF_Value >= 1.0:
+        CDF_Value = 0.9999999
+    if Type is TestTypes.LEFT:
+        CritValue = Model.qf(1-Confidence)
+        CriticalValues = (CritValue, None)
+    elif Type is TestTypes.RIGHT:
+        CritValue = Model.qf(Confidence)
+        CriticalValues = (None, CritValue)
+    else:
+        CritValue = Model.qf(0.5 * (1 + Confidence))
+        CriticalValues = (-CritValue, CritValue)
+    TestName = ' '.join(['Welch t-test at {:.1f}%'.format(100 * Confidence),
+                            'confidence on the samples` means.'])
+    DataName = '{} vs {}'.format(Data1.Name, Data2.Name)
     ModelName = Model.Name
     Result = TestResult(TestName, DataName, ModelName, TestValue, CDF_Value,
                                                                 CriticalValues)

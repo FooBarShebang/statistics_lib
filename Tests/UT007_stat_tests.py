@@ -389,6 +389,11 @@ class Test_z_test(unittest.TestCase):
     
     @classmethod
     def tearDownClass(cls) -> None:
+        """
+        Cleaning up after the tests. Done only once.
+        
+        Version 1.0.0.0
+        """
         del cls.Data
         cls.Data = None
     
@@ -820,6 +825,11 @@ class Test_t_test(unittest.TestCase):
     
     @classmethod
     def tearDownClass(cls) -> None:
+        """
+        Cleaning up after the tests. Done only once.
+        
+        Version 1.0.0.0
+        """
         del cls.Data
         cls.Data = None
     
@@ -1154,6 +1164,11 @@ class Test_chi_squared_test(unittest.TestCase):
     
     @classmethod
     def tearDownClass(cls) -> None:
+        """
+        Cleaning up after the tests. Done only once.
+        
+        Version 1.0.0.0
+        """
         del cls.Data
         cls.Data = None
     
@@ -1449,16 +1464,837 @@ class Test_chi_squared_test(unittest.TestCase):
         self.assertIsInstance(objTest.Report, str)
         del objTest
 
+class Test_unpaired_t_test(unittest.TestCase):
+    """
+    Unit tests for the function unpaired_t_test from the module
+    statistics_lib.stat_tests.
+    
+    Implements tests: TEST-T-740, TEST-T-700, TEST-T-701 and TEST-T-702.
+    
+    Covers requirements: REQ-FUN-740, REQ-AWM-700, REQ-AWM-701, REQ-SIO-700,
+    REQ-SIO-701 and REQ-SIO-702.
+
+    Version 1.0.0.0
+    """
+    
+    @classmethod
+    def setUpClass(cls) -> None:
+        """
+        Preparation for the test cases, done only once.
+        
+        Version 1.0.0.0
+        """
+        cls.TestFunction = staticmethod(test_module.unpaired_t_test)
+        PMean1 = random.randint(-2, 1) + random.random()
+        PSigma1 = 0.4 + random.random()
+        cls.Length1 = random.randint(10, 20)
+        PMean2 = random.randint(-2, 1) + random.random() + 0.2
+        PSigma2 = 0.6 + random.random()
+        cls.Length2 = random.randint(10, 20)
+        objGenerator = Gaussian(PMean1, PSigma1)
+        cls.Data1 = Statistics1D([objGenerator.random()
+                                                for _ in range(cls.Length1)])
+        del objGenerator
+        objGenerator = Gaussian(PMean2, PSigma2)
+        cls.Data2 = Statistics1D([objGenerator.random()
+                                                for _ in range(cls.Length2)])
+        cls.BadDataType = (1, 1.0, [1, 2.0], (1, 3), int, float, list, tuple,
+                                            bool, True, None, {'a':1}, 'test')
+        cls.NotFloat = ([1, 2.0], (1, 3), int, float, list, tuple, bool, True,
+                                        None, {'a':1}, cls.Data1, 'test', 1)
+        cls.Model = Student(Degree = cls.Length1 + cls.Length2 - 2)
+        del objGenerator
+    
+    @classmethod
+    def tearDownClass(cls) -> None:
+        """
+        Cleaning up after the tests. Done only once.
+        
+        Version 1.0.0.0
+        """
+        del cls.Data1
+        del cls.Data2
+        cls.Data1 = None
+        cls.Data2 = None
+    
+    def test_TypeError(self):
+        """
+        Checks that TypeError (or its sub-class) is raised in response to the
+        unexpected / inappropriate data type of, at least, one argument.
+        
+        Test ID: TEST-T-700
+        Requirement ID: REQ-AWM-700
+        
+        Version 1.0.0.0
+        """
+        for gItem in self.BadDataType:
+            #Data1 argument
+            with self.assertRaises(TypeError):
+                self.TestFunction(gItem, self.Data2, test_module.GT_TEST)
+            with self.assertRaises(TypeError):
+                self.TestFunction(gItem, self.Data2, test_module.LT_TEST)
+            with self.assertRaises(TypeError):
+                self.TestFunction(gItem, self.Data2, test_module.NEQ_TEST)
+            #Data2 argument
+            with self.assertRaises(TypeError):
+                self.TestFunction(self.Data1, gItem, test_module.GT_TEST)
+            with self.assertRaises(TypeError):
+                self.TestFunction(self.Data1, gItem, test_module.LT_TEST)
+            with self.assertRaises(TypeError):
+                self.TestFunction(self.Data1, gItem, test_module.NEQ_TEST)
+            #Type argument
+            with self.assertRaises(TypeError):
+                self.TestFunction(self.Data1, self.Data2, gItem)
+            with self.assertRaises(TypeError):
+                self.TestFunction(self.Data1, self.Data2, gItem)
+            with self.assertRaises(TypeError):
+                self.TestFunction(self.Data1, self.Data2, gItem)
+        for gItem in self.NotFloat:
+            #Confidence keyword argument
+            with self.assertRaises(TypeError):
+                self.TestFunction(self.Data1, self.Data2, test_module.GT_TEST,
+                                                            Confidence = gItem)
+            with self.assertRaises(TypeError):
+                self.TestFunction(self.Data1, self.Data2, test_module.LT_TEST,
+                                                            Confidence = gItem)
+            with self.assertRaises(TypeError):
+                self.TestFunction(self.Data1, self.Data2, test_module.NEQ_TEST,
+                                                            Confidence = gItem)
+
+    def test_ValueError(self):
+        """
+        Checks that ValueError (or its sub-class) is raised in response to the
+        unexpected / inappropriate value of, at least, one argument.
+        
+        Test ID: TEST-T-701
+        Requirement ID: REQ-AWM-701
+        
+        Version 1.0.0.0
+        """
+        with self.assertRaises(ValueError):
+            self.TestFunction(self.Data1, self.Data2, test_module.GT_TEST,
+                                                            Confidence = 0.0)
+        with self.assertRaises(ValueError):
+            self.TestFunction(self.Data1, self.Data2, test_module.GT_TEST,
+                                                            Confidence = 1.0)
+        for _ in range(10):
+            gValue = random.randint(1, 10)
+            with self.assertRaises(ValueError):
+                self.TestFunction(self.Data1, self.Data2, test_module.GT_TEST,
+                                        Confidence = gValue + random.random())
+            with self.assertRaises(ValueError):
+                self.TestFunction(self.Data1, self.Data2, test_module.GT_TEST,
+                                        Confidence = -gValue + random.random())
+        #special case
+        Data = Statistics1D([1])
+        with self.assertRaises(ValueError):
+            self.TestFunction(Data, self.Data2, test_module.GT_TEST)
+        with self.assertRaises(ValueError):
+            self.TestFunction(self.Data1, Data, test_module.GT_TEST)
+    
+    def test_GreaterTest(self):
+        """
+        Checks the implementation of the 1-sided right-tailed test.
+        
+        Test ID: TEST-T-740 and TEST-T-702
+        Requirement ID: REQ-FUN-740, REQ-SIO-700, REQ-SIO-701 and REQ-SIO-702.
+        
+        Version 1.0.0.0
+        """
+        #actual one with the default 95 % confidence
+        N1 = self.Data1.N
+        N2 = self.Data2.N
+        Temp = (N1 - 1) * self.Data1.FullVar + (N2 - 1) * self.Data2.FullVar
+        Temp /= N1 + N2 - 2
+        Temp *= (N1 + N2) / (N1 * N2)
+        TestValue = (self.Data1.Mean - self.Data2.Mean) / math.sqrt(Temp)
+        p_Value = 1 - self.Model.cdf(TestValue)
+        objTest = self.TestFunction(self.Data1, self.Data2, test_module.GT_TEST)
+        self.assertIsInstance(objTest, test_module.TestResult)
+        self.assertIsInstance(objTest.IsRejected, bool)
+        if p_Value <= 0.05:
+            self.assertTrue(objTest.IsRejected)
+        else:
+            self.assertFalse(objTest.IsRejected)
+        self.assertIsInstance(objTest.p_Value, float)
+        self.assertAlmostEqual(objTest.p_Value, p_Value)
+        self.assertIsInstance(objTest.Report, str)
+        del objTest
+        #make sure to fail due to too high confidence level
+        if p_Value > 0.01:
+            Confidence = 1 - 0.9 * p_Value
+            objTest = self.TestFunction(self.Data1, self.Data2,
+                                test_module.GT_TEST, Confidence = Confidence)
+            self.assertIsInstance(objTest, test_module.TestResult)
+            self.assertIsInstance(objTest.IsRejected, bool)
+            self.assertFalse(objTest.IsRejected)
+            self.assertIsInstance(objTest.p_Value, float)
+            self.assertAlmostEqual(objTest.p_Value, p_Value)
+            self.assertIsInstance(objTest.Report, str)
+            del objTest
+        #make sure to pass due to too low confidence level
+        if p_Value < 0.99:
+            Confidence = 0.9 * (1 - p_Value)
+            objTest = self.TestFunction(self.Data1, self.Data2,
+                                test_module.GT_TEST, Confidence = Confidence)
+            self.assertIsInstance(objTest, test_module.TestResult)
+            self.assertIsInstance(objTest.IsRejected, bool)
+            self.assertTrue(objTest.IsRejected)
+            self.assertIsInstance(objTest.p_Value, float)
+            self.assertAlmostEqual(objTest.p_Value, p_Value)
+            self.assertIsInstance(objTest.Report, str)
+            del objTest
+    
+    def test_LessTest(self):
+        """
+        Checks the implementation of the 1-sided left-tailed test.
+        
+        Test ID: TEST-T-740 and TEST-T-702
+        Requirement ID: REQ-FUN-740, REQ-SIO-700, REQ-SIO-701 and REQ-SIO-702.
+        
+        Version 1.0.0.0
+        """
+        #actual one with the default 95 % confidence
+        N1 = self.Data1.N
+        N2 = self.Data2.N
+        Temp = (N1 - 1) * self.Data1.FullVar + (N2 - 1) * self.Data2.FullVar
+        Temp /= N1 + N2 - 2
+        Temp *= (N1 + N2) / (N1 * N2)
+        TestValue = (self.Data1.Mean - self.Data2.Mean) / math.sqrt(Temp)
+        p_Value = self.Model.cdf(TestValue)
+        objTest = self.TestFunction(self.Data1, self.Data2, test_module.LT_TEST)
+        self.assertIsInstance(objTest, test_module.TestResult)
+        self.assertIsInstance(objTest.IsRejected, bool)
+        if p_Value <= 0.05:
+            self.assertTrue(objTest.IsRejected)
+        else:
+            self.assertFalse(objTest.IsRejected)
+        self.assertIsInstance(objTest.p_Value, float)
+        self.assertAlmostEqual(objTest.p_Value, p_Value)
+        self.assertIsInstance(objTest.Report, str)
+        del objTest
+        #make sure to fail due to too high confidence level
+        if p_Value > 0.01:
+            Confidence = 1 - 0.9 * p_Value
+            objTest = self.TestFunction(self.Data1, self.Data2,
+                                test_module.LT_TEST, Confidence = Confidence)
+            self.assertIsInstance(objTest, test_module.TestResult)
+            self.assertIsInstance(objTest.IsRejected, bool)
+            self.assertFalse(objTest.IsRejected)
+            self.assertIsInstance(objTest.p_Value, float)
+            self.assertAlmostEqual(objTest.p_Value, p_Value)
+            self.assertIsInstance(objTest.Report, str)
+            del objTest
+        #make sure to pass due to too low confidence level
+        if p_Value < 0.99:
+            Confidence = 0.9 * (1 - p_Value)
+            objTest = self.TestFunction(self.Data1, self.Data2,
+                                test_module.LT_TEST, Confidence = Confidence)
+            self.assertIsInstance(objTest, test_module.TestResult)
+            self.assertIsInstance(objTest.IsRejected, bool)
+            self.assertTrue(objTest.IsRejected)
+            self.assertIsInstance(objTest.p_Value, float)
+            self.assertAlmostEqual(objTest.p_Value, p_Value)
+            self.assertIsInstance(objTest.Report, str)
+            del objTest
+    
+    def test_NotEqualTest(self):
+        """
+        Checks the implementation of the 2-sided test.
+        
+        Test ID: TEST-T-740 and TEST-T-702
+        Requirement ID: REQ-FUN-740, REQ-SIO-700, REQ-SIO-701 and REQ-SIO-702.
+        
+        Version 1.0.0.0
+        """
+        #actual one with the default 95 % confidence
+        N1 = self.Data1.N
+        N2 = self.Data2.N
+        Temp = (N1 - 1) * self.Data1.FullVar + (N2 - 1) * self.Data2.FullVar
+        Temp /= N1 + N2 - 2
+        Temp *= (N1 + N2) / (N1 * N2)
+        TestValue = (self.Data1.Mean - self.Data2.Mean) / math.sqrt(Temp)
+        CDF = self.Model.cdf(TestValue)
+        if CDF < 0.5:
+            p_Value = 2 * self.Model.cdf(TestValue)
+        else:
+            p_Value = 2 * (1 - CDF)
+        objTest= self.TestFunction(self.Data1, self.Data2, test_module.NEQ_TEST)
+        self.assertIsInstance(objTest, test_module.TestResult)
+        self.assertIsInstance(objTest.IsRejected, bool)
+        if p_Value <= 0.05:
+            self.assertTrue(objTest.IsRejected)
+        else:
+            self.assertFalse(objTest.IsRejected)
+        self.assertIsInstance(objTest.p_Value, float)
+        self.assertAlmostEqual(objTest.p_Value, p_Value)
+        self.assertIsInstance(objTest.Report, str)
+        del objTest
+        #make sure to fail due to too high confidence level
+        if p_Value > 0.01:
+            Confidence = 1 - 0.9 * p_Value
+            objTest = self.TestFunction(self.Data1, self.Data2,
+                                test_module.NEQ_TEST, Confidence = Confidence)
+            self.assertIsInstance(objTest, test_module.TestResult)
+            self.assertIsInstance(objTest.IsRejected, bool)
+            self.assertFalse(objTest.IsRejected)
+            self.assertIsInstance(objTest.p_Value, float)
+            self.assertAlmostEqual(objTest.p_Value, p_Value)
+            self.assertIsInstance(objTest.Report, str)
+            del objTest
+        #make sure to pass due to too low confidence level
+        if p_Value < 0.99:
+            Confidence = 0.9 * (1 - p_Value)
+            objTest = self.TestFunction(self.Data1, self.Data2,
+                                test_module.NEQ_TEST, Confidence = Confidence)
+            self.assertIsInstance(objTest, test_module.TestResult)
+            self.assertIsInstance(objTest.IsRejected, bool)
+            self.assertTrue(objTest.IsRejected)
+            self.assertIsInstance(objTest.p_Value, float)
+            self.assertAlmostEqual(objTest.p_Value, p_Value)
+            self.assertIsInstance(objTest.Report, str)
+            del objTest
+
+class Test_paired_t_test(Test_unpaired_t_test):
+    """
+    Unit tests for the function paired_t_test from the module
+    statistics_lib.stat_tests.
+    
+    Implements tests: TEST-T-750, TEST-T-700, TEST-T-701 and TEST-T-702.
+    
+    Covers requirements: REQ-FUN-750, REQ-AWM-700, REQ-AWM-701, REQ-SIO-700,
+    REQ-SIO-701 and REQ-SIO-702.
+
+    Version 1.0.0.0
+    """
+    
+    @classmethod
+    def setUpClass(cls) -> None:
+        """
+        Preparation for the test cases, done only once.
+        
+        Version 1.0.0.0
+        """
+        cls.TestFunction = staticmethod(test_module.paired_t_test)
+        PMean1 = random.randint(-2, 1) + random.random()
+        PSigma1 = 0.4 + random.random()
+        cls.Length = random.randint(10, 20)
+        PMean2 = random.randint(-2, 1) + random.random() + 0.2
+        PSigma2 = 0.6 + random.random()
+        objGenerator = Gaussian(PMean1, PSigma1)
+        cls.Data1 = Statistics1D([objGenerator.random()
+                                                for _ in range(cls.Length)])
+        del objGenerator
+        objGenerator = Gaussian(PMean2, PSigma2)
+        cls.Data2 = Statistics1D([objGenerator.random()
+                                                for _ in range(cls.Length)])
+        cls.BadDataType = (1, 1.0, [1, 2.0], (1, 3), int, float, list, tuple,
+                                            bool, True, None, {'a':1}, 'test')
+        cls.NotReal = ([1, 2.0], (1, 3), int, float, list, tuple, bool,
+                                            None, {'a':1}, cls.Data1, 'test')
+        cls.NotFloat = ([1, 2.0], (1, 3), int, float, list, tuple, bool, True,
+                                        None, {'a':1}, cls.Data1, 'test', 1)
+        cls.Model = Student(Degree = cls.Length - 1)
+        del objGenerator
+        TempSeq = [cls.Data1.Values[Index] - cls.Data2.Values[Index]
+                                                for Index in range(cls.Length)]
+        objData = Statistics1D(TempSeq)
+        cls.Mean = objData.Mean
+        cls.Sigma = objData.FullSigma
+        del objData
+    
+    def test_TypeError(self):
+        """
+        Checks that TypeError (or its sub-class) is raised in response to the
+        unexpected / inappropriate data type of, at least, one argument.
+        
+        Test ID: TEST-T-700
+        Requirement ID: REQ-AWM-700
+        
+        Version 1.0.0.0
+        """
+        super().test_TypeError()
+        for gItem in self.NotReal:
+            with self.assertRaises(TypeError):
+                self.TestFunction(self.Data1, self.Data2, test_module.GT_TEST,
+                                                                Bias = gItem)
+    
+    def test_ValueError(self):
+        """
+        Checks that ValueError (or its sub-class) is raised in response to the
+        unexpected / inappropriate value of, at least, one argument.
+        
+        Test ID: TEST-T-701
+        Requirement ID: REQ-AWM-701
+        
+        Version 1.0.0.0
+        """
+        super().test_ValueError()
+        N = self.Length
+        for _ in range(10):
+            N1 = N + random.randint(1, 10)
+            Data = Statistics1D([1 for _ in range(N1)])
+            with self.assertRaises(ValueError):
+                self.TestFunction(self.Data1, Data, test_module.GT_TEST)
+            del Data
+            N2 = N - min(random.randint(1, 10), N - 1)
+            Data = Statistics1D([1 for _ in range(N1)])
+            with self.assertRaises(ValueError):
+                self.TestFunction(self.Data1, Data, test_module.GT_TEST)
+            del Data
+    
+    def test_GreaterTest(self):
+        """
+        Checks the implementation of the 1-sided right-tailed test.
+        
+        Test ID: TEST-T-750 and TEST-T-702
+        Requirement ID: REQ-FUN-750, REQ-SIO-700, REQ-SIO-701 and REQ-SIO-702.
+        
+        Version 1.0.0.0
+        """
+        #actual one with the default 95 % confidence
+        TestValue = self.Mean * math.sqrt(self.Length - 1) / self.Sigma
+        p_Value = 1 - self.Model.cdf(TestValue)
+        objTest = self.TestFunction(self.Data1, self.Data2, test_module.GT_TEST)
+        self.assertIsInstance(objTest, test_module.TestResult)
+        self.assertIsInstance(objTest.IsRejected, bool)
+        if p_Value <= 0.05:
+            self.assertTrue(objTest.IsRejected)
+        else:
+            self.assertFalse(objTest.IsRejected)
+        self.assertIsInstance(objTest.p_Value, float)
+        self.assertAlmostEqual(objTest.p_Value, p_Value)
+        self.assertIsInstance(objTest.Report, str)
+        del objTest
+        #make sure to fail due to too high confidence level
+        if p_Value > 0.01:
+            Confidence = 1 - 0.9 * p_Value
+            objTest = self.TestFunction(self.Data1, self.Data2,
+                                test_module.GT_TEST, Confidence = Confidence)
+            self.assertIsInstance(objTest, test_module.TestResult)
+            self.assertIsInstance(objTest.IsRejected, bool)
+            self.assertFalse(objTest.IsRejected)
+            self.assertIsInstance(objTest.p_Value, float)
+            self.assertAlmostEqual(objTest.p_Value, p_Value)
+            self.assertIsInstance(objTest.Report, str)
+            del objTest
+        #make sure to pass due to too low confidence level
+        if p_Value < 0.99:
+            Confidence = 0.9 * (1 - p_Value)
+            objTest = self.TestFunction(self.Data1, self.Data2,
+                                test_module.GT_TEST, Confidence = Confidence)
+            self.assertIsInstance(objTest, test_module.TestResult)
+            self.assertIsInstance(objTest.IsRejected, bool)
+            self.assertTrue(objTest.IsRejected)
+            self.assertIsInstance(objTest.p_Value, float)
+            self.assertAlmostEqual(objTest.p_Value, p_Value)
+            self.assertIsInstance(objTest.Report, str)
+            del objTest
+        CritValue = self.Model.qf(0.95)
+        #make sure to pass due to too low bias
+        Bias= -0.1 + self.Mean - CritValue*self.Sigma / math.sqrt(self.Length-1)
+        objTest = self.TestFunction(self.Data1, self.Data2, test_module.GT_TEST,
+                                                                    Bias = Bias)
+        self.assertIsInstance(objTest, test_module.TestResult)
+        self.assertIsInstance(objTest.IsRejected, bool)
+        self.assertTrue(objTest.IsRejected)
+        self.assertIsInstance(objTest.p_Value, float)
+        self.assertLess(objTest.p_Value, 0.05)
+        self.assertIsInstance(objTest.Report, str)
+        #make sure to fail due to too high bias
+        Bias= +0.1 + self.Mean - CritValue*self.Sigma / math.sqrt(self.Length-1)
+        objTest = self.TestFunction(self.Data1, self.Data2, test_module.GT_TEST,
+                                                                    Bias = Bias)
+        self.assertIsInstance(objTest, test_module.TestResult)
+        self.assertIsInstance(objTest.IsRejected, bool)
+        self.assertFalse(objTest.IsRejected)
+        self.assertIsInstance(objTest.p_Value, float)
+        self.assertGreater(objTest.p_Value, 0.05)
+        self.assertIsInstance(objTest.Report, str)
+    
+    def test_LessTest(self):
+        """
+        Checks the implementation of the 1-sided left-tailed test.
+        
+        Test ID: TEST-T-750 and TEST-T-702
+        Requirement ID: REQ-FUN-750, REQ-SIO-700, REQ-SIO-701 and REQ-SIO-702.
+        
+        Version 1.0.0.0
+        """
+        #actual one with the default 95 % confidence
+        TestValue = self.Mean * math.sqrt(self.Length - 1) / self.Sigma
+        p_Value = self.Model.cdf(TestValue)
+        objTest = self.TestFunction(self.Data1, self.Data2, test_module.LT_TEST)
+        self.assertIsInstance(objTest, test_module.TestResult)
+        self.assertIsInstance(objTest.IsRejected, bool)
+        if p_Value <= 0.05:
+            self.assertTrue(objTest.IsRejected)
+        else:
+            self.assertFalse(objTest.IsRejected)
+        self.assertIsInstance(objTest.p_Value, float)
+        self.assertAlmostEqual(objTest.p_Value, p_Value)
+        self.assertIsInstance(objTest.Report, str)
+        del objTest
+        #make sure to fail due to too high confidence level
+        if p_Value > 0.01:
+            Confidence = 1 - 0.9 * p_Value
+            objTest = self.TestFunction(self.Data1, self.Data2,
+                                test_module.LT_TEST, Confidence = Confidence)
+            self.assertIsInstance(objTest, test_module.TestResult)
+            self.assertIsInstance(objTest.IsRejected, bool)
+            self.assertFalse(objTest.IsRejected)
+            self.assertIsInstance(objTest.p_Value, float)
+            self.assertAlmostEqual(objTest.p_Value, p_Value)
+            self.assertIsInstance(objTest.Report, str)
+            del objTest
+        #make sure to pass due to too low confidence level
+        if p_Value < 0.99:
+            Confidence = 0.9 * (1 - p_Value)
+            objTest = self.TestFunction(self.Data1, self.Data2,
+                                test_module.LT_TEST, Confidence = Confidence)
+            self.assertIsInstance(objTest, test_module.TestResult)
+            self.assertIsInstance(objTest.IsRejected, bool)
+            self.assertTrue(objTest.IsRejected)
+            self.assertIsInstance(objTest.p_Value, float)
+            self.assertAlmostEqual(objTest.p_Value, p_Value)
+            self.assertIsInstance(objTest.Report, str)
+            del objTest
+        CritValue = self.Model.qf(0.05)
+        #make sure to fail due to too low bias
+        Bias= -0.1 + self.Mean - CritValue*self.Sigma / math.sqrt(self.Length-1)
+        objTest = self.TestFunction(self.Data1, self.Data2, test_module.LT_TEST,
+                                                                    Bias = Bias)
+        self.assertIsInstance(objTest, test_module.TestResult)
+        self.assertIsInstance(objTest.IsRejected, bool)
+        self.assertFalse(objTest.IsRejected)
+        self.assertIsInstance(objTest.p_Value, float)
+        self.assertGreater(objTest.p_Value, 0.05)
+        self.assertIsInstance(objTest.Report, str)
+        #make sure to pass due to too high bias
+        Bias= +0.1 + self.Mean - CritValue*self.Sigma / math.sqrt(self.Length-1)
+        objTest = self.TestFunction(self.Data1, self.Data2, test_module.LT_TEST,
+                                                                    Bias = Bias)
+        self.assertIsInstance(objTest, test_module.TestResult)
+        self.assertIsInstance(objTest.IsRejected, bool)
+        self.assertTrue(objTest.IsRejected)
+        self.assertIsInstance(objTest.p_Value, float)
+        self.assertLess(objTest.p_Value, 0.05)
+        self.assertIsInstance(objTest.Report, str)
+    
+    def test_NotEqualTest(self):
+        """
+        Checks the implementation of the 2-sided test.
+        
+        Test ID: TEST-T-750 and TEST-T-702
+        Requirement ID: REQ-FUN-750, REQ-SIO-700, REQ-SIO-701 and REQ-SIO-702.
+        
+        Version 1.0.0.0
+        """
+        #actual one with the default 95 % confidence
+        TestValue = self.Mean * math.sqrt(self.Length - 1) / self.Sigma
+        CDF = self.Model.cdf(TestValue)
+        if CDF < 0.5:
+            p_Value = 2 * self.Model.cdf(TestValue)
+        else:
+            p_Value = 2 * (1 - CDF)
+        objTest= self.TestFunction(self.Data1, self.Data2, test_module.NEQ_TEST)
+        self.assertIsInstance(objTest, test_module.TestResult)
+        self.assertIsInstance(objTest.IsRejected, bool)
+        if p_Value <= 0.05:
+            self.assertTrue(objTest.IsRejected)
+        else:
+            self.assertFalse(objTest.IsRejected)
+        self.assertIsInstance(objTest.p_Value, float)
+        self.assertAlmostEqual(objTest.p_Value, p_Value)
+        self.assertIsInstance(objTest.Report, str)
+        del objTest
+        #make sure to fail due to too high confidence level
+        if p_Value > 0.01:
+            Confidence = 1 - 0.9 * p_Value
+            objTest = self.TestFunction(self.Data1, self.Data2,
+                                test_module.NEQ_TEST, Confidence = Confidence)
+            self.assertIsInstance(objTest, test_module.TestResult)
+            self.assertIsInstance(objTest.IsRejected, bool)
+            self.assertFalse(objTest.IsRejected)
+            self.assertIsInstance(objTest.p_Value, float)
+            self.assertAlmostEqual(objTest.p_Value, p_Value)
+            self.assertIsInstance(objTest.Report, str)
+            del objTest
+        #make sure to pass due to too low confidence level
+        if p_Value < 0.99:
+            Confidence = 0.9 * (1 - p_Value)
+            objTest = self.TestFunction(self.Data1, self.Data2,
+                                test_module.NEQ_TEST, Confidence = Confidence)
+            self.assertIsInstance(objTest, test_module.TestResult)
+            self.assertIsInstance(objTest.IsRejected, bool)
+            self.assertTrue(objTest.IsRejected)
+            self.assertIsInstance(objTest.p_Value, float)
+            self.assertAlmostEqual(objTest.p_Value, p_Value)
+            self.assertIsInstance(objTest.Report, str)
+            del objTest
+        CritValue = self.Model.qf(0.975)
+        #make sure to pass due to too low bias - right tail
+        Bias= -0.1 + self.Mean - CritValue*self.Sigma / math.sqrt(self.Length-1)
+        objTest = self.TestFunction(self.Data1, self.Data2, test_module.GT_TEST,
+                                                                    Bias = Bias)
+        self.assertIsInstance(objTest, test_module.TestResult)
+        self.assertIsInstance(objTest.IsRejected, bool)
+        self.assertTrue(objTest.IsRejected)
+        self.assertIsInstance(objTest.p_Value, float)
+        self.assertLess(objTest.p_Value, 0.05)
+        self.assertIsInstance(objTest.Report, str)
+        CritValue = self.Model.qf(0.025)
+        #make sure to pass due to too high bias - left tail
+        Bias= +0.1 + self.Mean - CritValue*self.Sigma / math.sqrt(self.Length-1)
+        objTest = self.TestFunction(self.Data1, self.Data2, test_module.LT_TEST,
+                                                                    Bias = Bias)
+        self.assertIsInstance(objTest, test_module.TestResult)
+        self.assertIsInstance(objTest.IsRejected, bool)
+        self.assertTrue(objTest.IsRejected)
+        self.assertIsInstance(objTest.p_Value, float)
+        self.assertLess(objTest.p_Value, 0.05)
+        self.assertIsInstance(objTest.Report, str)
+        #make sure to fail due to too exact bias value matching the difference
+        Bias= self.Mean
+        objTest = self.TestFunction(self.Data1, self.Data2, test_module.GT_TEST,
+                                                                    Bias = Bias)
+        self.assertIsInstance(objTest, test_module.TestResult)
+        self.assertIsInstance(objTest.IsRejected, bool)
+        self.assertFalse(objTest.IsRejected)
+        self.assertIsInstance(objTest.p_Value, float)
+        self.assertGreater(objTest.p_Value, 0.05)
+        self.assertIsInstance(objTest.Report, str)
+
+class Test_welch_t_test(Test_unpaired_t_test):
+    """
+    Unit tests for the function welch_t_test from the module
+    statistics_lib.stat_tests.
+    
+    Implements tests: TEST-T-750, TEST-T-700, TEST-T-701 and TEST-T-702.
+    
+    Covers requirements: REQ-FUN-750, REQ-AWM-700, REQ-AWM-701, REQ-SIO-700,
+    REQ-SIO-701 and REQ-SIO-702.
+
+    Version 1.0.0.0
+    """
+    
+    @classmethod
+    def setUpClass(cls) -> None:
+        """
+        Preparation for the test cases, done only once.
+        
+        Version 1.0.0.0
+        """
+        cls.TestFunction = staticmethod(test_module.welch_t_test)
+        PMean1 = random.randint(-2, 1) + random.random()
+        PSigma1 = 0.4 + random.random()
+        cls.Length1 = random.randint(10, 20)
+        PMean2 = random.randint(-2, 1) + random.random() + 0.2
+        PSigma2 = 0.6 + random.random()
+        cls.Length2 = random.randint(10, 20)
+        objGenerator = Gaussian(PMean1, PSigma1)
+        cls.Data1 = Statistics1D([objGenerator.random()
+                                                for _ in range(cls.Length1)])
+        del objGenerator
+        objGenerator = Gaussian(PMean2, PSigma2)
+        cls.Data2 = Statistics1D([objGenerator.random()
+                                                for _ in range(cls.Length2)])
+        cls.BadDataType = (1, 1.0, [1, 2.0], (1, 3), int, float, list, tuple,
+                                            bool, True, None, {'a':1}, 'test')
+        cls.NotFloat = ([1, 2.0], (1, 3), int, float, list, tuple, bool, True,
+                                        None, {'a':1}, cls.Data1, 'test', 1)
+        NormVar1 = cls.Data1.FullVar / (cls.Data1.N - 1)
+        NormVar2 = cls.Data2.FullVar / (cls.Data2.N - 1)
+        Divident = math.pow(NormVar1 + NormVar2, 2)
+        Divisor = math.pow(NormVar1, 2) / (cls.Data1.N - 1)
+        Divisor += math.pow(NormVar2, 2) / (cls.Data2.N - 1)
+        Degree = Divident / Divisor
+        cls.Model = Student(Degree = Degree)
+        del objGenerator
+    
+    @classmethod
+    def tearDownClass(cls) -> None:
+        """
+        Cleaning up after the tests. Done only once.
+        
+        Version 1.0.0.0
+        """
+        del cls.Data1
+        del cls.Data2
+        cls.Data1 = None
+        cls.Data2 = None
+    
+    def test_GreaterTest(self):
+        """
+        Checks the implementation of the 1-sided right-tailed test.
+        
+        Test ID: TEST-T-760 and TEST-T-702
+        Requirement ID: REQ-FUN-760, REQ-SIO-700, REQ-SIO-701 and REQ-SIO-702.
+        
+        Version 1.0.0.0
+        """
+        #actual one with the default 95 % confidence
+        NormVar1 = self.Data1.FullVar / (self.Data1.N - 1)
+        NormVar2 = self.Data2.FullVar / (self.Data2.N - 1)
+        Temp = NormVar1 + NormVar2
+        TestValue = (self.Data1.Mean - self.Data2.Mean) / math.sqrt(Temp)
+        p_Value = 1 - self.Model.cdf(TestValue)
+        objTest = self.TestFunction(self.Data1, self.Data2, test_module.GT_TEST)
+        self.assertIsInstance(objTest, test_module.TestResult)
+        self.assertIsInstance(objTest.IsRejected, bool)
+        if p_Value <= 0.05:
+            self.assertTrue(objTest.IsRejected)
+        else:
+            self.assertFalse(objTest.IsRejected)
+        self.assertIsInstance(objTest.p_Value, float)
+        self.assertAlmostEqual(objTest.p_Value, p_Value)
+        self.assertIsInstance(objTest.Report, str)
+        del objTest
+        #make sure to fail due to too high confidence level
+        if p_Value > 0.01:
+            Confidence = 1 - 0.9 * p_Value
+            objTest = self.TestFunction(self.Data1, self.Data2,
+                                test_module.GT_TEST, Confidence = Confidence)
+            self.assertIsInstance(objTest, test_module.TestResult)
+            self.assertIsInstance(objTest.IsRejected, bool)
+            self.assertFalse(objTest.IsRejected)
+            self.assertIsInstance(objTest.p_Value, float)
+            self.assertAlmostEqual(objTest.p_Value, p_Value)
+            self.assertIsInstance(objTest.Report, str)
+            del objTest
+        #make sure to pass due to too low confidence level
+        if p_Value < 0.99:
+            Confidence = 0.9 * (1 - p_Value)
+            objTest = self.TestFunction(self.Data1, self.Data2,
+                                test_module.GT_TEST, Confidence = Confidence)
+            self.assertIsInstance(objTest, test_module.TestResult)
+            self.assertIsInstance(objTest.IsRejected, bool)
+            self.assertTrue(objTest.IsRejected)
+            self.assertIsInstance(objTest.p_Value, float)
+            self.assertAlmostEqual(objTest.p_Value, p_Value)
+            self.assertIsInstance(objTest.Report, str)
+            del objTest
+    
+    def test_LessTest(self):
+        """
+        Checks the implementation of the 1-sided left-tailed test.
+        
+        Test ID: TEST-T-760 and TEST-T-702
+        Requirement ID: REQ-FUN-760, REQ-SIO-700, REQ-SIO-701 and REQ-SIO-702.
+        
+        Version 1.0.0.0
+        """
+        #actual one with the default 95 % confidence
+        NormVar1 = self.Data1.FullVar / (self.Data1.N - 1)
+        NormVar2 = self.Data2.FullVar / (self.Data2.N - 1)
+        Temp = NormVar1 + NormVar2
+        TestValue = (self.Data1.Mean - self.Data2.Mean) / math.sqrt(Temp)
+        p_Value = self.Model.cdf(TestValue)
+        objTest = self.TestFunction(self.Data1, self.Data2, test_module.LT_TEST)
+        self.assertIsInstance(objTest, test_module.TestResult)
+        self.assertIsInstance(objTest.IsRejected, bool)
+        if p_Value <= 0.05:
+            self.assertTrue(objTest.IsRejected)
+        else:
+            self.assertFalse(objTest.IsRejected)
+        self.assertIsInstance(objTest.p_Value, float)
+        self.assertAlmostEqual(objTest.p_Value, p_Value)
+        self.assertIsInstance(objTest.Report, str)
+        del objTest
+        #make sure to fail due to too high confidence level
+        if p_Value > 0.01:
+            Confidence = 1 - 0.9 * p_Value
+            objTest = self.TestFunction(self.Data1, self.Data2,
+                                test_module.LT_TEST, Confidence = Confidence)
+            self.assertIsInstance(objTest, test_module.TestResult)
+            self.assertIsInstance(objTest.IsRejected, bool)
+            self.assertFalse(objTest.IsRejected)
+            self.assertIsInstance(objTest.p_Value, float)
+            self.assertAlmostEqual(objTest.p_Value, p_Value)
+            self.assertIsInstance(objTest.Report, str)
+            del objTest
+        #make sure to pass due to too low confidence level
+        if p_Value < 0.99:
+            Confidence = 0.9 * (1 - p_Value)
+            objTest = self.TestFunction(self.Data1, self.Data2,
+                                test_module.LT_TEST, Confidence = Confidence)
+            self.assertIsInstance(objTest, test_module.TestResult)
+            self.assertIsInstance(objTest.IsRejected, bool)
+            self.assertTrue(objTest.IsRejected)
+            self.assertIsInstance(objTest.p_Value, float)
+            self.assertAlmostEqual(objTest.p_Value, p_Value)
+            self.assertIsInstance(objTest.Report, str)
+            del objTest
+    
+    def test_NotEqualTest(self):
+        """
+        Checks the implementation of the 2-sided test.
+        
+        Test ID: TEST-T-760 and TEST-T-702
+        Requirement ID: REQ-FUN-760, REQ-SIO-700, REQ-SIO-701 and REQ-SIO-702.
+        
+        Version 1.0.0.0
+        """
+        #actual one with the default 95 % confidence
+        NormVar1 = self.Data1.FullVar / (self.Data1.N - 1)
+        NormVar2 = self.Data2.FullVar / (self.Data2.N - 1)
+        Temp = NormVar1 + NormVar2
+        TestValue = (self.Data1.Mean - self.Data2.Mean) / math.sqrt(Temp)
+        CDF = self.Model.cdf(TestValue)
+        if CDF < 0.5:
+            p_Value = 2 * self.Model.cdf(TestValue)
+        else:
+            p_Value = 2 * (1 - CDF)
+        objTest= self.TestFunction(self.Data1, self.Data2, test_module.NEQ_TEST)
+        self.assertIsInstance(objTest, test_module.TestResult)
+        self.assertIsInstance(objTest.IsRejected, bool)
+        if p_Value <= 0.05:
+            self.assertTrue(objTest.IsRejected)
+        else:
+            self.assertFalse(objTest.IsRejected)
+        self.assertIsInstance(objTest.p_Value, float)
+        self.assertAlmostEqual(objTest.p_Value, p_Value)
+        self.assertIsInstance(objTest.Report, str)
+        del objTest
+        #make sure to fail due to too high confidence level
+        if p_Value > 0.01:
+            Confidence = 1 - 0.9 * p_Value
+            objTest = self.TestFunction(self.Data1, self.Data2,
+                                test_module.NEQ_TEST, Confidence = Confidence)
+            self.assertIsInstance(objTest, test_module.TestResult)
+            self.assertIsInstance(objTest.IsRejected, bool)
+            self.assertFalse(objTest.IsRejected)
+            self.assertIsInstance(objTest.p_Value, float)
+            self.assertAlmostEqual(objTest.p_Value, p_Value)
+            self.assertIsInstance(objTest.Report, str)
+            del objTest
+        #make sure to pass due to too low confidence level
+        if p_Value < 0.99:
+            Confidence = 0.9 * (1 - p_Value)
+            objTest = self.TestFunction(self.Data1, self.Data2,
+                                test_module.NEQ_TEST, Confidence = Confidence)
+            self.assertIsInstance(objTest, test_module.TestResult)
+            self.assertIsInstance(objTest.IsRejected, bool)
+            self.assertTrue(objTest.IsRejected)
+            self.assertIsInstance(objTest.p_Value, float)
+            self.assertAlmostEqual(objTest.p_Value, p_Value)
+            self.assertIsInstance(objTest.Report, str)
+            del objTest
+
 #+ test suites
 
 TestSuite1 = unittest.TestLoader().loadTestsFromTestCase(Test_TestResult)
 TestSuite2 = unittest.TestLoader().loadTestsFromTestCase(Test_z_test)
 TestSuite3 = unittest.TestLoader().loadTestsFromTestCase(Test_t_test)
 TestSuite4 = unittest.TestLoader().loadTestsFromTestCase(Test_chi_squared_test)
+TestSuite5 = unittest.TestLoader().loadTestsFromTestCase(Test_unpaired_t_test)
+TestSuite6 = unittest.TestLoader().loadTestsFromTestCase(Test_paired_t_test)
+TestSuite7 = unittest.TestLoader().loadTestsFromTestCase(Test_welch_t_test)
 
 TestSuite = unittest.TestSuite()
 
-TestSuite.addTests([TestSuite1, TestSuite2, TestSuite3, TestSuite4])
+TestSuite.addTests([TestSuite1, TestSuite2, TestSuite3, TestSuite4, TestSuite5,
+                    TestSuite6, TestSuite7])
 
 if __name__ == "__main__":
     sys.stdout.write(

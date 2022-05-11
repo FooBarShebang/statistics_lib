@@ -82,7 +82,7 @@ if __name__ == '__main__':
         fFile.write('\n\n')
         del objTest
         objGenerator1 = Gaussian(1.5, 0.5)
-        objGenerator2 = Gaussian(2.5, 0.3)
+        objGenerator2 = Gaussian(1.7, 0.3)
         objData1 = Statistics1D([objGenerator1.random() for _ in range(15)])
         objData1.Name = 'test set 1'
         objData2 = Statistics1D([objGenerator2.random() for _ in range(15)])
@@ -104,6 +104,21 @@ if __name__ == '__main__':
         fFile.write('\n\n')
         del objTest
         objTest = st.chi_squared_test(objData1, 0.6, st.LT_TEST)
+        print(objTest.Report, '\n')
+        fFile.write(objTest.Report)
+        fFile.write('\n\n')
+        del objTest
+        objTest = st.unpaired_t_test(objData1, objData2, st.NEQ_TEST)
+        print(objTest.Report, '\n')
+        fFile.write(objTest.Report)
+        fFile.write('\n\n')
+        del objTest
+        objTest = st.paired_t_test(objData1, objData2, st.NEQ_TEST)
+        print(objTest.Report, '\n')
+        fFile.write(objTest.Report)
+        fFile.write('\n\n')
+        del objTest
+        objTest = st.welch_t_test(objData1, objData2, st.NEQ_TEST)
         print(objTest.Report, '\n')
         fFile.write(objTest.Report)
         fFile.write('\n\n')
