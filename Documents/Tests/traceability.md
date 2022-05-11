@@ -94,9 +94,9 @@
 | REQ-AWM-600        | TEST-T-607             | YES                      |
 | REQ-AWM-601        | TEST-T-608             | YES                      |
 | REQ-FUN-700        | TEST-A-700             | NO                       |
-| REQ-FUN-710        | TEST-T-710             | NO                       |
-| REQ-FUN-720        | TEST-T-720             | NO                       |
-| REQ-FUN-730        | TEST-T-730             | NO                       |
+| REQ-FUN-710        | TEST-T-710             | YES                      |
+| REQ-FUN-720        | TEST-T-720             | YES                      |
+| REQ-FUN-730        | TEST-T-730             | YES                      |
 | REQ-FUN-740        | TEST-T-740             | NO                       |
 | REQ-FUN-750        | TEST-T-750             | NO                       |
 | REQ-FUN-760        | TEST-T-760             | NO                       |

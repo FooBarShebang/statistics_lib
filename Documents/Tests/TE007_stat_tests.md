@@ -165,7 +165,7 @@ In each of the cases check the relation of the calculated test value to the crit
 
 Also perform the demonstration test TEST-D-700.
 
-**Test result:** PASS / FAIL
+**Test result:** PASS
 
 ___
 
@@ -192,7 +192,7 @@ In each of the cases check the relation of the calculated test value to the crit
 
 Also perform the demonstration test TEST-D-700.
 
-**Test result:** PASS / FAIL
+**Test result:** PASS
 
 ___
 
@@ -427,8 +427,8 @@ For traceability the relation between tests and requirements is summarized in th
 | :----------------- | :--------------------- | :----------------------- |
 | REQ-FUN-700        | TEST-A-700             | NO                       |
 | REQ-FUN-710        | TEST-T-710             | YES                      |
-| REQ-FUN-720        | TEST-T-720             | NO                       |
-| REQ-FUN-730        | TEST-T-730             | NO                       |
+| REQ-FUN-720        | TEST-T-720             | YES                      |
+| REQ-FUN-730        | TEST-T-730             | YES                      |
 | REQ-FUN-740        | TEST-T-740             | NO                       |
 | REQ-FUN-750        | TEST-T-750             | NO                       |
 | REQ-FUN-760        | TEST-T-760             | NO                       |

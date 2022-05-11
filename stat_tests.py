@@ -10,7 +10,14 @@ Classes:
     TestResult
 
 Functions:
-    z_test
+    z_test(Data, Mean, Sigma, Type, *, Confidence = 0.95):
+        Statistics1D, int OR float, int > 0 OR float > 0, TestTypes
+            /, *, 0 < float < 1/ -> TestResult
+    t_test(Data, Mean, Type, *, Confidence = 0.95):
+        Statistics1D, int OR float, TestTypes/, *, 0 < float < 1/ -> TestResult
+    chi_squared_test(Data, Sigma, Type, *, Confidence = 0.95):
+        Statistics1D, int > 0 OR float > 0, TestTypes
+            /, *, 0 < float < 1/ -> TestResult
 
 Constants:
     GT_TEST: enum(TestType) - indication for 1-sided right-tailed test
@@ -19,7 +26,7 @@ Constants:
 """
 
 __version__= '1.0.0.0'
-__date__ = '10-05-2022'
+__date__ = '11-05-2022'
 __status__ = 'Development'
 
 #imports
@@ -317,7 +324,8 @@ def z_test(Data: DC, Mean: T_REAL, Sigma: T_REAL, Type: TestTypes, *,
     Raises:
         UT_TypeError: either of the arguments is of the improper data type
         UT_ValueError: Sigma argument is zero or negative, OR Confidence
-            argument is not in the range (0, 1)
+            argument is not in the range (0, 1), OR data sequence is less than
+            2 elements long
     
     Version 1.0.0.0
     """
@@ -334,12 +342,17 @@ def z_test(Data: DC, Mean: T_REAL, Sigma: T_REAL, Type: TestTypes, *,
     if Sigma <= 0:
         raise UT_ValueError(Sigma, '> 0 - population sigma', SkipFrames = 1)
     if Confidence <= 0 or Confidence >= 1:
-        raise UT_ValueError(Sigma, 'in range (0, 1) - confidence', SkipFrames=1)
+        raise UT_ValueError(Confidence, 'in range (0, 1) - confidence',
+                                                                SkipFrames=1)
     if Data.N < 2:
         raise UT_ValueError(Data.N, '> 1 - data length', SkipFrames = 1)
     TestValue = math.sqrt(Data.N) * (Data.Mean - Mean) / Sigma
     Model = MC.Z_Distribution()
     CDF_Value = Model.cdf(TestValue)
+    if CDF_Value <= 0.0:
+        CDF_Value = 0.0000001
+    elif CDF_Value >= 1.0:
+        CDF_Value = 0.9999999
     if Type is TestTypes.LEFT:
         CritValue = Model.qf(1-Confidence)
         CriticalValues = (CritValue, None)
@@ -352,6 +365,153 @@ def z_test(Data: DC, Mean: T_REAL, Sigma: T_REAL, Type: TestTypes, *,
     TestName = ' '.join(['Z-test at {:.1f}%'.format(100 * Confidence),
                         'confidence on the sample`s mean vs population',
                         'mean = {} and sigma = {}'.format(Mean, Sigma)])
+    DataName = str(Data.Name)
+    ModelName = Model.Name
+    Result = TestResult(TestName, DataName, ModelName, TestValue, CDF_Value,
+                                                                CriticalValues)
+    return Result
+
+def t_test(Data: DC, Mean: T_REAL, Type: TestTypes, *,
+                                        Confidence: float = 0.95) -> TestResult:
+    """
+    Implementation of the one sample Student`s t-test, comparing the sample's
+    mean with the known population mean. The actual population standard
+    deviation is unknown.
+    
+    Signature:
+        Statistics1D, int OR float, TestTypes/, *, 0 < float < 1/ -> TestResult
+    
+    Args:
+        Data: Statistics1D; instance of, the sampled data stored in an instance
+            of specialized statistical class
+        Mean: int OR float; the mean of the population parameter of the model
+            distribution
+        Type: TestTypes; an enumeration value indicating the 1- or 2-sided
+            nature of the test, use values GT_TEST, LT_TEST and NEQ_TEST defined
+            in this module
+        Confidence: (keyword) 0 < float < 1; the confidence level of test,
+            defaults to 0.95, i.e. 95%.
+    
+    Returns:
+        TestResult: instance of the class (defined in this module), which can
+            generate a human-readable report on the performed test
+    
+    Raises:
+        UT_TypeError: either of the arguments is of the improper data type
+        UT_ValueError: Confidence argument is not in the range (0, 1), OR the
+            data sequence is less than 2 elements long
+    
+    Version 1.0.0.0
+    """
+    if not isinstance(Data, DC):
+        raise UT_TypeError(Data, DC, SkipFrames = 1)
+    if not isinstance(Mean, (int, float)):
+        raise UT_TypeError(Mean, (int, float), SkipFrames = 1)
+    if not isinstance(Type, TestTypes):
+        raise UT_TypeError(Type, TestTypes, SkipFrames = 1)
+    if not isinstance(Confidence, float):
+        raise UT_TypeError(Confidence, float, SkipFrames = 1)
+    if Confidence <= 0 or Confidence >= 1:
+        raise UT_ValueError(Confidence, 'in range (0, 1) - confidence',
+                                                                SkipFrames=1)
+    if Data.N < 2:
+        raise UT_ValueError(Data.N, '> 1 - data length', SkipFrames = 1)
+    TestValue = math.sqrt(Data.N - 1) * (Data.Mean - Mean) / Data.FullSigma
+    Model = MC.Student(Degree = Data.N - 1)
+    CDF_Value = Model.cdf(TestValue)
+    if CDF_Value <= 0.0:
+        CDF_Value = 0.0000001
+    elif CDF_Value >= 1.0:
+        CDF_Value = 0.9999999
+    if Type is TestTypes.LEFT:
+        CritValue = Model.qf(1-Confidence)
+        CriticalValues = (CritValue, None)
+    elif Type is TestTypes.RIGHT:
+        CritValue = Model.qf(Confidence)
+        CriticalValues = (None, CritValue)
+    else:
+        CritValue = Model.qf(0.5 * (1 + Confidence))
+        CriticalValues = (-CritValue, CritValue)
+    TestName = ' '.join(['One sample Student`s t-test at {:.1f}%'.format(
+                                                            100 * Confidence),
+                            'confidence on the sample`s mean vs population',
+                            'mean = {}'.format(Mean)])
+    DataName = str(Data.Name)
+    ModelName = Model.Name
+    Result = TestResult(TestName, DataName, ModelName, TestValue, CDF_Value,
+                                                                CriticalValues)
+    return Result
+    
+def chi_squared_test(Data: DC, Sigma: T_REAL, Type: TestTypes, *,
+                                        Confidence: float = 0.95) -> TestResult:
+    """
+    Implementation of the one sample Student`s t-test, comparing the sample's
+    mean with the known population mean. The actual population standard
+    deviation is unknown.
+    
+    Signature:
+        Statistics1D, int > 0 OR float > 0, TestTypes
+            /, *, 0 < float < 1/ -> TestResult
+    
+    Args:
+        Data: Statistics1D; instance of, the sampled data stored in an instance
+            of specialized statistical class
+        Sigma: int > 0 OR float > 0; the standard deviation of the population
+            parameter of the model distribution
+        Type: TestTypes; an enumeration value indicating the 1- or 2-sided
+            nature of the test, use values GT_TEST, LT_TEST and NEQ_TEST defined
+            in this module
+        Confidence: (keyword) 0 < float < 1; the confidence level of test,
+            defaults to 0.95, i.e. 95%.
+    
+    Returns:
+        TestResult: instance of the class (defined in this module), which can
+            generate a human-readable report on the performed test
+    
+    Raises:
+        UT_TypeError: either of the arguments is of the improper data type
+        UT_ValueError: Confidence argument is not in the range (0, 1), OR the
+            data sequence is less than 2 elements long, OR the Sigma argument
+            is not positive
+    
+    Version 1.0.0.0
+    """
+    if not isinstance(Data, DC):
+        raise UT_TypeError(Data, DC, SkipFrames = 1)
+    if not isinstance(Sigma, (int, float)):
+        raise UT_TypeError(Sigma, (int, float), SkipFrames = 1)
+    if not isinstance(Type, TestTypes):
+        raise UT_TypeError(Type, TestTypes, SkipFrames = 1)
+    if not isinstance(Confidence, float):
+        raise UT_TypeError(Confidence, float, SkipFrames = 1)
+    if Sigma <= 0:
+        raise UT_ValueError(Sigma, '> 0 - population sigma', SkipFrames = 1)
+    if Confidence <= 0 or Confidence >= 1:
+        raise UT_ValueError(Confidence, 'in range (0, 1) - confidence',
+                                                                SkipFrames=1)
+    if Data.N < 2:
+        raise UT_ValueError(Data.N, '> 1 - data length', SkipFrames = 1)
+    TestValue = Data.N * Data.FullVar / (Sigma * Sigma)
+    Model = MC.ChiSquared(Degree = Data.N - 1)
+    CDF_Value = Model.cdf(TestValue)
+    if CDF_Value <= 0.0:
+        CDF_Value = 0.0000001
+    elif CDF_Value >= 1.0:
+        CDF_Value = 0.9999999
+    if Type is TestTypes.LEFT:
+        CritValue = Model.qf(1-Confidence)
+        CriticalValues = (CritValue, None)
+    elif Type is TestTypes.RIGHT:
+        CritValue = Model.qf(Confidence)
+        CriticalValues = (None, CritValue)
+    else:
+        CritValueUpper = Model.qf(0.5 * (1 + Confidence))
+        CritValueLower = Model.qf(0.5 * (1 - Confidence))
+        CriticalValues = (CritValueLower, CritValueUpper)
+    TestName = ' '.join(['Chi-squared test at {:.1f}% confidence'.format(
+                                                            100 * Confidence),
+                            'on the sample`s standard deviation vs population',
+                            'sigma = {}'.format(Sigma)])
     DataName = str(Data.Name)
     ModelName = Model.Name
     Result = TestResult(TestName, DataName, ModelName, TestValue, CDF_Value,

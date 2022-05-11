@@ -7,7 +7,7 @@ REQ-FUN-7B0 and REQ-FUN-7B1.
 """
 
 __version__= '1.0.0.0'
-__date__ = '10-05-2022'
+__date__ = '11-05-2022'
 __status__ = 'Testing'
 
 #imports
@@ -94,6 +94,16 @@ if __name__ == '__main__':
         fFile.write(objData2.Summary)
         fFile.write('\n\n')
         objTest = st.z_test(objData1, 1.5, 0.5, st.NEQ_TEST)
+        print(objTest.Report, '\n')
+        fFile.write(objTest.Report)
+        fFile.write('\n\n')
+        del objTest
+        objTest = st.t_test(objData1, 1.0, st.GT_TEST)
+        print(objTest.Report, '\n')
+        fFile.write(objTest.Report)
+        fFile.write('\n\n')
+        del objTest
+        objTest = st.chi_squared_test(objData1, 0.6, st.LT_TEST)
         print(objTest.Report, '\n')
         fFile.write(objTest.Report)
         fFile.write('\n\n')
