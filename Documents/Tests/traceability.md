@@ -100,7 +100,7 @@
 | REQ-FUN-740        | TEST-T-740             | YES                      |
 | REQ-FUN-750        | TEST-T-750             | YES                      |
 | REQ-FUN-760        | TEST-T-760             | YES                      |
-| REQ-FUN-770        | TEST-T-770             | NO                       |
+| REQ-FUN-770        | TEST-T-770             | YES                      |
 | REQ-FUN-780        | TEST-T-780             | NO                       |
 | REQ-FUN-790        | TEST-T-790             | NO                       |
 | REQ-FUN-7A0        | TEST-T-7A0             | NO                       |

@@ -123,3 +123,8 @@ if __name__ == '__main__':
         fFile.write(objTest.Report)
         fFile.write('\n\n')
         del objTest
+        objTest = st.f_test(objData1, objData2, st.NEQ_TEST)
+        print(objTest.Report, '\n')
+        fFile.write(objTest.Report)
+        fFile.write('\n\n')
+        del objTest

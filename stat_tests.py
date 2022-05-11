@@ -25,6 +25,9 @@ Functions:
             /, *, 0 < float < 1, int OR float/ -> TestResult
     welch_t_test(Data1, Data2, Type, *, Confidence = 0.95):
         Statistics1D, Statistics1D, TestTypes/, *, 0 < float < 1/ -> TestResult
+    f_test(Data1, Data2, Type, *, Confidence = 0.95, Delta = 1.0):
+        Statistics1D, Statistics1D, TestTypes
+            /, *, 0 < float < 1, int > 0 OR float > 0/ -> TestResult
 
 Constants:
     GT_TEST: enum(TestType) - indication for 1-sided right-tailed test
@@ -765,6 +768,87 @@ def welch_t_test(Data1: DC, Data2: DC, Type: TestTypes, *,
         CriticalValues = (-CritValue, CritValue)
     TestName = ' '.join(['Welch t-test at {:.1f}%'.format(100 * Confidence),
                             'confidence on the samples` means.'])
+    DataName = '{} vs {}'.format(Data1.Name, Data2.Name)
+    ModelName = Model.Name
+    Result = TestResult(TestName, DataName, ModelName, TestValue, CDF_Value,
+                                                                CriticalValues)
+    return Result
+    
+def f_test(Data1: DC, Data2: DC, Type: TestTypes, *,
+                    Confidence: float = 0.95, Delta: TReal = 1.0) -> TestResult:
+    """
+    Implementation of the f-test, comparing the samples` standard deviations.
+    
+    Signature:
+        Statistics1D, Statistics1D, TestTypes
+            /, *, 0 < float < 1, int > 0 OR float > 0/ -> TestResult
+    
+    Args:
+        Data1: Statistics1D; instance of, the sampled data stored in an instance
+            of specialized statistical class - the first sample
+        Data2: Statistics1D; instance of, the sampled data stored in an instance
+            of specialized statistical class - the second sample
+        Type: TestTypes; an enumeration value indicating the 1- or 2-sided
+            nature of the test, use values GT_TEST, LT_TEST and NEQ_TEST defined
+            in this module
+        Confidence: (keyword) 0 < float < 1; the confidence level of test,
+            defaults to 0.95, i.e. 95%
+        Delta: (keyword) int > 0 OR float > 0; the expected ratio of the true
+            underlying population variances, defaults to 1.0
+    
+    Returns:
+        TestResult: instance of the class (defined in this module), which can
+            generate a human-readable report on the performed test
+    
+    Raises:
+        UT_TypeError: either of the arguments is of the improper data type
+        UT_ValueError: Confidence argument is not in the range (0, 1), OR the
+            data sequence is less than 2 elements long for any of the samples,
+            OR the data samples have unequal lengths
+    
+    Version 1.0.0.0
+    """
+    if not isinstance(Data1, DC):
+        raise UT_TypeError(Data1, DC, SkipFrames = 1)
+    if not isinstance(Data2, DC):
+        raise UT_TypeError(Data2, DC, SkipFrames = 1)
+    if not isinstance(Type, TestTypes):
+        raise UT_TypeError(Type, TestTypes, SkipFrames = 1)
+    if not isinstance(Confidence, float):
+        raise UT_TypeError(Confidence, float, SkipFrames = 1)
+    if not isinstance(Delta, (int, float)):
+        raise UT_TypeError(Delta, (int, float), SkipFrames = 1)
+    if Confidence <= 0 or Confidence >= 1:
+        raise UT_ValueError(Confidence, 'in range (0, 1) - confidence',
+                                                                SkipFrames = 1)
+    if Delta <= 0:
+        raise UT_ValueError(Delta, '> 0 - delta parameter', SkipFrames = 1)
+    if Data1.N < 2:
+        raise UT_ValueError(Data1.N, '> 1 - data length, first sample',
+                                                                SkipFrames = 1)
+    if Data2.N < 2:
+        raise UT_ValueError(Data2.N, '> 1 - data length, second sample',
+                                                                SkipFrames = 1)
+    Correction = Data1.N * (Data2.N - 1) / (Data2.N * (Data1.N - 1))
+    TestValue = Correction * Delta * Data1.FullVar / Data2.FullVar
+    Model = MC.F_Distribution(Degree1 = Data1.N - 1, Degree2 = Data2.N - 1)
+    CDF_Value = Model.cdf(TestValue)
+    if CDF_Value <= 0.0:
+        CDF_Value = 0.0000001
+    elif CDF_Value >= 1.0:
+        CDF_Value = 0.9999999
+    if Type is TestTypes.LEFT:
+        CritValue = Model.qf(1-Confidence)
+        CriticalValues = (CritValue, None)
+    elif Type is TestTypes.RIGHT:
+        CritValue = Model.qf(Confidence)
+        CriticalValues = (None, CritValue)
+    else:
+        CritValueUpper = Model.qf(0.5 * (1 + Confidence))
+        CritValueLower = Model.qf(0.5 * (1 - Confidence))
+        CriticalValues = (CritValueLower, CritValueUpper)
+    TestName = ' '.join(['F-test at {:.1f}%'.format(100 * Confidence),
+                            'confidence on the samples` variances.'])
     DataName = '{} vs {}'.format(Data1.Name, Data2.Name)
     ModelName = Model.Name
     Result = TestResult(TestName, DataName, ModelName, TestValue, CDF_Value,

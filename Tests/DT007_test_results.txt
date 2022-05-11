@@ -49,31 +49,31 @@ Is null hypothesis rejected?: Yes
 ----------------------------------------------------------
 Name:	test set 1
 N:	15
-Mean:	1.4834775133998508
-Median:	1.5387390159833112
-Q1:	1.2634458491875091
-Q3:	1.6939045466632865
-Min:	0.8454456421954436
-Max:	2.2714882730860513
-Var:	0.13815399428613626
-FullVar:	0.13815399428613626
-Skew:	0.059010973465250596
-Kurt:	-0.32067204249895287
+Mean:	1.5705067178300207
+Median:	1.6084491286729532
+Q1:	1.259606281041374
+Q3:	2.0477199319165003
+Min:	0.5472272493555582
+Max:	2.4735494761214047
+Var:	0.33856191421922327
+FullVar:	0.33856191421922327
+Skew:	-0.1793131648409636
+Kurt:	-1.0050330035917163
 ----------------------------------------------------------
 
 ----------------------------------------------------------
 Name:	test set 2
 N:	15
-Mean:	1.7467208198690547
-Median:	1.7281497514764184
-Q1:	1.604701552921709
-Q3:	1.845333399046014
-Min:	1.374780469525807
-Max:	2.165146329233985
-Var:	0.05845328866238702
-FullVar:	0.05845328866238702
-Skew:	0.17546411187918107
-Kurt:	-0.8371124291900065
+Mean:	1.684573921908322
+Median:	1.7294283716329013
+Q1:	1.4373567787098294
+Q3:	1.8634971997566492
+Min:	1.122070714483879
+Max:	2.3258600666651885
+Var:	0.0896244962987016
+FullVar:	0.0896244962987016
+Skew:	0.09596735535378743
+Kurt:	-0.37773991068826707
 ----------------------------------------------------------
 
 Statistical test report.
@@ -84,8 +84,8 @@ Model distribution: Z_Distribution()
 Null hypothesis: equal to
 Alternative hypothesis: not equal to
 Critical values: -1.9599639845400538 and 1.9599639845400538
-Test value: -0.1279826308806262
-p-value: 0.898162718543328
+Test value: 0.5461426879028316
+p-value: 0.5849678583892386
 Is null hypothesis rejected?: No
 
 Statistical test report.
@@ -96,8 +96,8 @@ Model distribution: Student(Degree = 14)
 Null hypothesis: less than or equal to
 Alternative hypothesis: greater than
 Critical value: 1.761310045840669
-Test value: 4.866968941340766
-p-value: 0.00012460859306606675
+Test value: 3.668645345571443
+p-value: 0.0012648189367480134
 Is null hypothesis rejected?: Yes
 
 Statistical test report.
@@ -108,9 +108,9 @@ Model distribution: ChiSquared(Degree = 14)
 Null hypothesis: greater than or equal to
 Alternative hypothesis: less than
 Critical value: 6.570631444454193
-Test value: 5.756416428589011
-p-value: 0.027737638625479132
-Is null hypothesis rejected?: Yes
+Test value: 14.10674642580097
+p-value: 0.5582109682840657
+Is null hypothesis rejected?: No
 
 Statistical test report.
 Name: Unpaired Student`s t-test at 95.0% confidence on the samples` means.
@@ -120,9 +120,9 @@ Model distribution: Student(Degree = 28)
 Null hypothesis: equal to
 Alternative hypothesis: not equal to
 Critical values: -2.0484072287280797 and 2.0484072287280797
-Test value: -2.2993398487876706
-p-value: 0.02915449839341885
-Is null hypothesis rejected?: Yes
+Test value: -0.6751340100165022
+p-value: 0.5051280776907587
+Is null hypothesis rejected?: No
 
 Statistical test report.
 Name: Paired Student`s t-test at 95.0% confidence on the samples` means with the expected difference = 0.0.
@@ -132,19 +132,31 @@ Model distribution: Student(Degree = 14)
 Null hypothesis: equal to
 Alternative hypothesis: not equal to
 Critical values: -2.1447868538499493 and 2.1447868538499493
-Test value: -1.8417391044276041
-p-value: 0.0867955205752121
+Test value: -0.7584697515937856
+p-value: 0.460748583113777
 Is null hypothesis rejected?: No
 
 Statistical test report.
 Name: Welch t-test at 95.0% confidence on the samples` means.
 Data: test set 1 vs test set 2
 Type: 2-sided
-Model distribution: Student(Degree = 24.04810037034377)
+Model distribution: Student(Degree = 20.926781900820647)
 Null hypothesis: equal to
 Alternative hypothesis: not equal to
-Critical values: -2.0636801359406975 and 2.0636801359406975
-Test value: -2.2213733344205595
-p-value: 0.035992752572992046
+Critical values: -2.080056944815982 and 2.080056944815982
+Test value: -0.6522414195543178
+p-value: 0.521345983969439
+Is null hypothesis rejected?: No
+
+Statistical test report.
+Name: F-test at 95.0% confidence on the samples` variances.
+Data: test set 1 vs test set 2
+Type: 2-sided
+Model distribution: F_Distribution(Degree1 = 14, Degree2 = 14)
+Null hypothesis: equal to
+Alternative hypothesis: not equal to
+Critical values: 0.3357296188672384 and 2.97858730951945
+Test value: 3.7775600221044483
+p-value: 0.018172574733262836
 Is null hypothesis rejected?: Yes
 
