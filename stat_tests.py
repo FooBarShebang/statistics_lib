@@ -381,6 +381,7 @@ def z_test(Data: DC, Mean: T_REAL, Sigma: T_REAL, Type: TestTypes, *,
     ModelName = Model.Name
     Result = TestResult(TestName, DataName, ModelName, TestValue, CDF_Value,
                                                                 CriticalValues)
+    del Model
     return Result
 
 def t_test(Data: DC, Mean: T_REAL, Type: TestTypes, *,
@@ -452,6 +453,7 @@ def t_test(Data: DC, Mean: T_REAL, Type: TestTypes, *,
     ModelName = Model.Name
     Result = TestResult(TestName, DataName, ModelName, TestValue, CDF_Value,
                                                                 CriticalValues)
+    del Model
     return Result
     
 def chi_squared_test(Data: DC, Sigma: T_REAL, Type: TestTypes, *,
@@ -527,6 +529,7 @@ def chi_squared_test(Data: DC, Sigma: T_REAL, Type: TestTypes, *,
     ModelName = Model.Name
     Result = TestResult(TestName, DataName, ModelName, TestValue, CDF_Value,
                                                                 CriticalValues)
+    del Model
     return Result
 
 def unpaired_t_test(Data1: DC, Data2: DC, Type: TestTypes, *,
@@ -605,6 +608,7 @@ def unpaired_t_test(Data1: DC, Data2: DC, Type: TestTypes, *,
     ModelName = Model.Name
     Result = TestResult(TestName, DataName, ModelName, TestValue, CDF_Value,
                                                                 CriticalValues)
+    del Model
     return Result
 
 def paired_t_test(Data1: DC, Data2: DC, Type: TestTypes, *,
@@ -692,6 +696,7 @@ def paired_t_test(Data1: DC, Data2: DC, Type: TestTypes, *,
     Result = TestResult(TestName, DataName, ModelName, TestValue, CDF_Value,
                                                                 CriticalValues)
     del Data
+    del Model
     return Result
 
 def welch_t_test(Data1: DC, Data2: DC, Type: TestTypes, *,
@@ -772,6 +777,7 @@ def welch_t_test(Data1: DC, Data2: DC, Type: TestTypes, *,
     ModelName = Model.Name
     Result = TestResult(TestName, DataName, ModelName, TestValue, CDF_Value,
                                                                 CriticalValues)
+    del Model
     return Result
     
 def f_test(Data1: DC, Data2: DC, Type: TestTypes, *,
@@ -853,4 +859,5 @@ def f_test(Data1: DC, Data2: DC, Type: TestTypes, *,
     ModelName = Model.Name
     Result = TestResult(TestName, DataName, ModelName, TestValue, CDF_Value,
                                                                 CriticalValues)
+    del Model
     return Result
