@@ -1,0 +1,13 @@
+@startuml stat_tests_components
+
+!if %not(%variable_exists("$COMPONENTS"))
+    !include ../Templates/Components2.cuml
+!endif
+
+title Components Diagram of the Module statistics_lib.stat_tests. $generated()
+
+!if $is_not_defined("$STAT_TESTS")
+    !include ./stat_tests_components.iuml
+!endif
+
+@enduml

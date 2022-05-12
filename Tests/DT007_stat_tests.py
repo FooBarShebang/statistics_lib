@@ -7,7 +7,7 @@ REQ-FUN-7B0 and REQ-FUN-7B1.
 """
 
 __version__= '1.0.0.0'
-__date__ = '11-05-2022'
+__date__ = '12-05-2022'
 __status__ = 'Testing'
 
 #imports
@@ -118,12 +118,27 @@ if __name__ == '__main__':
         fFile.write(objTest.Report)
         fFile.write('\n\n')
         del objTest
-        objTest = st.welch_t_test(objData1, objData2, st.NEQ_TEST)
+        objTest = st.Welch_t_test(objData1, objData2, st.NEQ_TEST)
         print(objTest.Report, '\n')
         fFile.write(objTest.Report)
         fFile.write('\n\n')
         del objTest
         objTest = st.f_test(objData1, objData2, st.NEQ_TEST)
+        print(objTest.Report, '\n')
+        fFile.write(objTest.Report)
+        fFile.write('\n\n')
+        del objTest
+        objTest = st.ANOVA_test(objData1, objData2)
+        print(objTest.Report, '\n')
+        fFile.write(objTest.Report)
+        fFile.write('\n\n')
+        del objTest
+        objTest = st.Levene_test(objData1, objData2)
+        print(objTest.Report, '\n')
+        fFile.write(objTest.Report)
+        fFile.write('\n\n')
+        del objTest
+        objTest = st.Brown_Forsythe_test(objData1, objData2)
         print(objTest.Report, '\n')
         fFile.write(objTest.Report)
         fFile.write('\n\n')

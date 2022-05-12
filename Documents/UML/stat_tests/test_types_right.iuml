@@ -1,0 +1,10 @@
+!$TESTTYPESRIGHT = "v2"
+
+!if %not(%variable_exists("$CLASSES"))
+    !include ../Templates/Classes2.cuml
+!endif
+
+class TestTypes.RIGHT {
+    H0: str = 'less than or equal to'
+    H1: str = 'greater than'
+}

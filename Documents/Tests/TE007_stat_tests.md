@@ -43,9 +43,9 @@ The verification method for a requirement is given by a single letter according 
 
 **Expected result:** All required classes and functions implementing the statistical significance testing are present and function as expected, i.e. all TEST-T-7xy and TEST-D-700 tests defined in this document are passed.
 
-**Test steps:** Analyze the source code of the module [stat\_tests](../../stat_tests.py) as well as of the unit-test module [/Tests/UT007\_stat\_tests](../../Tests/UT007_stat_test.py). Execute the mentioned unit-test module. Also run the demonstration test defined as TEST-D-700.
+**Test steps:** Analyze the source code of the module [stat\_tests](../../stat_tests.py) as well as of the unit-test module [/Tests/UT007\_stat\_tests](../../Tests/UT007_stat_test.py). Execute the mentioned unit-test module. Also run the demonstration test defined as TEST-D-700, see module [/Tests/DT007\_stat\_tests](../../Tests/UT007_stat_tests.py).
 
-**Test result:** PASS / FAIL
+**Test result:** PASS
 
 ## Tests definition (Test)
 
@@ -66,7 +66,7 @@ The verification method for a requirement is given by a single letter according 
 
 **Test steps:** This step is performed for each of the testing functions separately. Try to call the function is question with only one argument at the time violating the restrictions, repeat with the different unacceptable types for the same argument. Each argument MUST be checked, including the optional keyword ones. However, more than one 'wrong' argument at the same type check is optional. Check, that the expected exception type is raised each time.
 
-**Test result:** PASS / FAIL
+**Test result:** PASS
 
 ___
 
@@ -87,7 +87,7 @@ ___
 
 **Test steps:** This step is performed for each of the testing functions separately. Try to call the function is question with only one argument at the time violating the restrictions, repeat with the different unacceptable values of a proper data type for the same argument. Each concerned argument MUST be checked. Check, that the expected exception type is raised each time.
 
-**Test result:** PASS / FAIL
+**Test result:** PASS
 
 ___
 
@@ -110,7 +110,7 @@ ___
 
 **Test steps:** This step is performed for each of the testing functions separately. Try to call the function in question with a set of proper arguments and check the returned value. The actual content / state of the returned object is checked separately for each function, as a part of the specific TEST-T-710 to TEST-T-7A0 tests.
 
-**Test result:** PASS / FAIL
+**Test result:** PASS
 
 ___
 
@@ -315,7 +315,7 @@ ___
 
 Also perform the demonstration test TEST-D-700.
 
-**Test result:** PASS / FAIL
+**Test result:** PASS
 
 ___
 
@@ -336,7 +336,7 @@ ___
 
 Also perform the demonstration test TEST-D-700.
 
-**Test result:** PASS / FAIL
+**Test result:** PASS
 
 ___
 
@@ -357,7 +357,7 @@ ___
 
 Also perform the demonstration test TEST-D-700.
 
-**Test result:** PASS / FAIL
+**Test result:** PASS
 
 ___
 
@@ -417,7 +417,7 @@ Use the actual test value such that some tests are considered to fail to reject 
 
 Generate two random samples using the same Gaussian distribution with arbitrary parameters and use them to demonstrate the outcome of all of the implemented testing functions.
 
-**Test result:** PASS / FAIL
+**Test result:** PASS
 
 ## Traceability
 
@@ -425,7 +425,7 @@ For traceability the relation between tests and requirements is summarized in th
 
 | **Requirement ID** | **Covered in test(s)** | **Verified \[YES/NO\]**) |
 | :----------------- | :--------------------- | :----------------------- |
-| REQ-FUN-700        | TEST-A-700             | NO                       |
+| REQ-FUN-700        | TEST-A-700             | YES                      |
 | REQ-FUN-710        | TEST-T-710             | YES                      |
 | REQ-FUN-720        | TEST-T-720             | YES                      |
 | REQ-FUN-730        | TEST-T-730             | YES                      |
@@ -433,17 +433,17 @@ For traceability the relation between tests and requirements is summarized in th
 | REQ-FUN-750        | TEST-T-750             | YES                      |
 | REQ-FUN-760        | TEST-T-760             | YES                      |
 | REQ-FUN-770        | TEST-T-770             | YES                      |
-| REQ-FUN-780        | TEST-T-780             | NO                       |
-| REQ-FUN-790        | TEST-T-790             | NO                       |
-| REQ-FUN-7A0        | TEST-T-7A0             | NO                       |
-| REQ-FUN-7B0        | TEST-T-7B0, TEST-D-700 | NO                       |
-| REQ-FUN-7B1        | TEST-T-7B0, TEST-D-700 | NO                       |
-| REQ-SIO-700        | TEST-T-702             | NO                       |
-| REQ-SIO-701        | TEST-T-702             | NO                       |
-| REQ-SIO-702        | TEST-T-702             | NO                       |
-| REQ-AWM-700        | TEST-T-700             | NO                       |
-| REQ-AWM-701        | TEST-T-701             | NO                       |
+| REQ-FUN-780        | TEST-T-780             | YES                      |
+| REQ-FUN-790        | TEST-T-790             | YES                      |
+| REQ-FUN-7A0        | TEST-T-7A0             | YES                      |
+| REQ-FUN-7B0        | TEST-T-7B0, TEST-D-700 | YES                      |
+| REQ-FUN-7B1        | TEST-T-7B0, TEST-D-700 | YES                      |
+| REQ-SIO-700        | TEST-T-702             | YES                      |
+| REQ-SIO-701        | TEST-T-702             | YES                      |
+| REQ-SIO-702        | TEST-T-702             | YES                      |
+| REQ-AWM-700        | TEST-T-700             | YES                      |
+| REQ-AWM-701        | TEST-T-701             | YES                      |
 
 | **Software ready for production \[YES/NO\]** | **Rationale**        |
 | :------------------------------------------: | :------------------- |
-| NO                                           | Under development    |
+| YES                                          | All tests passed     |

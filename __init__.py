@@ -47,14 +47,20 @@ Modules:
         the specified number of bins. The parameters of a distribution are
         defined during instantiation, and they can be changed later via setter
         properties.
+    stat_tests: Implements statistical significance tests as functions returning
+        a class instance, which can generate human-readable report. The input
+        data must be passed as instance(s) of Statistics1D class, and the test
+        type (1-sided left- or right-tailed, 2-sided) must be indicated using
+        the enumeration values GT_TEST, LT_TEST or NEQ_TEST defined in this
+        module.
 """
 
 __project__ = 'Statistics of the measurements with experimental uncertainties'
-__version_info__= (0, 7, 0)
+__version_info__= (0, 8, 0)
 __version_suffix__= '-dev1'
 __version__= ''.join(['.'.join(map(str, __version_info__)), __version_suffix__])
-__date__ = '28-04-2022'
-__status__ = 'Development'
+__date__ = '12-05-2022'
+__status__ = 'Production'
 __author__ = 'Anton Azarov'
 __maintainer__ = 'a.azarov@diagnoptics.com'
 __license__ = 'Public Domain'
@@ -62,4 +68,4 @@ __copyright__ = 'Diagnoptics Technologies B.V.'
 
 __all__ = ['base_functions', 'ordered_functions', 'data_classes',
             'special_functions', 'distribution_classes',
-            'inverse_distributions']
+            'inverse_distributions', 'stat_tests']

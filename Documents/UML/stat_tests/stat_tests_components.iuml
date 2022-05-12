@@ -1,0 +1,37 @@
+!$STAT_TESTS = "v2"
+
+!if %not(%variable_exists("$COMPONENTS"))
+    !include ../Templates/Components2.cuml
+!endif
+
+$module(stat_tests) {
+    $class(TestReport)
+    
+    $function(z_test)
+    
+    $function(t_test)
+    
+    $function(chi_squared_test)
+    
+    $function(unpaired_t_test)
+    
+    $function(paired_t_test)
+    
+    $function(Welch_t_test)
+    
+    $function(f_test)
+    
+    $function(ANOVA_test)
+    
+    $function(Levene_test)
+    
+    $function(Brown_Forsythe_test)
+    
+    frame "const" <<alisases for enumeration values>> {
+        component GT_TEST
+        
+        component LT_TEST
+        
+        component NEQ_TEST
+    }
+}

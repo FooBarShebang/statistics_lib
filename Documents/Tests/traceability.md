@@ -15,13 +15,13 @@
 
 | **Requirement ID** | **Covered in test(s)** | **Verified \[YES/NO\]**) |
 | :----------------- | :--------------------- | :----------------------- |
-| REQ-FUN-000        | TEST-A-000             | NO                       |
-| REQ-FUN-001        | TEST-A-000             | NO                       |
-| REQ-SIO-000        | TEST-A-001             | NO                       |
-| REQ-SIO-001        | TEST-A-001             | NO                       |
-| REQ-INT-000        | TEST-I-000             | NO                       |
-| REQ-AWM-000        | TEST-D-000             | NO                       |
-| REQ-USE-000        | TEST-D-001             | NO                       |
+| REQ-FUN-000        | TEST-A-000             | YES                      |
+| REQ-FUN-001        | TEST-A-000             | YES                      |
+| REQ-SIO-000        | TEST-A-001             | YES                      |
+| REQ-SIO-001        | TEST-A-001             | YES                      |
+| REQ-INT-000        | TEST-I-000             | YES                      |
+| REQ-AWM-000        | TEST-D-000             | YES                      |
+| REQ-USE-000        | TEST-D-001             | YES                      |
 | REQ-IAR-000        | TEST-D-002             | NO                       |
 | REQ-IAR-001        | TEST-D-003             | NO                       |
 | REQ-IAR-002        | TEST-D-002             | NO                       |
@@ -93,7 +93,7 @@
 | REQ-FUN-608        | TEST-D-600             | YES                      |
 | REQ-AWM-600        | TEST-T-607             | YES                      |
 | REQ-AWM-601        | TEST-T-608             | YES                      |
-| REQ-FUN-700        | TEST-A-700             | NO                       |
+| REQ-FUN-700        | TEST-A-700             | YES                      |
 | REQ-FUN-710        | TEST-T-710             | YES                      |
 | REQ-FUN-720        | TEST-T-720             | YES                      |
 | REQ-FUN-730        | TEST-T-730             | YES                      |
@@ -101,16 +101,16 @@
 | REQ-FUN-750        | TEST-T-750             | YES                      |
 | REQ-FUN-760        | TEST-T-760             | YES                      |
 | REQ-FUN-770        | TEST-T-770             | YES                      |
-| REQ-FUN-780        | TEST-T-780             | NO                       |
-| REQ-FUN-790        | TEST-T-790             | NO                       |
-| REQ-FUN-7A0        | TEST-T-7A0             | NO                       |
-| REQ-FUN-7B0        | TEST-T-7B0, TEST-D-700 | NO                       |
-| REQ-FUN-7B1        | TEST-T-7B0, TEST-D-700 | NO                       |
-| REQ-SIO-700        | TEST-T-702             | NO                       |
-| REQ-SIO-701        | TEST-T-702             | NO                       |
-| REQ-SIO-702        | TEST-T-702             | NO                       |
-| REQ-AWM-700        | TEST-T-700             | NO                       |
-| REQ-AWM-701        | TEST-T-701             | NO                       |
+| REQ-FUN-780        | TEST-T-780             | YES                      |
+| REQ-FUN-790        | TEST-T-790             | YES                      |
+| REQ-FUN-7A0        | TEST-T-7A0             | YES                      |
+| REQ-FUN-7B0        | TEST-T-7B0, TEST-D-700 | YES                      |
+| REQ-FUN-7B1        | TEST-T-7B0, TEST-D-700 | YES                      |
+| REQ-SIO-700        | TEST-T-702             | YES                      |
+| REQ-SIO-701        | TEST-T-702             | YES                      |
+| REQ-SIO-702        | TEST-T-702             | YES                      |
+| REQ-AWM-700        | TEST-T-700             | YES                      |
+| REQ-AWM-701        | TEST-T-701             | YES                      |
 
 | **Software ready for production \[YES/NO\]** | **Rationale**                 |
 | :------------------------------------------: | :---------------------------- |

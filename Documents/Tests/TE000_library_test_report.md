@@ -43,9 +43,9 @@ The verification method for a requirement is given by a single letter according 
 
 **Expected result:** If any library outside the Standard Python Library is used, it should be widely accepted, well maintained and not marked for deprecation in the nearest future (2 years).
 
-**Test steps:** Check / review the source code.
+**Test steps:** Check / review the source code. Findings: there are no 3rd party dependencies. The library depends on 2 other libraries by the same author, which are maintained.
 
-**Test result:** PASS / FAIL
+**Test result:** PASS
 
 ---
 
@@ -75,9 +75,9 @@ The verification method for a requirement is given by a single letter according 
 
 **Expected result:** The library provides functions / class methods implementing all required functionality. All required functionality as well as the additional functions / class methods operate properly: they generate the proper response to the proper input data, and raise expected exceptions in response to an improper data input.
 
-**Test steps:** Check / review the source code. Run all unit-test suits defined for the individual modules; specifically [UT001_base_functions](../../Tests/UT001_base_functions.py), [UT002_ordered_functions](../../Tests/UT002_ordered_functions.py), [UT003_data_classes](../../Tests/UT003_data_classes.py).
+**Test steps:** Check / review the source code. Run all unit-test suits defined for the individual modules; specifically [UT001_base_functions](../../Tests/UT001_base_functions.py), [UT002_ordered_functions](../../Tests/UT002_ordered_functions.py), [UT003_data_classes](../../Tests/UT003_data_classes.py), [UT004_distribution_classes](../../Tests/UT004_distribution_classes.py), [UT005_special_functions](../../Tests/UT005_special_function.py) and [UT007_stat_tests](../../Tests/UT007_stat_tests.py).
 
-**Test result:** PASS / FAIL
+**Test result:** PASS
 
 ---
 
@@ -101,9 +101,9 @@ as long as all elements are generic numbers. Generic number is:
 
 The returned values are of the native Python data types - **int**, **float**, **bool** or **list** / **tuple** of elements of the three mentioned scalar types.
 
-**Test steps:** Check / review the source code. Run all unit-test suits defined for the individual modules.
+**Test steps:** Check / review the source code. Run all unit-test suits defined for the individual modules. See the respective module's test reports: [TE001](./TE001_base_functions.md), [TE002](./TE002_ordered_functions.md), [TE003](./TE003_data_classes.md), [TE004](./TE004_distribution_classes.md) and [TE007](./TE007_stat_tests.md).
 
-**Test result:** PASS / FAIL
+**Test result:** PASS
 
 ## Tests definition (Demonstration)
 
@@ -117,9 +117,9 @@ The returned values are of the native Python data types - **int**, **float**, **
 
 **Expected result:** An exception is raised if the input data is not a generic numeric sequence, or the aditional arguments (as moment power, etc.) is of the improper data type or proper typed improper value. The exception provides the traceback information (if caught and processed) as well as the description of what is wrong.
 
-**Test steps:** Check / review the source code. Demonstrate the fault situations in action (part of unit-tests).
+**Test steps:** Check / review the source code. Demonstrate the fault situations in action (part of unit-tests). Findings: user-defined exceptions (see library *introspection_lib*) are used to communicate the improper input, and sufficient information is provided. See the respective module's test reports: [TE001](./TE001_base_functions.md), [TE002](./TE002_ordered_functions.md), [TE003](./TE003_data_classes.md), [TE004](./TE004_distribution_classes.md) and [TE007](./TE007_stat_tests.md).
 
-**Test result:** PASS / FAIL
+**Test result:** PASS
 
 ---
 
@@ -133,9 +133,9 @@ The returned values are of the native Python data types - **int**, **float**, **
 
 **Expected result:** The library can be used with a basic but sufficient proficiency in Python programming language and statistics.
 
-**Test steps:** Demonstrate the use of the different functions / class methods provided by the library in the separate scripts / programms following the examples provided in the reference documentation and unit-test modules.
+**Test steps:** Demonstrate the use of the different functions / class methods provided by the library in the separate scripts / programms following the examples provided in the reference documentation and unit-test modules. See demonstration tests [DT003](../../Tests/DT003_data_classes.py), [DT004](../../Tests/DT004_distribution_classes.py) and [DT007](../../Tests/DT007_stat_tests.py).
 
-**Test result:** PASS / FAIL
+**Test result:** PASS
 
 ---
 
@@ -175,13 +175,13 @@ For traceability the relation between tests and requirements is summarized in th
 
 | **Requirement ID** | **Covered in test(s)** | **Verified \[YES/NO\]**) |
 | :----------------- | :--------------------- | :----------------------- |
-| REQ-FUN-000        | TEST-A-000             | NO                       |
-| REQ-FUN-001        | TEST-A-000             | NO                       |
-| REQ-SIO-000        | TEST-A-001             | NO                       |
-| REQ-SIO-001        | TEST-A-001             | NO                       |
-| REQ-INT-000        | TEST-I-000             | NO                       |
-| REQ-AWM-000        | TEST-D-000             | NO                       |
-| REQ-USE-000        | TEST-D-001             | NO                       |
+| REQ-FUN-000        | TEST-A-000             | YES                      |
+| REQ-FUN-001        | TEST-A-000             | YES                      |
+| REQ-SIO-000        | TEST-A-001             | YES                      |
+| REQ-SIO-001        | TEST-A-001             | YES                      |
+| REQ-INT-000        | TEST-I-000             | YES                      |
+| REQ-AWM-000        | TEST-D-000             | YES                      |
+| REQ-USE-000        | TEST-D-001             | YES                      |
 | REQ-IAR-000        | TEST-D-002             | NO                       |
 | REQ-IAR-001        | TEST-D-003             | NO                       |
 | REQ-IAR-002        | TEST-D-002             | NO                       |
