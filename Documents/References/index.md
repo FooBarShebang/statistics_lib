@@ -6,3 +6,4 @@
 * Module [distribution_classes](./UD004_distribution_classes.md)
 * Module [special_functions](./UD005_special_functions.md)
 * Module [inverse_distributions](./UD006_inverse_distributions.md)
+* Module [stat_tests](./UD007_stat_tests.md)

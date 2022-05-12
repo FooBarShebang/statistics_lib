@@ -123,7 +123,7 @@ int >= 0, int >= 0 -> int > 0
 
 *Args*:
 
-** *n*: **int** >= 0; the total number of objects available
+* *n*: **int** >= 0; the total number of objects available
 * *k*: **int** >= 0; the number of objects taken
 
 *Raises*:
