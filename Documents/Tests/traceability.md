@@ -22,10 +22,10 @@
 | REQ-INT-000        | TEST-I-000             | YES                      |
 | REQ-AWM-000        | TEST-D-000             | YES                      |
 | REQ-USE-000        | TEST-D-001             | YES                      |
-| REQ-IAR-000        | TEST-D-002             | NO                       |
+| REQ-IAR-000        | TEST-D-002             | YES                      |
 | REQ-IAR-001        | TEST-D-003             | NO                       |
-| REQ-IAR-002        | TEST-D-002             | NO                       |
-| REQ-UDR-000        | TEST-I-001             | NO                       |
+| REQ-IAR-002        | TEST-D-002             | YES                      |
+| REQ-UDR-000        | TEST-I-001             | YES                      |
 | REQ-FUN-100        | TEST-A-100             | YES                      |
 | REQ-FUN-101        | TEST-T-100             | YES                      |
 | REQ-AWM-100        | TEST-T-101             | YES                      |

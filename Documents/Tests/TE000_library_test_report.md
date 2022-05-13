@@ -59,9 +59,9 @@ The verification method for a requirement is given by a single letter according 
 
 **Expected result:** The requirements and design documentation, test reports and the user / programmer reference documentation is present. Reference documents provide 'use manuals' sufficient to work with the libary, and the implementation is also documented sufficiently (API reference) to ensure the maintenance and future modification of the library, providing the sufficient proficiency of the user with Python programming language.
 
-**Test steps:** Check / review the documentation provided with the library.
+**Test steps:** Check / review the documentation provided with the library. Findings: the library is thoroughly and comprehensively documented.
 
-**Test result:** PASS / FAIL
+**Test result:** PASS
 
 ## Tests definition (Analysis)
 
@@ -149,9 +149,9 @@ The returned values are of the native Python data types - **int**, **float**, **
 
 **Expected result:** The dependencies check script (module) is present and it detects the missing dependencies, too old versions as well as improper or too old Python interpreter version. If this script does not detect problems, the library should operate as designed.
 
-**Test steps:** Install the library on different PCs using different OS. Run the check module [check_dependencies.py](../../check_dependencies.py). If missing dependencies or improper Python version is detected take the corrective actions. When the dependencies check has passed - try to work with the library, e.g. retrieve some data from the DPG. See also [tested_OS](./tested_OS.md).
+**Test steps:** Install the library on different PCs using different OS. Run the check module [check_dependencies.py](../../check_dependencies.py). If missing dependencies or improper Python version is detected take the corrective actions. When the dependencies check has passed - try to work with the library, e.g. retrieve some data from the DPG. See also [tested_OS](./tested_OS.md). Findings: the wheel / egg distribution package installation via *pip* tool picks up the dependencies from the respective repository for the requested Python version, and reports the problem, when it is unable to find a dependecy (missing). The script *check_dependencies.py* included into the library successfully detects missing dependencies and checks the used Python interpreter version.
 
-**Test result:** PASS / FAIL
+**Test result:** PASS
 
 ---
 
@@ -182,10 +182,10 @@ For traceability the relation between tests and requirements is summarized in th
 | REQ-INT-000        | TEST-I-000             | YES                      |
 | REQ-AWM-000        | TEST-D-000             | YES                      |
 | REQ-USE-000        | TEST-D-001             | YES                      |
-| REQ-IAR-000        | TEST-D-002             | NO                       |
+| REQ-IAR-000        | TEST-D-002             | YES                      |
 | REQ-IAR-001        | TEST-D-003             | NO                       |
-| REQ-IAR-002        | TEST-D-002             | NO                       |
-| REQ-UDR-000        | TEST-I-001             | NO                       |
+| REQ-IAR-002        | TEST-D-002             | YES                      |
+| REQ-UDR-000        | TEST-I-001             | YES                      |
 
 | **Software ready for production \[YES/NO\]** | **Rationale**                 |
 | :------------------------------------------: | :---------------------------- |
