@@ -1,5 +1,9 @@
 # Release log of library statistics_lib
 
+## 2022-05-16 v1.0.0-rc1
+
+The first release.
+
 ## 2022-05-12 v0.8.0-dev1
 
 Implemented and tested module *stat_tests*, which provided functions for the statistical hypothesis significance testing, including z-test, one sample and two samples (paired and unpaired) Student's t-tests, Welch t-test, F-test on samples variances, chi-squared test on the sample's variance, as well as ANOVA F-test, Levene's and Brown-Forsythe tests.
