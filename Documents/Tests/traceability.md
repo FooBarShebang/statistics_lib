@@ -23,7 +23,7 @@
 | REQ-AWM-000        | TEST-D-000             | YES                      |
 | REQ-USE-000        | TEST-D-001             | YES                      |
 | REQ-IAR-000        | TEST-D-002             | YES                      |
-| REQ-IAR-001        | TEST-D-003             | NO                       |
+| REQ-IAR-001        | TEST-D-003             | YES                      |
 | REQ-IAR-002        | TEST-D-002             | YES                      |
 | REQ-UDR-000        | TEST-I-001             | YES                      |
 | REQ-FUN-100        | TEST-A-100             | YES                      |
@@ -114,4 +114,4 @@
 
 | **Software ready for production \[YES/NO\]** | **Rationale**                 |
 | :------------------------------------------: | :---------------------------- |
-| NO                                           | Under development             |
+| YES                                          | All tests are passed          |
