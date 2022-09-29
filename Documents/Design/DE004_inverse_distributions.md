@@ -87,7 +87,7 @@ The inverse chi-squared distribution is a special case of the inverse Gamma dist
 
 ## Scaled inverse chi-squared distribution
 
-The inverse Gamma distribution has two parameters:
+The scaled inverse chi-squared distribution has two parameters:
 
 * Degree of freedoms $\nu > 0$
 * Scale $\tau^2 > 0$
@@ -133,7 +133,7 @@ The Cauchy distribution, also known as Lorenz distribution or Cauchy-Lorenz dist
 
 ## Levy distribution
 
-The inverse Gamma distribution has two parameters:
+The Levy distribution has two parameters:
 
 * Location $\mu \in \mathbb{R}$, and
 * Scale $\sigma > 0$

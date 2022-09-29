@@ -272,7 +272,7 @@ The statistical test hypothesis are the same.
 
 ## Brown-Forsythe test
 
-In the Brwon-Forsythe test a different transformation is used:
+In the Brown-Forsythe test a different transformation is used:
 
 $$
 X_1 \rightarrow Y_1 \; : \; y_{1,i} = |x_{1, i} - \tilde{x}_1| \newline
