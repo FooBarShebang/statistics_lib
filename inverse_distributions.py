@@ -33,7 +33,7 @@ import sys
 import os
 import math
 
-from typing import ClassVar, Tuple, Union
+from typing import ClassVar, Union
 
 #+ custom modules
 

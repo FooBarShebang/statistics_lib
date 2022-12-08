@@ -2,7 +2,7 @@
 
 ## Scope
 
-This document describes the intended usage, design and implementation of the functionality implemented in the module **distribution_classes** of the library **statistics_lib**. The API reference is also provided.
+This document describes the intended usage, design and implementation of the functionality implemented in the module **special_functions** of the library **statistics_lib**. The API reference is also provided.
 
 The concerted functional elements are functions:
 
@@ -90,6 +90,8 @@ The *incomplete beta functions* are implemented via computation of the continued
 The actual computation of the power series and continued fractions as well as the evaluation of the ration functions and polynomial is delegated to the '*private*' helper functions, which are outside the scope of this document. Thus, the '*public*' functions described in this document are more like *process flow manager*, ensuring the application of the input data sanity checks and selection of the appropriate calculation algorithm based on the values of the passed arguments.
 
 In addition, two combinatorics functions are defined in the module: *permutation*() and *combination*(). In the case of the Python interpreter version 3.8 or newer they simply wrap the calls to the Standard Python Library functions *math.perm*() and *math.comb*() respectively. For the earlier versions of the Python interpreter they implement calculation of the respective factorials ratios using iterative multiplication, taking advantage of Python's support for the arbitrary length integers.
+
+**Note** that this module implements only aliases / references to the actual functions, which are implemented in the library **math\_extra\_lib**.
 
 ## API Reference
 

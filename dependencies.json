@@ -13,6 +13,11 @@
                 "major" : 0,
                 "minor" : 1,
                 "path": "https://github.com/FooBarShebang/phyqus_lib"
+        },
+        "math_extra_lib" : {
+                "major" : 0,
+                "minor" : 1,
+                "path" : "https://github.com/FooBarShebang/math_extra_lib"
         }
     }
 }

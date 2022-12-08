@@ -8,3 +8,4 @@ This library  requires the Python 3, specifically version >= 3.6.
 
 * [introspection_lib](https://github.com/FooBarShebang/introspection_lib)
 * [phyqus_lib](https://github.com/FooBarShebang/phyqus_lib)
+* [math_extra_lib](https://github.com/FooBarShebang/math_extra_lib)

@@ -1,4 +1,4 @@
-# Requirements for the Module statistics_lib.distribution_classes
+# Requirements for the Module statistics_lib.special_functions
 
 ## Conventions
 
