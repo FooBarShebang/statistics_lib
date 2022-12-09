@@ -7,8 +7,8 @@ report TE001_base_functions.md
 """
 
 
-__version__= '1.0.0.0'
-__date__ = '10-02-2022'
+__version__= '1.1.0.0'
+__date__ = '09-12-2022'
 __status__ = 'Testing'
 
 #imports
@@ -119,7 +119,7 @@ def CheckCovariance(DataX, DataY):
     Calculates the covariance of two sequences
     """
     if sys.version_info[0] >= 3 and sys.version_info[1] >= 10:
-        Result = statistics.correlation(DataX, DataY)
+        Result = statistics.covariance(DataX, DataY)
     else:
         MeanX = statistics.mean(DataX)
         MeanY = statistics.mean(DataY)
@@ -927,32 +927,43 @@ class Test_GetCovariance(Test_Basis):
         Implements test TEST-T-100.
         Covers the requirement REQ-FUN-101.
         """
+        i = 0
         for TestInputX, BaseInputX in ((self.AllInt, self.AllInt),
                                         (self.AllFloat, self.AllFloat),
                                         (self.Mixed, self.Mixed),
                                         (self.IntErr, self.AllInt),
                                         (self.FloatErr, self.AllFloat),
                                         (self.MixedErr, self.Mixed),
-                                        (self.TotalMixed, self.Mixed)):
+                                        (self.TotalMixed, self.Mixed)
+                                        ):
             for TestInputY, BaseInputY in ((self.AllInt, self.AllInt),
                                         (self.AllFloat, self.AllFloat),
                                         (self.Mixed, self.Mixed),
                                         (self.IntErr, self.AllInt),
                                         (self.FloatErr, self.AllFloat),
                                         (self.MixedErr, self.Mixed),
-                                        (self.TotalMixed, self.Mixed)):
+                                        (self.TotalMixed, self.Mixed)
+                                        ):
                 MinLength = min(len(BaseInputX), len(BaseInputY))
                 CheckResult = self.CheckFunction(BaseInputX[:MinLength],
                                                         BaseInputY[:MinLength])
                 TestResult = self.TestFunction(TestInputX[:MinLength],
                                                         TestInputY[:MinLength])
                 self.assertIsInstance(TestResult, (int, float))
-                self.assertAlmostEqual(TestResult, CheckResult,
+                if abs(CheckResult) > 10:
+                    self.assertAlmostEqual(TestResult, CheckResult,
+                                                delta= 0.1 * abs(CheckResult))
+                else:
+                    self.assertAlmostEqual(TestResult, CheckResult,
                                                 places= FLOAT_CHECK_PRECISION)
                 TestResult = self.TestFunction(tuple(TestInputX[:MinLength]),
                                                 tuple(TestInputY[:MinLength]))
                 self.assertIsInstance(TestResult, (int, float))
-                self.assertAlmostEqual(TestResult, CheckResult,
+                if abs(CheckResult) > 10:
+                    self.assertAlmostEqual(TestResult, CheckResult,
+                                                delta= 0.1 * abs(CheckResult))
+                else:
+                    self.assertAlmostEqual(TestResult, CheckResult,
                                                 places= FLOAT_CHECK_PRECISION)
     
     def test_EdgeCase(self) -> None:

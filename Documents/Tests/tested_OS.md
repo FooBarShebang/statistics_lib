@@ -3,6 +3,7 @@
 * GNU / Linux
   * Linux Mint 20.3 (MATE 64-bit, kernel 5.4.0) + Python 3.8.10 (64-bit)
   * Linux Mint 19.3 (MATE 64-bit, kernel 4.15.0) + Python 3.6.9 (64-bit)
+  * Mint 21.0 (MATE, 64 bit, kernel v5.15.0), Python v.3.10.6
 * MS Windows
   * Windows 11 Home 21H2 + Python 3.9.5
   * Windows 8 Pro + Python 3.9.0
