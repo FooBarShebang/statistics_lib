@@ -6,7 +6,7 @@
     "DO" : {
         "introspection_lib" : {
             "major" : 0,
-            "minor" : 4,
+            "minor" : 5,
             "path": "https://github.com/FooBarShebang/introspection_lib"
         },
         "phyqus_lib" : {
@@ -15,8 +15,8 @@
                 "path": "https://github.com/FooBarShebang/phyqus_lib"
         },
         "math_extra_lib" : {
-                "major" : 0,
-                "minor" : 1,
+                "major" : 1,
+                "minor" : 0,
                 "path" : "https://github.com/FooBarShebang/math_extra_lib"
         }
     }
