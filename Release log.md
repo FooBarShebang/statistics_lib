@@ -1,8 +1,9 @@
 # Release log of library statistics_lib
 
-## 2022-12-08 v1.1.0-rc1
+## 2023-05-01 v1.1.0-rc1
 
-Moved implementation of the special functions into a different library *math\_extra\_lib*. Module *special\_functions* now simply aliases them.
+* Moved implementation of the special functions into a different library *math\_extra\_lib*. Module *special\_functions* now simply aliases them.
+* Cleaned-up code
 
 ## 2022-05-16 v1.0.0-rc1
 

@@ -44,8 +44,8 @@ Constants:
     NEQ_TEST: enum(TestType) - indication for 2-sided test
 """
 
-__version__= '1.0.0.0'
-__date__ = '12-05-2022'
+__version__= '1.1.0.0'
+__date__ = '01-05-2023'
 __status__ = 'Production'
 
 #imports
@@ -56,11 +56,11 @@ import sys
 import os
 import math
 
-from typing import Tuple, Union
+from typing import Tuple, Union, Any
 
 from enum import Enum
 
-from statistics_lib.base_functions import TReal
+from .base_functions import TReal
 
 #+ custom modules
 
@@ -75,11 +75,17 @@ if not (ROOT_FOLDER in sys.path):
 
 from introspection_lib.base_exceptions import UT_TypeError, UT_ValueError
 
-from statistics_lib.data_classes import Statistics1D as DC
+from .data_classes import Statistics1D as DC
 
 import statistics_lib.distribution_classes as MC
 
 #globals
+
+DEF_CONF = 0.95
+
+MIN_CDF = 0.0000001
+
+MAX_CDF = 1 - MIN_CDF
 
 #+ data types
 
@@ -133,7 +139,7 @@ class TestResult:
         p_Value: (read-only) 0 <= float <= 1
         Report: (read-only) str
     
-    Version 1.0.0.0
+    Version 1.0.1.0
     """
     
     #special methods
@@ -167,7 +173,7 @@ class TestResult:
             UT_ValueError: CDF_Value is not in the range (0, 1), OR the upper
                 critical value is not greater than or equal to the lower one
         
-        Version 1.0.0.0
+        Version 1.0.1.0
         """
         if not isinstance(TestName, str):
             raise UT_TypeError(TestName, str, SkipFrames = 1)
@@ -181,24 +187,24 @@ class TestResult:
             raise UT_TypeError(CDF_Value, float, SkipFrames = 1)
         if not isinstance(CritValues, tuple):
             raise UT_TypeError(CritValues, tuple, SkipFrames = 1)
-        strError= '{} is not 2-tuple of real numbers or None'.format(CritValues)
-        bCond1 = len(CritValues) != 2
-        bCond2 = (CritValues[0] is None) and (CritValues[1] is None)
-        bCond3 = False
+        Message = f'{CritValues} is not 2-tuple of real numbers or None'
+        Cond1 = len(CritValues) != 2
+        Cond2 = (CritValues[0] is None) and (CritValues[1] is None)
+        Cond3 = False
         for Item in CritValues:
             if (not isinstance(Item, (int, float))) and (not (Item is None)):
-                bCond3 = True
+                Cond3 = True
                 break
-        if bCond1 or bCond2 or bCond3:
-            objError = UT_TypeError(CritValues, tuple, SkipFrames = 1)
-            objError.args = (strError, )
-            raise objError
+        if Cond1 or Cond2 or Cond3:
+            Error = UT_TypeError(CritValues, tuple, SkipFrames = 1)
+            Error.setMessage(Message)
+            raise Error
         if CDF_Value >= 1.0 or CDF_Value <= 0.0:
             raise UT_ValueError(CDF_Value, 'in the range (0, 1)', SkipFrames= 1)
-        bCond = (not (CritValues[0] is None)) and (not (CritValues[1] is None))
-        if bCond and CritValues[1] < CritValues[0]:
-            strError = 'second item must be greater then or equal to the first'
-            raise UT_ValueError(CritValues, strError, SkipFrames = 1)
+        Cond = (not (CritValues[0] is None)) and (not (CritValues[1] is None))
+        if Cond and CritValues[1] < CritValues[0]:
+            Message = 'second item must be greater then or equal to the first'
+            raise UT_ValueError(CritValues, Message, SkipFrames = 1)
         self._Data = dict()
         self._Data['TestName'] = TestName
         self._Data['DataName'] = DataName
@@ -274,9 +280,10 @@ class TestResult:
         Signature:
             None -> str
         
-        Version 1.0.0.0
+        Version 1.0.1.0
         """
-        CritValues = self._Data['CritValues']
+        _Data = self._Data
+        CritValues = _Data['CritValues']
         if CritValues[1] is None: #1-sided left-tailed
             TestType = '1-sided left-tailed'
             CritValueLine = 'Critical value: {}'.format(CritValues[0])
@@ -300,23 +307,266 @@ class TestResult:
             IsRejected = 'Yes'
         else:
             IsRejected = 'No'
+        
         Result = '\n'.join(['Statistical test report.',
-                    'Name: {}'.format(self._Data['TestName']),
-                    'Data: {}'.format(self._Data['DataName']),
-                    'Type: {}'.format(TestType),
-                    'Model distribution: {}'.format(self._Data['ModelName']),
-                    'Null hypothesis: {}'.format(H0),
-                    'Alternative hypothesis: {}'.format(H1),
-                    CritValueLine,
-                    'Test value: {}'.format(self._Data['TestValue']),
-                    'p-value: {}'.format(self.p_Value),
-                    'Is null hypothesis rejected?: {}'.format(IsRejected)])
+                            f'Name: {_Data["TestName"]}',
+                            f'Data: {_Data["DataName"]}',
+                            f'Type: {TestType}',
+                            f'Model distribution: {_Data["ModelName"]}',
+                            f'Null hypothesis: {H0}',
+                            f'Alternative hypothesis: {H1}',
+                            CritValueLine,
+                            f'Test value: {_Data["TestValue"]}',
+                            f'p-value: {self.p_Value}',
+                            f'Is null hypothesis rejected?: {IsRejected}'])
         return Result
 
 #functions
 
+#+ 'private' check functions
+
+def _CheckData1D(Data: Any) -> None:
+    """
+    Helper function to check that the passed argument is an instance of class
+    statistics_lib.data_classes.Statistics1D, and it contains more than a single
+    data point.
+    
+    Signature:
+        type A -> None
+    
+    Raises:
+        UT_TypeError: the passed argument is not an instance of Statistics1D
+        UT_ValueError: it contains less than 2 data points
+    
+    Version 1.0.0.0
+    """
+    if not isinstance(Data, DC):
+        raise UT_TypeError(Data, DC, SkipFrames = 2)
+    if Data.N < 2:
+        raise UT_ValueError(Data.N, '> 1 - data length', SkipFrames = 2)
+
+def _CheckData2D(Data1: Any, Data2: Any) -> None:
+    """
+    Helper function to check that the passed arguments are the instances of
+    statistics_lib.data_classes.Statistics1D class, and they contain more than a
+    single data point each.
+    
+    Signature:
+        type A, type B -> None
+    
+    Raises:
+        UT_TypeError: any of the passed arguments is not an instance of
+            Statistics1D class
+        UT_ValueError: any of the passed arguments contains less than 2 data
+            points
+    
+    Version 1.0.0.0
+    """
+    if not isinstance(Data1, DC):
+        raise UT_TypeError(Data1, DC, SkipFrames = 2)
+    if not isinstance(Data2, DC):
+        raise UT_TypeError(Data2, DC, SkipFrames = 2)
+    if Data1.N < 2:
+        raise UT_ValueError(Data1.N, '> 1 - data length, first sample',
+                                                                SkipFrames = 2)
+    if Data2.N < 2:
+        raise UT_ValueError(Data2.N, '> 1 - data length, second sample',
+                                                                SkipFrames = 2)
+
+def _CheckTestParameters(Type: Any, Confidence: Any) -> None:
+    """
+    Helper function to check the statistics test definition parameters.
+    
+    Signature:
+        type A, type B -> None
+        
+    Raises:
+        UT_TypeError: test type is not an instance of TestType enumeration, OR
+            confidence value is not a floating point number
+        UT_ValueError: confidence value in not in the open range (0, 1)
+    
+    Version 1.0.0.0
+    """
+    if not isinstance(Type, TestTypes):
+        raise UT_TypeError(Type, TestTypes, SkipFrames = 2)
+    if not isinstance(Confidence, float):
+        raise UT_TypeError(Confidence, float, SkipFrames = 2)
+    if Confidence <= 0 or Confidence >= 1:
+        raise UT_ValueError(Confidence, 'in range (0, 1) - confidence',
+                                                                SkipFrames = 2)
+
+#+ 'private' work base function
+
+def _GetCDF(Model: MC.ContinuousDistributionABC, TestValue: TReal) -> TReal:
+    """
+    Helper funtion to calculate the cummulative distribution function value at
+    the given test value. The values are capped to [0.0000001, 1 - 0.0000001]
+    closed interval.
+    
+    Signature:
+        statistics_lib.distribution_classes.ContinuousDistributionABC,
+            int OR float -> int OR float 
+    
+    Args:
+        Model: ContinuousDistributionABC; instance of any sub-class off, the
+            model data distribution
+        TestValue: int OR float; the test value
+    
+    Returns:
+        int OR float: the calculated CDF value
+    
+    Version 1.0.0.0
+    """
+    CDF_Value = Model.cdf(TestValue)
+    if CDF_Value <= 0.0:
+        CDF_Value = MIN_CDF
+    elif CDF_Value >= 1.0:
+        CDF_Value = MAX_CDF
+    return CDF_Value
+
+def _GetBoundariesSym(Model: MC.ContinuousDistributionABC, Type: TestTypes,
+                                            Confidence: float) -> T_CRIT_BOUNDS:
+    """
+    Helper function to calculate the critical value bounds of the test in the
+    case of the symmetric model distribution.
+    
+    Signature:
+        statistics_lib.distribution_classes.ContinuousDistributionABC,
+            TestTypes, float -> tuple(None OR int OR float)
+    
+    Args:
+        Model: ContinuousDistributionABC; instance of any sub-class off, the
+            model data distribution
+        Type: TestType; instance of the enum class representing left-, right-
+            or two-tailed test
+        Confidence: float; value of the test confidence
+    
+    Returns:
+        (int OR float, None): for the left-tailed test
+        (None, int OR float): for the right-tailed test
+        (int OR float, int OR float): for the two-tailed test
+    
+    Version 1.0.0.0
+    """
+    if Type is TestTypes.LEFT:
+        CritValue = Model.qf(1-Confidence)
+        CriticalValues = (CritValue, None)
+    elif Type is TestTypes.RIGHT:
+        CritValue = Model.qf(Confidence)
+        CriticalValues = (None, CritValue)
+    else:
+        CritValue = Model.qf(0.5 * (1 + Confidence))
+        CriticalValues = (-CritValue, CritValue)
+    return CriticalValues
+
+def _GetBoundariesAsym(Model: MC.ContinuousDistributionABC, Type: TestTypes,
+                                            Confidence: float) -> T_CRIT_BOUNDS:
+    """
+    Helper function to calculate the critical value bounds of the test in the
+    case of the asymmetric model distribution.
+    
+    Signature:
+        statistics_lib.distribution_classes.ContinuousDistributionABC,
+            TestTypes, float -> tuple(None OR int OR float)
+    
+    Args:
+        Model: ContinuousDistributionABC; instance of any sub-class off, the
+            model data distribution
+        Type: TestType; instance of the enum class representing left-, right-
+            or two-tailed test
+        Confidence: float; value of the test confidence
+    
+    Returns:
+        (int OR float, None): for the left-tailed test
+        (None, int OR float): for the right-tailed test
+        (int OR float, int OR float): for the two-tailed test
+    
+    Version 1.0.0.0
+    """
+    if Type is TestTypes.LEFT:
+        CritValue = Model.qf(1-Confidence)
+        CriticalValues = (CritValue, None)
+    elif Type is TestTypes.RIGHT:
+        CritValue = Model.qf(Confidence)
+        CriticalValues = (None, CritValue)
+    else:
+        CritValueUpper = Model.qf(0.5 * (1 + Confidence))
+        CritValueLower = Model.qf(0.5 * (1 - Confidence))
+        CriticalValues = (CritValueLower, CritValueUpper)
+    return CriticalValues
+
+def _DoTest1D(Model: MC.ContinuousDistributionABC, Data: DC, TestValue: TReal,
+            Confidence: float, Type: TestTypes, TestName: str) -> TestResult:
+    """
+    Helper function to create the report for 1-sample test.
+    
+    Signature:
+        statistics_lib.distribution_classes.ContinuousDistributionABC,
+            Statistics1D, Statistics1D, int OR float, float, TestTypes,
+                str -> TestResult
+    
+    Args:
+        Model: ContinuousDistributionABC; instance of any sub-class off, the
+            model data distribution
+        Data: Statistics1D; instance of, the test data
+        TestValue: int OR float; the calculated test value
+        Confidence: float; value of the test confidence
+        Type: TestType; instance of the enum class representing left-, right-
+            or two-tailed test
+        TestName: str; human-readable test name / information
+    
+    Returns:
+        TestResult: instance of the class, containg the full test report
+    
+    Version 1.0.0.0
+    """
+    CDF_Value = _GetCDF(Model, TestValue)
+    CriticalValues = _GetBoundariesSym(Model, Type, Confidence)
+    DataName = str(Data.Name)
+    ModelName = Model.Name
+    Result = TestResult(TestName, DataName, ModelName, TestValue, CDF_Value,
+                                                                CriticalValues)
+    return Result
+
+def _DoTest2D(Model: MC.ContinuousDistributionABC, Data1: DC, Data2: DC,
+                    TestValue: TReal, Confidence: float,
+                                Type: TestTypes, TestName: str) -> TestResult:
+    """
+    Helper function to create the report for 2-samples test.
+    
+    Signature:
+        statistics_lib.distribution_classes.ContinuousDistributionABC,
+            Statistics1D, Statistics1D, int OR float, float, TestTypes,
+                str -> TestResult
+    
+    Args:
+        Model: ContinuousDistributionABC; instance of any sub-class off, the
+            model data distribution
+        Data1: Statistics1D; instance of, the first test data
+        Data2: Statistics1D; instance of, the second test data
+        TestValue: int OR float; the calculated test value
+        Confidence: float; value of the test confidence
+        Type: TestType; instance of the enum class representing left-, right-
+            or two-tailed test
+        TestName: str; human-readable test name / information
+    
+    Returns:
+        TestResult: instance of the class, containg the full test report
+    
+    Version 1.0.0.0
+    """
+    CDF_Value = _GetCDF(Model, TestValue)
+    CriticalValues = _GetBoundariesSym(Model, Type, Confidence)
+    DataName = '{} vs {}'.format(Data1.Name, Data2.Name)
+    ModelName = Model.Name
+    Result = TestResult(TestName, DataName, ModelName, TestValue, CDF_Value,
+                                                                CriticalValues)
+    return Result
+
+#+ work functions
+
 def z_test(Data: DC, Mean: T_REAL, Sigma: T_REAL, Type: TestTypes, *,
-                                        Confidence: float = 0.95) -> TestResult:
+                                    Confidence: float = DEF_CONF) -> TestResult:
     """
     Implementation of the Z-test, comparing the sample's mean with the known
     population mean. The actual population standard deviation must be known.
@@ -348,53 +598,27 @@ def z_test(Data: DC, Mean: T_REAL, Sigma: T_REAL, Type: TestTypes, *,
             argument is not in the range (0, 1), OR data sequence is less than
             2 elements long
     
-    Version 1.0.0.0
+    Version 2.0.0.0
     """
-    if not isinstance(Data, DC):
-        raise UT_TypeError(Data, DC, SkipFrames = 1)
+    _CheckData1D(Data)
+    _CheckTestParameters(Type, Confidence)
     if not isinstance(Mean, (int, float)):
         raise UT_TypeError(Mean, (int, float), SkipFrames = 1)
     if not isinstance(Sigma, (int, float)):
         raise UT_TypeError(Sigma, (int, float), SkipFrames = 1)
-    if not isinstance(Type, TestTypes):
-        raise UT_TypeError(Type, TestTypes, SkipFrames = 1)
-    if not isinstance(Confidence, float):
-        raise UT_TypeError(Confidence, float, SkipFrames = 1)
     if Sigma <= 0:
         raise UT_ValueError(Sigma, '> 0 - population sigma', SkipFrames = 1)
-    if Confidence <= 0 or Confidence >= 1:
-        raise UT_ValueError(Confidence, 'in range (0, 1) - confidence',
-                                                                SkipFrames=1)
-    if Data.N < 2:
-        raise UT_ValueError(Data.N, '> 1 - data length', SkipFrames = 1)
     TestValue = math.sqrt(Data.N) * (Data.Mean - Mean) / Sigma
     Model = MC.Z_Distribution()
-    CDF_Value = Model.cdf(TestValue)
-    if CDF_Value <= 0.0:
-        CDF_Value = 0.0000001
-    elif CDF_Value >= 1.0:
-        CDF_Value = 0.9999999
-    if Type is TestTypes.LEFT:
-        CritValue = Model.qf(1-Confidence)
-        CriticalValues = (CritValue, None)
-    elif Type is TestTypes.RIGHT:
-        CritValue = Model.qf(Confidence)
-        CriticalValues = (None, CritValue)
-    else:
-        CritValue = Model.qf(0.5 * (1 + Confidence))
-        CriticalValues = (-CritValue, CritValue)
     TestName = ' '.join(['Z-test at {:.1f}%'.format(100 * Confidence),
-                        'confidence on the sample`s mean vs population',
-                        'mean = {} and sigma = {}'.format(Mean, Sigma)])
-    DataName = str(Data.Name)
-    ModelName = Model.Name
-    Result = TestResult(TestName, DataName, ModelName, TestValue, CDF_Value,
-                                                                CriticalValues)
+                            'confidence on the sample`s mean vs population',
+                                        f'mean = {Mean} and sigma = {Sigma}'])
+    Result = _DoTest1D(Model, Data, TestValue, Confidence, Type, TestName)
     del Model
     return Result
 
 def t_test(Data: DC, Mean: T_REAL, Type: TestTypes, *,
-                                        Confidence: float = 0.95) -> TestResult:
+                                    Confidence: float = DEF_CONF) -> TestResult:
     """
     Implementation of the one sample Student`s t-test, comparing the sample's
     mean with the known population mean. The actual population standard
@@ -423,45 +647,19 @@ def t_test(Data: DC, Mean: T_REAL, Type: TestTypes, *,
         UT_ValueError: Confidence argument is not in the range (0, 1), OR the
             data sequence is less than 2 elements long
     
-    Version 1.0.0.0
+    Version 2.0.0.0
     """
-    if not isinstance(Data, DC):
-        raise UT_TypeError(Data, DC, SkipFrames = 1)
+    _CheckData1D(Data)
+    _CheckTestParameters(Type, Confidence)
     if not isinstance(Mean, (int, float)):
         raise UT_TypeError(Mean, (int, float), SkipFrames = 1)
-    if not isinstance(Type, TestTypes):
-        raise UT_TypeError(Type, TestTypes, SkipFrames = 1)
-    if not isinstance(Confidence, float):
-        raise UT_TypeError(Confidence, float, SkipFrames = 1)
-    if Confidence <= 0 or Confidence >= 1:
-        raise UT_ValueError(Confidence, 'in range (0, 1) - confidence',
-                                                                SkipFrames=1)
-    if Data.N < 2:
-        raise UT_ValueError(Data.N, '> 1 - data length', SkipFrames = 1)
     TestValue = math.sqrt(Data.N - 1) * (Data.Mean - Mean) / Data.FullSigma
     Model = MC.Student(Degree = Data.N - 1)
-    CDF_Value = Model.cdf(TestValue)
-    if CDF_Value <= 0.0:
-        CDF_Value = 0.0000001
-    elif CDF_Value >= 1.0:
-        CDF_Value = 0.9999999
-    if Type is TestTypes.LEFT:
-        CritValue = Model.qf(1-Confidence)
-        CriticalValues = (CritValue, None)
-    elif Type is TestTypes.RIGHT:
-        CritValue = Model.qf(Confidence)
-        CriticalValues = (None, CritValue)
-    else:
-        CritValue = Model.qf(0.5 * (1 + Confidence))
-        CriticalValues = (-CritValue, CritValue)
     TestName = ' '.join(['One sample Student`s t-test at {:.1f}%'.format(
                                                             100 * Confidence),
                             'confidence on the sample`s mean vs population',
-                            'mean = {}'.format(Mean)])
-    DataName = str(Data.Name)
-    ModelName = Model.Name
-    Result = TestResult(TestName, DataName, ModelName, TestValue, CDF_Value,
-                                                                CriticalValues)
+                                                            f'mean = {Mean}'])
+    Result = _DoTest1D(Model, Data, TestValue, Confidence, Type, TestName)
     del Model
     return Result
     
@@ -496,44 +694,22 @@ def chi_squared_test(Data: DC, Sigma: T_REAL, Type: TestTypes, *,
             data sequence is less than 2 elements long, OR the Sigma argument
             is not positive
     
-    Version 1.0.0.0
+    Version 2.0.0.0
     """
-    if not isinstance(Data, DC):
-        raise UT_TypeError(Data, DC, SkipFrames = 1)
+    _CheckData1D(Data)
+    _CheckTestParameters(Type, Confidence)
     if not isinstance(Sigma, (int, float)):
         raise UT_TypeError(Sigma, (int, float), SkipFrames = 1)
-    if not isinstance(Type, TestTypes):
-        raise UT_TypeError(Type, TestTypes, SkipFrames = 1)
-    if not isinstance(Confidence, float):
-        raise UT_TypeError(Confidence, float, SkipFrames = 1)
     if Sigma <= 0:
         raise UT_ValueError(Sigma, '> 0 - population sigma', SkipFrames = 1)
-    if Confidence <= 0 or Confidence >= 1:
-        raise UT_ValueError(Confidence, 'in range (0, 1) - confidence',
-                                                                SkipFrames=1)
-    if Data.N < 2:
-        raise UT_ValueError(Data.N, '> 1 - data length', SkipFrames = 1)
     TestValue = Data.N * Data.FullVar / (Sigma * Sigma)
     Model = MC.ChiSquared(Degree = Data.N - 1)
-    CDF_Value = Model.cdf(TestValue)
-    if CDF_Value <= 0.0:
-        CDF_Value = 0.0000001
-    elif CDF_Value >= 1.0:
-        CDF_Value = 0.9999999
-    if Type is TestTypes.LEFT:
-        CritValue = Model.qf(1-Confidence)
-        CriticalValues = (CritValue, None)
-    elif Type is TestTypes.RIGHT:
-        CritValue = Model.qf(Confidence)
-        CriticalValues = (None, CritValue)
-    else:
-        CritValueUpper = Model.qf(0.5 * (1 + Confidence))
-        CritValueLower = Model.qf(0.5 * (1 - Confidence))
-        CriticalValues = (CritValueLower, CritValueUpper)
+    CDF_Value = _GetCDF(Model, TestValue)
+    CriticalValues = _GetBoundariesAsym(Model, Type, Confidence)
     TestName = ' '.join(['Chi-squared test at {:.1f}% confidence'.format(
                                                             100 * Confidence),
                             'on the sample`s standard deviation vs population',
-                            'sigma = {}'.format(Sigma)])
+                                                            f'sigma = {Sigma}'])
     DataName = str(Data.Name)
     ModelName = Model.Name
     Result = TestResult(TestName, DataName, ModelName, TestValue, CDF_Value,
@@ -570,25 +746,10 @@ def unpaired_t_test(Data1: DC, Data2: DC, Type: TestTypes, *,
         UT_ValueError: Confidence argument is not in the range (0, 1), OR the
             data sequence is less than 2 elements long for any of the samples
     
-    Version 1.0.0.0
+    Version 2.0.0.0
     """
-    if not isinstance(Data1, DC):
-        raise UT_TypeError(Data1, DC, SkipFrames = 1)
-    if not isinstance(Data2, DC):
-        raise UT_TypeError(Data2, DC, SkipFrames = 1)
-    if not isinstance(Type, TestTypes):
-        raise UT_TypeError(Type, TestTypes, SkipFrames = 1)
-    if not isinstance(Confidence, float):
-        raise UT_TypeError(Confidence, float, SkipFrames = 1)
-    if Confidence <= 0 or Confidence >= 1:
-        raise UT_ValueError(Confidence, 'in range (0, 1) - confidence',
-                                                                SkipFrames = 1)
-    if Data1.N < 2:
-        raise UT_ValueError(Data1.N, '> 1 - data length, first sample',
-                                                                SkipFrames = 1)
-    if Data2.N < 2:
-        raise UT_ValueError(Data2.N, '> 1 - data length, second sample',
-                                                                SkipFrames = 1)
+    _CheckData2D(Data1, Data2)
+    _CheckTestParameters(Type, Confidence)
     N1 = Data1.N
     N2 = Data2.N
     Temp = (N1 - 1) * Data1.FullVar + (N2 - 1) * Data2.FullVar
@@ -596,27 +757,10 @@ def unpaired_t_test(Data1: DC, Data2: DC, Type: TestTypes, *,
     Temp *= (N1 + N2) / (N1 * N2)
     TestValue = (Data1.Mean - Data2.Mean) / math.sqrt(Temp)
     Model = MC.Student(Degree = N1 + N2 - 2)
-    CDF_Value = Model.cdf(TestValue)
-    if CDF_Value <= 0.0:
-        CDF_Value = 0.0000001
-    elif CDF_Value >= 1.0:
-        CDF_Value = 0.9999999
-    if Type is TestTypes.LEFT:
-        CritValue = Model.qf(1-Confidence)
-        CriticalValues = (CritValue, None)
-    elif Type is TestTypes.RIGHT:
-        CritValue = Model.qf(Confidence)
-        CriticalValues = (None, CritValue)
-    else:
-        CritValue = Model.qf(0.5 * (1 + Confidence))
-        CriticalValues = (-CritValue, CritValue)
     TestName = ' '.join(['Unpaired Student`s t-test at {:.1f}%'.format(
                                                             100 * Confidence),
                             'confidence on the samples` means.'])
-    DataName = '{} vs {}'.format(Data1.Name, Data2.Name)
-    ModelName = Model.Name
-    Result = TestResult(TestName, DataName, ModelName, TestValue, CDF_Value,
-                                                                CriticalValues)
+    Result=_DoTest2D(Model, Data1, Data2, TestValue, Confidence, Type, TestName)
     del Model
     return Result
 
@@ -653,57 +797,24 @@ def paired_t_test(Data1: DC, Data2: DC, Type: TestTypes, *,
             data sequence is less than 2 elements long for any of the samples,
             OR the data samples have unequal lengths
     
-    Version 1.0.0.0
+    Version 2.0.0.0
     """
-    if not isinstance(Data1, DC):
-        raise UT_TypeError(Data1, DC, SkipFrames = 1)
-    if not isinstance(Data2, DC):
-        raise UT_TypeError(Data2, DC, SkipFrames = 1)
-    if not isinstance(Type, TestTypes):
-        raise UT_TypeError(Type, TestTypes, SkipFrames = 1)
-    if not isinstance(Confidence, float):
-        raise UT_TypeError(Confidence, float, SkipFrames = 1)
-    if not isinstance(Bias, (int, float)):
-        raise UT_TypeError(Bias, (int, float), SkipFrames = 1)
-    if Confidence <= 0 or Confidence >= 1:
-        raise UT_ValueError(Confidence, 'in range (0, 1) - confidence',
-                                                                SkipFrames = 1)
-    if Data1.N < 2:
-        raise UT_ValueError(Data1.N, '> 1 - data length, first sample',
-                                                                SkipFrames = 1)
-    if Data2.N < 2:
-        raise UT_ValueError(Data2.N, '> 1 - data length, second sample',
-                                                                SkipFrames = 1)
+    _CheckData2D(Data1, Data2)
+    _CheckTestParameters(Type, Confidence)
     if Data1.N != Data2.N:
         raise UT_ValueError(Data1.N, '= {} - samples lengths'.format(Data2.N),
                                                                 SkipFrames = 1)
     N = Data1.N
     Temp = [Data1.Values[Index] - Data2.Values[Index] for Index in range(N)]
     Data = DC(Temp)
+    del Temp
     TestValue = (Data.Mean - Bias) * math.sqrt(N - 1) / Data.FullSigma
     Model = MC.Student(Degree = N - 1)
-    CDF_Value = Model.cdf(TestValue)
-    if CDF_Value <= 0.0:
-        CDF_Value = 0.0000001
-    elif CDF_Value >= 1.0:
-        CDF_Value = 0.9999999
-    if Type is TestTypes.LEFT:
-        CritValue = Model.qf(1-Confidence)
-        CriticalValues = (CritValue, None)
-    elif Type is TestTypes.RIGHT:
-        CritValue = Model.qf(Confidence)
-        CriticalValues = (None, CritValue)
-    else:
-        CritValue = Model.qf(0.5 * (1 + Confidence))
-        CriticalValues = (-CritValue, CritValue)
     TestName = ' '.join(['Paired Student`s t-test at {:.1f}%'.format(
                                                             100 * Confidence),
                             'confidence on the samples` means with the',
-                            'expected difference = {}.'.format(Bias)])
-    DataName = '{} vs {}'.format(Data1.Name, Data2.Name)
-    ModelName = Model.Name
-    Result = TestResult(TestName, DataName, ModelName, TestValue, CDF_Value,
-                                                                CriticalValues)
+                                            f'expected difference = {Bias}.'])
+    Result=_DoTest2D(Model, Data1, Data2, TestValue, Confidence, Type, TestName)
     del Data
     del Model
     return Result
@@ -738,25 +849,10 @@ def Welch_t_test(Data1: DC, Data2: DC, Type: TestTypes, *,
         UT_ValueError: Confidence argument is not in the range (0, 1), OR the
             data sequence is less than 2 elements long for any of the samples
     
-    Version 1.0.0.0
+    Version 2.0.0.0
     """
-    if not isinstance(Data1, DC):
-        raise UT_TypeError(Data1, DC, SkipFrames = 1)
-    if not isinstance(Data2, DC):
-        raise UT_TypeError(Data2, DC, SkipFrames = 1)
-    if not isinstance(Type, TestTypes):
-        raise UT_TypeError(Type, TestTypes, SkipFrames = 1)
-    if not isinstance(Confidence, float):
-        raise UT_TypeError(Confidence, float, SkipFrames = 1)
-    if Confidence <= 0 or Confidence >= 1:
-        raise UT_ValueError(Confidence, 'in range (0, 1) - confidence',
-                                                                SkipFrames = 1)
-    if Data1.N < 2:
-        raise UT_ValueError(Data1.N, '> 1 - data length, first sample',
-                                                                SkipFrames = 1)
-    if Data2.N < 2:
-        raise UT_ValueError(Data2.N, '> 1 - data length, second sample',
-                                                                SkipFrames = 1)
+    _CheckData2D(Data1, Data2)
+    _CheckTestParameters(Type, Confidence)
     NormVar1 = Data1.FullVar / (Data1.N - 1)
     NormVar2 = Data2.FullVar / (Data2.N - 1)
     NormVarSum = NormVar1 + NormVar2
@@ -766,26 +862,9 @@ def Welch_t_test(Data1: DC, Data2: DC, Type: TestTypes, *,
     Degree = Divident / Divisor
     TestValue = (Data1.Mean - Data2.Mean) / math.sqrt(NormVarSum)
     Model = MC.Student(Degree = Degree)
-    CDF_Value = Model.cdf(TestValue)
-    if CDF_Value <= 0.0:
-        CDF_Value = 0.0000001
-    elif CDF_Value >= 1.0:
-        CDF_Value = 0.9999999
-    if Type is TestTypes.LEFT:
-        CritValue = Model.qf(1-Confidence)
-        CriticalValues = (CritValue, None)
-    elif Type is TestTypes.RIGHT:
-        CritValue = Model.qf(Confidence)
-        CriticalValues = (None, CritValue)
-    else:
-        CritValue = Model.qf(0.5 * (1 + Confidence))
-        CriticalValues = (-CritValue, CritValue)
     TestName = ' '.join(['Welch t-test at {:.1f}%'.format(100 * Confidence),
                             'confidence on the samples` means.'])
-    DataName = '{} vs {}'.format(Data1.Name, Data2.Name)
-    ModelName = Model.Name
-    Result = TestResult(TestName, DataName, ModelName, TestValue, CDF_Value,
-                                                                CriticalValues)
+    Result=_DoTest2D(Model, Data1, Data2, TestValue, Confidence, Type, TestName)
     del Model
     return Result
     
@@ -821,50 +900,22 @@ def f_test(Data1: DC, Data2: DC, Type: TestTypes, *,
             data sequence is less than 2 elements long for any of the samples,
             OR the Delta parameter is not positive
     
-    Version 1.0.0.0
+    Version 2.0.0.0
     """
-    if not isinstance(Data1, DC):
-        raise UT_TypeError(Data1, DC, SkipFrames = 1)
-    if not isinstance(Data2, DC):
-        raise UT_TypeError(Data2, DC, SkipFrames = 1)
-    if not isinstance(Type, TestTypes):
-        raise UT_TypeError(Type, TestTypes, SkipFrames = 1)
-    if not isinstance(Confidence, float):
-        raise UT_TypeError(Confidence, float, SkipFrames = 1)
+    _CheckData2D(Data1, Data2)
+    _CheckTestParameters(Type, Confidence)
     if not isinstance(Delta, (int, float)):
         raise UT_TypeError(Delta, (int, float), SkipFrames = 1)
-    if Confidence <= 0 or Confidence >= 1:
-        raise UT_ValueError(Confidence, 'in range (0, 1) - confidence',
-                                                                SkipFrames = 1)
     if Delta <= 0:
         raise UT_ValueError(Delta, '> 0 - delta parameter', SkipFrames = 1)
-    if Data1.N < 2:
-        raise UT_ValueError(Data1.N, '> 1 - data length, first sample',
-                                                                SkipFrames = 1)
-    if Data2.N < 2:
-        raise UT_ValueError(Data2.N, '> 1 - data length, second sample',
-                                                                SkipFrames = 1)
     Correction = Data1.N * (Data2.N - 1) / (Data2.N * (Data1.N - 1))
     TestValue = Correction * Delta * Data1.FullVar / Data2.FullVar
     Model = MC.F_Distribution(Degree1 = Data1.N - 1, Degree2 = Data2.N - 1)
-    CDF_Value = Model.cdf(TestValue)
-    if CDF_Value <= 0.0:
-        CDF_Value = 0.0000001
-    elif CDF_Value >= 1.0:
-        CDF_Value = 0.9999999
-    if Type is TestTypes.LEFT:
-        CritValue = Model.qf(1-Confidence)
-        CriticalValues = (CritValue, None)
-    elif Type is TestTypes.RIGHT:
-        CritValue = Model.qf(Confidence)
-        CriticalValues = (None, CritValue)
-    else:
-        CritValueUpper = Model.qf(0.5 * (1 + Confidence))
-        CritValueLower = Model.qf(0.5 * (1 - Confidence))
-        CriticalValues = (CritValueLower, CritValueUpper)
+    CDF_Value = _GetCDF(Model, TestValue)
+    CriticalValues = _GetBoundariesAsym(Model, Type, Confidence)
     TestName = ' '.join(['F-test at {:.1f}%'.format(100 * Confidence),
                             'confidence on the samples` variances with',
-                            'delta = {}'.format(Delta)])
+                                                        f'delta = {Delta}'])
     DataName = '{} vs {}'.format(Data1.Name, Data2.Name)
     ModelName = Model.Name
     Result = TestResult(TestName, DataName, ModelName, TestValue, CDF_Value,
@@ -896,23 +947,10 @@ def ANOVA_test(Data1: DC, Data2: DC, *, Confidence: float = 0.95) -> TestResult:
         UT_ValueError: Confidence argument is not in the range (0, 1), OR the
             data sequence is less than 2 elements long for any of the samples
     
-    Version 1.0.0.0
+    Version 2.0.0.0
     """
-    if not isinstance(Data1, DC):
-        raise UT_TypeError(Data1, DC, SkipFrames = 1)
-    if not isinstance(Data2, DC):
-        raise UT_TypeError(Data2, DC, SkipFrames = 1)
-    if not isinstance(Confidence, float):
-        raise UT_TypeError(Confidence, float, SkipFrames = 1)
-    if Confidence <= 0 or Confidence >= 1:
-        raise UT_ValueError(Confidence, 'in range (0, 1) - confidence',
-                                                                SkipFrames = 1)
-    if Data1.N < 2:
-        raise UT_ValueError(Data1.N, '> 1 - data length, first sample',
-                                                                SkipFrames = 1)
-    if Data2.N < 2:
-        raise UT_ValueError(Data2.N, '> 1 - data length, second sample',
-                                                                SkipFrames = 1)
+    _CheckData2D(Data1, Data2)
+    _CheckTestParameters(TestTypes.RIGHT, Confidence)
     N1 = Data1.N
     N2 = Data2.N
     Mean1 = Data1.Mean
@@ -923,11 +961,7 @@ def ANOVA_test(Data1: DC, Data2: DC, *, Confidence: float = 0.95) -> TestResult:
     TestValue /= N1 * Data1.FullVar + N2 * Data2.FullVar
     TestValue *= (N1 + N2 - 2)
     Model = MC.F_Distribution(Degree1 = 1, Degree2 = N1 + N2 - 2)
-    CDF_Value = Model.cdf(TestValue)
-    if CDF_Value <= 0.0:
-        CDF_Value = 0.0000001
-    elif CDF_Value >= 1.0:
-        CDF_Value = 0.9999999
+    CDF_Value = _GetCDF(Model, TestValue)
     CritValue = Model.qf(Confidence)
     CriticalValues = (CritValue, CritValue)
     TestName = ' '.join(['ANOVA F-test at {:.1f}%'.format(100 * Confidence),
@@ -963,23 +997,10 @@ def Levene_test(Data1: DC, Data2: DC, *, Confidence: float= 0.95) -> TestResult:
         UT_ValueError: Confidence argument is not in the range (0, 1), OR the
             data sequence is less than 2 elements long for any of the samples
     
-    Version 1.0.0.0
+    Version 2.0.0.0
     """
-    if not isinstance(Data1, DC):
-        raise UT_TypeError(Data1, DC, SkipFrames = 1)
-    if not isinstance(Data2, DC):
-        raise UT_TypeError(Data2, DC, SkipFrames = 1)
-    if not isinstance(Confidence, float):
-        raise UT_TypeError(Confidence, float, SkipFrames = 1)
-    if Confidence <= 0 or Confidence >= 1:
-        raise UT_ValueError(Confidence, 'in range (0, 1) - confidence',
-                                                                SkipFrames = 1)
-    if Data1.N < 2:
-        raise UT_ValueError(Data1.N, '> 1 - data length, first sample',
-                                                                SkipFrames = 1)
-    if Data2.N < 2:
-        raise UT_ValueError(Data2.N, '> 1 - data length, second sample',
-                                                                SkipFrames = 1)
+    _CheckData2D(Data1, Data2)
+    _CheckTestParameters(TestTypes.RIGHT, Confidence)
     N1 = Data1.N
     N2 = Data2.N
     Mean1 = Data1.Mean
@@ -994,11 +1015,9 @@ def Levene_test(Data1: DC, Data2: DC, *, Confidence: float= 0.95) -> TestResult:
     TestValue /= N1 * MData1.Var + N2 * MData2.Var
     TestValue *= (N1 + N2 - 2)
     Model = MC.F_Distribution(Degree1 = 1, Degree2 = N1 + N2 - 2)
-    CDF_Value = Model.cdf(TestValue)
-    if CDF_Value <= 0.0:
-        CDF_Value = 0.0000001
-    elif CDF_Value >= 1.0:
-        CDF_Value = 0.9999999
+    del MData1
+    del MData2
+    CDF_Value = _GetCDF(Model, TestValue)
     CritValue = Model.qf(Confidence)
     CriticalValues = (CritValue, CritValue)
     TestName = ' '.join(['Levene test at {:.1f}%'.format(100 * Confidence),
@@ -1036,23 +1055,10 @@ def Brown_Forsythe_test(Data1: DC, Data2: DC, *,
         UT_ValueError: Confidence argument is not in the range (0, 1), OR the
             data sequence is less than 2 elements long for any of the samples
     
-    Version 1.0.0.0
+    Version 2.0.0.0
     """
-    if not isinstance(Data1, DC):
-        raise UT_TypeError(Data1, DC, SkipFrames = 1)
-    if not isinstance(Data2, DC):
-        raise UT_TypeError(Data2, DC, SkipFrames = 1)
-    if not isinstance(Confidence, float):
-        raise UT_TypeError(Confidence, float, SkipFrames = 1)
-    if Confidence <= 0 or Confidence >= 1:
-        raise UT_ValueError(Confidence, 'in range (0, 1) - confidence',
-                                                                SkipFrames = 1)
-    if Data1.N < 2:
-        raise UT_ValueError(Data1.N, '> 1 - data length, first sample',
-                                                                SkipFrames = 1)
-    if Data2.N < 2:
-        raise UT_ValueError(Data2.N, '> 1 - data length, second sample',
-                                                                SkipFrames = 1)
+    _CheckData2D(Data1, Data2)
+    _CheckTestParameters(TestTypes.RIGHT, Confidence)
     N1 = Data1.N
     N2 = Data2.N
     Mean1 = Data1.Median
@@ -1067,11 +1073,9 @@ def Brown_Forsythe_test(Data1: DC, Data2: DC, *,
     TestValue /= N1 * MData1.Var + N2 * MData2.Var
     TestValue *= (N1 + N2 - 2)
     Model = MC.F_Distribution(Degree1 = 1, Degree2 = N1 + N2 - 2)
-    CDF_Value = Model.cdf(TestValue)
-    if CDF_Value <= 0.0:
-        CDF_Value = 0.0000001
-    elif CDF_Value >= 1.0:
-        CDF_Value = 0.9999999
+    del MData1
+    del MData2
+    CDF_Value = _GetCDF(Model, TestValue)
     CritValue = Model.qf(Confidence)
     CriticalValues = (CritValue, CritValue)
     TestName = ' '.join(['Brown-Forsythe test at {:.1f}%'.format(

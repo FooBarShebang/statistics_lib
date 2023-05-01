@@ -13,8 +13,8 @@ Classes:
     Statistics2D
 """
 
-__version__= '1.0.0.0'
-__date__ = '08-03-2022'
+__version__= '1.0.1.0'
+__date__ = '01-05-2023'
 __status__ = 'Production'
 
 #imports
@@ -24,7 +24,6 @@ __status__ = 'Production'
 import sys
 import os
 import math
-from telnetlib import DO
 
 from typing import Optional, Union, Any, Tuple
 
@@ -106,7 +105,7 @@ class Statistics1D:
             /*, int > 0 OR None, int > 0 OR float > 0 OR None/
                 -> tuple(tuple(int OR float, int >= 0))
     
-    Version 1.0.0.0
+    Version 1.0.1.0
     """
     
     #special methods
@@ -149,9 +148,9 @@ class Statistics1D:
         Signature:
             None -> str
         
-        Version 1.0.0.0
+        Version 1.0.1.0
         """
-        return '{}({})'.format(self.__class__.__name__, self.Name)
+        return f'{self.__class__.__name__}({self.Name})'
     
     def __repr__(self) -> str:
         """
@@ -161,10 +160,10 @@ class Statistics1D:
         Signature:
             None -> str
         
-        Version 1.0.0.0
+        Version 1.0.1.0
         """
-        return '<{}({}) at {}>'.format(self.__class__.__name__, self.Name,
-                                                                hex(id(self)))
+        IdHex = hex(id(self))
+        return f'<{self.__class__.__name__}({self.Name}) at {IdHex}>'
     
     #public API
 
@@ -471,15 +470,15 @@ class Statistics1D:
         Signature:
             None -> str
         
-        Version 1.0.0.0
+        Version 1.0.1.0
         """
         Separator = '----------------------------------------------------------'
         if self.Name is None:
             Result = Separator
         else:
-            Result = '{}\nName:\t{}'.format(Separator, self.Name)
+            Result = f'{Separator}\nName:\t{self.Name}'
         Result = '\n'.join([Result,
-                '\n'.join('{}:\t{}'.format(Key, getattr(self, Key)) for Key in
+                        '\n'.join(f'{Key}:\t{getattr(self, Key)}' for Key in
                         ['N', 'Mean', 'Median', 'Q1', 'Q3', 'Min', 'Max', 'Var',
                                         'FullVar', 'Skew', 'Kurt']), Separator])
         return Result
@@ -545,11 +544,11 @@ class Statistics1D:
             UT_ValueError: any keyword argument is of the proper type but
                 unacceptable value
 
-        Version 1.0.0.0
+        Version 1.0.0.1
         """
-        dictTemp = of.GetHistogram(self.Values, NBins = NBins, BinSize= BinSize,
+        Temp = of.GetHistogram(self.Values, NBins = NBins, BinSize= BinSize,
                                                 SkipFrames = 2, DoCheck = False)
-        Result = tuple((Key, Item) for Key, Item in dictTemp.items())
+        Result = tuple((Key, Item) for Key, Item in Temp.items())
         return Result
 
 class Statistics2D:
@@ -577,7 +576,7 @@ class Statistics2D:
         Summary: (read-only) str; the summary of the statistical properties of
             the data set
     
-    Version 1.0.0.0
+    Version 1.0.1.0
     """
     
     #special methods
@@ -608,32 +607,33 @@ class Statistics2D:
             UT_ValueError: any of the passed sequences is empty, or they have
                 unequal length
         
-        Version 1.0.0.0
+        Version 1.0.1.0
         """
         self._Data = dict()
         try:
             self._Data['X'] = Statistics1D(DataX)
         except (UT_TypeError, UT_ValueError) as err1:
-            Message = '{} - X data'.format(err1.args[0])
+            Message = f'{err1.getMessage()} - X data'
             if isinstance(err1, UT_TypeError):
                 err = UT_TypeError(1, int, SkipFrames = 1)
             else:
                 err = UT_ValueError(1, 'whatever', SkipFrames = 1)
-            err.args = (Message, )
+            err.setMessage(Message)
             raise err from None
         try:
             self._Data['Y'] = Statistics1D(DataY)
         except (UT_TypeError, UT_ValueError) as err1:
-            Message = '{} - Y data'.format(err1.args[0])
+            Message = f'{err1.getMessage()} - Y data'
             if isinstance(err1, UT_TypeError):
                 err = UT_TypeError(1, int, SkipFrames = 1)
             else:
                 err = UT_ValueError(1, 'whatever', SkipFrames = 1)
-            err.args = (Message, )
+            err.setMessage(Message)
             raise err from None
-        if self.X.N != self.Y.N:
-            raise UT_ValueError(self.X.N,
-                                    '== {} - sequences length'.format(self.Y.N),
+        LengthX = self.X.N
+        LengthY = self.Y.N
+        if LengthX != LengthY:
+            raise UT_ValueError(LengthX, f'== {LengthY} - sequences length',
                                                                 SkipFrames = 1)
         self._Properties = {Key : None for Key in ['Cov', 'Pearson', 'Spearman',
                                                             'Kendall', 'Name']}
@@ -646,9 +646,9 @@ class Statistics2D:
         Signature:
             None -> str
         
-        Version 1.0.0.0
+        Version 1.0.1.0
         """
-        return '{}({})'.format(self.__class__.__name__, self.Name)
+        return f'{self.__class__.__name__}({self.Name})'
     
     def __repr__(self) -> str:
         """
@@ -658,10 +658,10 @@ class Statistics2D:
         Signature:
             None -> str
         
-        Version 1.0.0.0
+        Version 1.0.1.0
         """
-        return '<{}({}) at {}>'.format(self.__class__.__name__, self.Name,
-                                                                hex(id(self)))
+        IdHex = hex(id(self))
+        return f'<{self.__class__.__name__}({self.Name}) at {IdHex}>'
     
     #public API
 
@@ -802,7 +802,7 @@ class Statistics2D:
         Signature:
             None -> str
         
-        Version 1.0.0.0
+        Version 1.0.1.0
         """
         Separator = '=========================================================='
         if self.Name is None:
@@ -810,7 +810,7 @@ class Statistics2D:
         else:
             Result = '{}\nName:\t{}'.format(Separator, self.Name)
         Result = '\n'.join([Result,
-                '\n'.join('{}:\t{}'.format(Key, getattr(self, Key)) for Key in
+                '\n'.join(f'{Key}:\t{getattr(self, Key)}' for Key in
                         ['Cov', 'Pearson', 'Spearman', 'Kendall',]),
                             'X data sub-set', self.X.Summary,
                                 'Y data sub-set', self.Y.Summary, Separator])

@@ -21,8 +21,8 @@ Classes:
     Levy
 """
 
-__version__= '1.0.0.0'
-__date__ = '29-04-2022'
+__version__= '1.0.1.0'
+__date__ = '01-05-2023'
 __status__ = 'Production'
 
 #imports
@@ -50,7 +50,8 @@ from introspection_lib.base_exceptions import UT_TypeError, UT_ValueError
 
 import statistics_lib.special_functions as sf
 
-from statistics_lib.distribution_classes import ContinuousDistributionABC as BC
+from .distribution_classes import ContinuousDistributionABC as BC
+from .distribution_classes import ALMOST_ZERO, POS_INF
 
 # classes
 
@@ -88,12 +89,12 @@ class InverseGaussian(BC):
         random()
             None -> float > 0
     
-    Version 1.0.0.0
+    Version 1.0.1.0
     """
 
     #class 'private' fields
     
-    _Min: ClassVar[sf.TReal] = 2 * sys.float_info.min
+    _Min: ClassVar[sf.TReal] = 2 * ALMOST_ZERO
 
     #private methods
     
@@ -194,14 +195,14 @@ class InverseGaussian(BC):
         Raises:
             UT_TypeError: passed value is not a real number
         
-        Version 1.0.0.0
+        Version 1.0.1.0
         """
         if not isinstance(Value, (int, float)):
             raise UT_TypeError(Value, (int, float), SkipFrames = 1)
         if Value <= 0:
             raise UT_ValueError(Value, '> 0 - mean parameter', SkipFrames = 1)
         self._Parameters['Mean'] = Value
-        for Key in self._Cached.keys():
+        for Key in self._Cached:
             self._Cached[Key] = None
     
     @property
@@ -227,14 +228,14 @@ class InverseGaussian(BC):
         Raises:
             UT_TypeError: passed value is not a real number
         
-        Version 1.0.0.0
+        Version 1.0.1.0
         """
         if not isinstance(Value, (int, float)):
             raise UT_TypeError(Value, (int, float), SkipFrames = 1)
         if Value <= 0:
             raise UT_ValueError(Value, '> 0 - shape parameter', SkipFrames = 1)
         self._Parameters['Shape'] = Value
-        for Key in self._Cached.keys():
+        for Key in self._Cached:
             self._Cached[Key] = None
     
     @property
@@ -308,12 +309,12 @@ class InverseGamma(BC):
         random()
             None -> float > 0
     
-    Version 1.0.0.0
+    Version 1.0.1.0
     """
 
     #class 'private' fields
     
-    _Min: ClassVar[sf.TReal] = 2 * sys.float_info.min
+    _Min: ClassVar[sf.TReal] = 2 * ALMOST_ZERO
 
     #private methods
     
@@ -411,14 +412,14 @@ class InverseGamma(BC):
         Raises:
             UT_TypeError: passed value is not a real number
         
-        Version 1.0.0.0
+        Version 1.0.1.0
         """
         if not isinstance(Value, (int, float)):
             raise UT_TypeError(Value, (int, float), SkipFrames = 1)
         if Value <= 0:
             raise UT_ValueError(Value, '> 0 - scale parameter', SkipFrames = 1)
         self._Parameters['Scale'] = Value
-        for Key in self._Cached.keys():
+        for Key in self._Cached:
             self._Cached[Key] = None
         Scale = Value
         Shape = self.Shape
@@ -447,14 +448,14 @@ class InverseGamma(BC):
         Raises:
             UT_TypeError: passed value is not a real number
         
-        Version 1.0.0.0
+        Version 1.0.1.0
         """
         if not isinstance(Value, (int, float)):
             raise UT_TypeError(Value, (int, float), SkipFrames = 1)
         if Value <= 0:
             raise UT_ValueError(Value, '> 0 - shape parameter', SkipFrames = 1)
         self._Parameters['Shape'] = Value
-        for Key in self._Cached.keys():
+        for Key in self._Cached:
             self._Cached[Key] = None
         Scale = self.Scale
         Shape = Value
@@ -602,12 +603,12 @@ class InverseChiSquared(BC):
         random()
             None -> float > 0
     
-    Version 1.0.0.0
+    Version 1.0.1.0
     """
 
     #class 'private' fields
     
-    _Min: ClassVar[sf.TReal] = 2 * sys.float_info.min
+    _Min: ClassVar[sf.TReal] = 2 * ALMOST_ZERO
 
     #private methods
     
@@ -699,14 +700,14 @@ class InverseChiSquared(BC):
         Raises:
             UT_TypeError: passed value is not a real number
         
-        Version 1.0.0.0
+        Version 1.0.1.0
         """
         if not isinstance(Value, (int, float)):
             raise UT_TypeError(Value, (int, float), SkipFrames = 1)
         if Value <= 0:
             raise UT_ValueError(Value, '> 0 - degree parameter', SkipFrames = 1)
         self._Parameters['Degree'] = Value
-        for Key in self._Cached.keys():
+        for Key in self._Cached:
             self._Cached[Key] = None
         Degree = Value
         self._Cached['Factor']=-0.5*Degree*math.log(2) - math.lgamma(0.5*Degree)
@@ -852,12 +853,12 @@ class ScaledInverseChiSquared(InverseChiSquared):
         random()
             None -> float > 0
     
-    Version 1.0.0.0
+    Version 1.0.1.0
     """
 
     #class 'private' fields
     
-    _Min: ClassVar[sf.TReal] = 2 * sys.float_info.min
+    _Min: ClassVar[sf.TReal] = 2 * ALMOST_ZERO
 
     #private methods
     
@@ -958,14 +959,14 @@ class ScaledInverseChiSquared(InverseChiSquared):
         Raises:
             UT_TypeError: passed value is not a real number
         
-        Version 1.0.0.0
+        Version 1.0.1.0
         """
         if not isinstance(Value, (int, float)):
             raise UT_TypeError(Value, (int, float), SkipFrames = 1)
         if Value <= 0:
             raise UT_ValueError(Value, '> 0 - degree parameter', SkipFrames = 1)
         self._Parameters['Degree'] = Value
-        for Key in self._Cached.keys():
+        for Key in self._Cached:
             self._Cached[Key] = None
         Degree = Value
         Scale = self.Scale
@@ -995,14 +996,14 @@ class ScaledInverseChiSquared(InverseChiSquared):
         Raises:
             UT_TypeError: passed value is not a real number
         
-        Version 1.0.0.0
+        Version 1.0.1.0
         """
         if not isinstance(Value, (int, float)):
             raise UT_TypeError(Value, (int, float), SkipFrames = 1)
         if Value <= 0:
             raise UT_ValueError(Value, '> 0 - scale parameter', SkipFrames = 1)
         self._Parameters['Scale'] = Value
-        for Key in self._Cached.keys():
+        for Key in self._Cached:
             self._Cached[Key] = None
         Degree = self.Degree
         Scale = Value
@@ -1387,7 +1388,7 @@ class Levy(Cauchy):
         random()
             None -> float > 0
     
-    Version 1.0.0.0
+    Version 1.0.0.1
     """
 
      #private methods
@@ -1465,9 +1466,9 @@ class Levy(Cauchy):
         Signature:
             None -> float
         
-        Version 1.0.0.0
+        Version 1.0.0.1
         """
-        return math.inf
+        return POS_INF
     
     @property
     def Median(self) -> float:
@@ -1516,7 +1517,7 @@ class Levy(Cauchy):
         
         Version 1.0.0.0
         """
-        return math.inf
+        return POS_INF
     
     @property
     def Sigma(self) -> float:
@@ -1529,4 +1530,4 @@ class Levy(Cauchy):
         
         Version 1.0.0.0
         """
-        return math.inf
+        return POS_INF

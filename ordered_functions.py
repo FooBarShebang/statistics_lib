@@ -45,8 +45,8 @@ Functions:
                 *, int > 0, bool/ -> int OR float
 """
 
-__version__= '1.0.0.0'
-__date__ = '24-02-2022'
+__version__= '1.0.1.0'
+__date__ = '01-05-2023'
 __status__ = 'Production'
 
 #imports
@@ -72,9 +72,8 @@ if not (ROOT_FOLDER in sys.path):
 
 from introspection_lib.base_exceptions import UT_TypeError, UT_ValueError
 
-from statistics_lib.base_functions import TGenericSequence, TReal, TRealList
-from statistics_lib.base_functions import GetMean, GetPearsonR
-from statistics_lib.base_functions import _ExtractMeans, _CheckPositiveInteger
+from .base_functions import TGenericSequence, TReal, TRealList, GetMean
+from .base_functions import GetPearsonR, _ExtractMeans, _CheckPositiveInteger
 
 #functions
 
@@ -111,7 +110,7 @@ def _GetRanks(Data: TGenericSequence, *, SkipFrames: int = 1,
         UT_ValueError: passed mandatory sequence is empty, OR any keyword
             argument is of the proper type but unacceptable value
 
-    Version 1.0.0.0
+    Version 1.0.0.1
     """
     _CheckPositiveInteger(SkipFrames)
     if DoCheck:
@@ -119,23 +118,23 @@ def _GetRanks(Data: TGenericSequence, *, SkipFrames: int = 1,
     else:
         _Data = Data
     _DataSorted = sorted(_Data)
-    dictFrequencies = dict()
+    Frequencies = dict()
     for Item in _DataSorted:
-        dictFrequencies[Item] = dictFrequencies.get(Item, 0) + 1
-    dictRanks = dict()
+        Frequencies[Item] = Frequencies.get(Item, 0) + 1
+    Ranks = dict()
     Last = 0
     if sys.version_info[0] >= 3 and sys.version_info[1] >= 7:
-        Keys = dictFrequencies.keys()
+        Keys = Frequencies.keys()
     else:
-        Keys = sorted(dictFrequencies.keys())
+        Keys = sorted(Frequencies.keys())
     for Key in Keys:
-        Value = dictFrequencies[Key]
+        Value = Frequencies[Key]
         if Value == 1:
-            dictRanks[Key] = Last + 1
+            Ranks[Key] = Last + 1
         else:
-            dictRanks[Key] = Last + (Value + 1) / 2
+            Ranks[Key] = Last + (Value + 1) / 2
         Last += Value
-    Result = [dictRanks[Key] for Key in _Data]
+    Result = [Ranks[Key] for Key in _Data]
     return Result
 
 #+ main, public functions
@@ -254,7 +253,7 @@ def GetMedian(Data: TGenericSequence, *, SkipFrames: int = 1,
         UT_ValueError: passed mandatory sequence is empty, OR any keyword
             argument is of the proper type but unacceptable value
 
-    Version 1.0.0.0
+    Version 1.0.0.1
     """
     _CheckPositiveInteger(SkipFrames)
     if DoCheck:
@@ -266,7 +265,7 @@ def GetMedian(Data: TGenericSequence, *, SkipFrames: int = 1,
         Result = _Data[0]
     else:
         Index, Remainder = divmod(N, 2)
-        if Remainder == 1:
+        if Remainder:
             Result = _Data[Index]
         else:
             Result = (_Data[Index - 1] + _Data[Index]) / 2
@@ -408,7 +407,7 @@ def GetQuantile(Data: TGenericSequence, k: int, m: int, *, SkipFrames: int = 1,
             the quantile index is negative integer or integer greater than the
             total number of qunatiles
 
-    Version 1.0.0.0
+    Version 1.0.0.1
     """
     _CheckPositiveInteger(SkipFrames)
     _CheckPositiveInteger(m)
@@ -427,7 +426,7 @@ def GetQuantile(Data: TGenericSequence, k: int, m: int, *, SkipFrames: int = 1,
     else:
         if k == m:
             Result = _Data[N-1]
-        elif k == 0:
+        elif not k:
             Result = _Data[0]
         else:
             Index, Remainder = divmod((N - 1) * k, m)
@@ -550,19 +549,19 @@ def GetModes(Data: TGenericSequence, *, SkipFrames: int = 1,
         UT_ValueError: passed mandatory sequence is empty, OR any keyword
             argument is of the proper type but unacceptable value
 
-    Version 1.0.0.0
+    Version 1.0.0.1
     """
     _CheckPositiveInteger(SkipFrames)
     if DoCheck:
         _Data = _ExtractMeans(Data, SkipFrames = SkipFrames + 1)
     else:
         _Data = Data
-    dictTemp = dict()
+    Temp = dict()
     for Item in _Data:
-        dictTemp[Item] = dictTemp.get(Item, 0) + 1
-    MaxCount = max(dictTemp.values())
+        Temp[Item] = Temp.get(Item, 0) + 1
+    MaxCount = max(Temp.values())
     Result = []
-    for Key, Value in dictTemp.items():
+    for Key, Value in Temp.items():
         if Value == MaxCount:
             Result.append(Key)
     return Result
@@ -603,17 +602,17 @@ def GetSpearman(DataX: TGenericSequence, DataY: TGenericSequence, *,
             keyword argument is of the proper type but unacceptable value, OR
             the X and Y sequences are of different length
 
-    Version 1.0.0.0
+    Version 1.0.1.0
     """
     _CheckPositiveInteger(SkipFrames)
     RankX = _GetRanks(DataX, SkipFrames = SkipFrames + 1, DoCheck = DoCheck)
     RankY = _GetRanks(DataY, SkipFrames = SkipFrames + 1, DoCheck = DoCheck)
-    Length = len(RankX)
-    if Length != len(RankY):
-        raise UT_ValueError(
-                Length, '== {} - X and Y data length'.format(len(RankY)),
+    LengthX = len(RankX)
+    LengthY = len(RankY)
+    if LengthX != LengthY:
+        raise UT_ValueError(LengthX, f'== {LengthY} - X and Y data length',
                                                     SkipFrames = SkipFrames)
-    if Length == 1:
+    if LengthX == 1:
         Result = 1
     else:
         Result = GetPearsonR(RankX, RankY, DoCheck = False)
@@ -653,7 +652,7 @@ def GetKendall(DataX: TGenericSequence, DataY: TGenericSequence, *,
             keyword argument is of the proper type but unacceptable value, OR
             the X and Y sequences are of different length
 
-    Version 1.0.0.0
+    Version 1.0.1.0
     """
     _CheckPositiveInteger(SkipFrames)
     if DoCheck:
@@ -662,20 +661,20 @@ def GetKendall(DataX: TGenericSequence, DataY: TGenericSequence, *,
     else:
         _DataX = DataX
         _DataY = DataY
-    Length = len(_DataX)
-    if Length != len(_DataY):
-        raise UT_ValueError(
-                Length, '== {} - X and Y data length'.format(len(_DataY)),
+    LengthX = len(_DataX)
+    LengthY = len(_DataY)
+    if LengthX != LengthY:
+        raise UT_ValueError(LengthX, f'== {LengthY} - X and Y data length',
                                                     SkipFrames = SkipFrames)
-    if Length== 1:
+    if LengthX == 1:
         Result = 1
     else:
         NConcord = 0
         NDiscord = 0
         NXTies = 0
         NYTies = 0
-        for FirstIdx in range(Length - 1):
-            for SecondIdx in range(FirstIdx + 1, Length):
+        for FirstIdx in range(LengthX - 1):
+            for SecondIdx in range(FirstIdx + 1, LengthX):
                 X1 = _DataX[FirstIdx]
                 X2 = _DataX[SecondIdx]
                 Y1 = _DataY[FirstIdx]

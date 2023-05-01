@@ -29,8 +29,8 @@ Classes:
     Hypergeometric
 """
 
-__version__= '1.0.0.0'
-__date__ = '21-04-2022'
+__version__= '1.0.1.0'
+__date__ = '01-05-2023'
 __status__ = 'Production'
 
 #imports
@@ -60,6 +60,16 @@ if not (ROOT_FOLDER in sys.path):
 from introspection_lib.base_exceptions import UT_TypeError, UT_ValueError
 
 import statistics_lib.special_functions as sf
+
+#globals
+
+DEF_PRECISION = 1.0E-8
+
+ALMOST_ZERO = sys.float_info.min
+
+POS_INF = math.inf
+
+NEG_INF = - math.inf
 
 # classes
 
@@ -101,9 +111,9 @@ class ContinuousDistributionABC(abc.ABC):
     
     #class 'private' fields
     
-    _Min: ClassVar[sf.TReal] = - math.inf
+    _Min: ClassVar[sf.TReal] = NEG_INF
     
-    _Max: ClassVar[sf.TReal] = math.inf
+    _Max: ClassVar[sf.TReal] = POS_INF
     
     # 'private' instance methods
     
@@ -136,21 +146,21 @@ class ContinuousDistributionABC(abc.ABC):
         Signature:
            0 < float < 1 -> int OR float
         
-        Version 1.0.0.0
+        Version 1.0.1.0
         """
         Sigma = self.Sigma
-        if (Sigma is None) or (Sigma is math.inf):
+        if (Sigma is None) or (Sigma is POS_INF):
             Sigma = 1 #fallback for distrbutions w/o defined variance
         Min = self.Min
         Max = self.Max
-        Precision = 1.0E-8
+        Precision = DEF_PRECISION
         Point = self.Mean #check self.Mean
         if Point is None:
-            if (Min > (- math.inf)) and (Max < math.inf):
+            if (Min > NEG_INF) and (Max < POS_INF):
                 Point = 0.5 * (Min + Max)
-            elif (Min > (- math.inf)):
+            elif (Min > NEG_INF):
                 Point = Min + 3 * Sigma
-            elif Max < math.inf:
+            elif Max < POS_INF:
                 Point = Max - 3 * Sigma
             else:
                 Point = 0
@@ -164,7 +174,7 @@ class ContinuousDistributionABC(abc.ABC):
             if y < x: #between 1st and self.Max
                 while Right < Max:
                     Left = Right
-                    if Max < math.inf:
+                    if Max < POS_INF:
                         Right = 0.5 * (Right + Max)
                     else:
                         if Right > Sigma:
@@ -183,7 +193,7 @@ class ContinuousDistributionABC(abc.ABC):
             else: #between 1st and self.Min
                 while Left > Min:
                     Right = Left
-                    if Min > (-math.inf):
+                    if Min > NEG_INF:
                         Left = 0.5 * (Left + Min)
                     else:
                         if Left < - Sigma:
@@ -240,9 +250,9 @@ class ContinuousDistributionABC(abc.ABC):
         Signature:
             None -> str
         
-        Version 1.0.0.0
+        Version 1.0.1.0
         """
-        return '<{} at {}>'.format(self.Name, hex(id(self)))
+        return f'<{self.Name} at {hex(id(self))}>'
     
     #public properties
     
@@ -257,14 +267,14 @@ class ContinuousDistributionABC(abc.ABC):
         Returns:
             str: string identifier of the distribution in the form
                 '{Name}(parameter = value, ...)'
-        Version 1.0.0.0
+        Version 1.0.1.0
         """
         BaseName = self.__class__.__name__.split('.')[-1]
-        Result = '{}('.format(BaseName)
+        Result = f'{BaseName}('
         if hasattr(self, '_Parameters'):
-            Result += ', '.join(['{} = {}'.format(Key, Value)
+            Result += ', '.join([f'{Key} = {Value}'
                                     for Key, Value in self._Parameters.items()])
-        Result += ')'
+        Result = f'{Result})'
         return Result
     
     @property
@@ -568,15 +578,15 @@ class ContinuousDistributionABC(abc.ABC):
                                                                 SkipFrames = 1)
         if NBins < 2:
             raise UT_ValueError(NBins, '> 1 - number of bins', SkipFrames=  1)
-        S = (maxb - minb) / (NBins - 1)
-        Right = minb - 0.5 * S
+        Step = (maxb - minb) / (NBins - 1)
+        Right = minb - 0.5 * Step
         RightCDF = self.cdf(Right)
         Result = list()
         for k in range(NBins):
             LeftCDF = RightCDF
-            Right = minb + (k + 0.5) * S
+            Right = minb + (k + 0.5) * Step
             RightCDF = self.cdf(Right)
-            Centre = minb + k * S
+            Centre = minb + k * Step
             Result.append((Centre, RightCDF - LeftCDF))
         return tuple(Result)
 
@@ -613,7 +623,7 @@ class DiscreteDistributionABC(ContinuousDistributionABC):
         random()
             None -> int
     
-    Version 1.0.0.0
+    Version 1.0.0.1
     """
     
     #class 'private' fields
@@ -631,14 +641,14 @@ class DiscreteDistributionABC(ContinuousDistributionABC):
         Signature:
            0 < float < 1 -> int OR float
         
-        Version 1.0.0.0
+        Version 1.0.0.1
         """
         Sigma = self.Sigma
-        if (Sigma is None) or (Sigma is math.inf) or (Sigma < 1.0):
+        if (Sigma is None) or (Sigma is POS_INF) or (Sigma < 1.0):
             Sigma = 1 #fallback for distrbutions w/o defined variance
         Min = self.Min #should be integer
         Max = self.Max #can be integer or math.inf
-        Precision = 1.0E-8
+        Precision = DEF_PRECISION
         #check for x <= self.pdf(self.Min)
         y = self._pdf(Min)
         if abs(y - x) <= Precision: #in vicinity!
@@ -646,11 +656,11 @@ class DiscreteDistributionABC(ContinuousDistributionABC):
         elif y > x: #just below self.Min
             Result = Min - 1.0 + x / y
         else: #between self.Min and self.Max
-            if Max < math.inf: #max boundary is finite - get mid-point
+            if Max < POS_INF: #max boundary is finite - get mid-point
                 Point = round(0.5 * (Min + Max))
             else: #check self.Mean
                 Mean = self.Mean
-                if (Mean is None) or (Mean is math.inf):
+                if (Mean is None) or (Mean is POS_INF):
                     Point = round(Min + 3 * Sigma)
                 else:
                     Point = math.ceil(Mean)
@@ -668,7 +678,7 @@ class DiscreteDistributionABC(ContinuousDistributionABC):
                 if z < x: #shift towards self.Max
                     while Right < Max:
                         Left = Right
-                        if Max < math.inf:
+                        if Max < POS_INF:
                             Right = math.ceil(0.5 * (Right + Max))
                         else:
                             if Right > Sigma:
@@ -1403,7 +1413,7 @@ class Student(ContinuousDistributionABC):
         random()
             None -> float
     
-    Version 1.0.0.0
+    Version 1.0.1.0
     """
     
     #special methods
@@ -1470,9 +1480,9 @@ class Student(ContinuousDistributionABC):
         _x = 0.5 * Degree
         y = 0.5
         if x > 0:
-            Result = 1 - 0.5*sf.beta_incomplete_reg(z, _x, y)
+            Result = 1 - 0.5 * sf.beta_incomplete_reg(z, _x, y)
         elif x < 0:
-            Result = 0.5*sf.beta_incomplete_reg(z, _x, y)
+            Result = 0.5 * sf.beta_incomplete_reg(z, _x, y)
         else:
             Result = 0.5
         return Result
@@ -1533,14 +1543,14 @@ class Student(ContinuousDistributionABC):
             UT_TypeError: passed value is not a real number
             UT_ValueError: passed value is not positive
         
-        Version 1.0.0.0
+        Version 1.0.1.0
         """
         if not isinstance(Value, (int, float)):
             raise UT_TypeError(Value, (int, float), SkipFrames = 1)
         if Value <= 0:
             raise UT_ValueError(Value, '> 0 - degree parameter', SkipFrames = 1)
         self._Parameters['Degree'] = Value
-        for Key in self._Cached.keys():
+        for Key in self._Cached:
             self._Cached[Key] = None
         Temp = math.lgamma(0.5 * (Value + 1)) - math.lgamma(0.5 * Value)
         Temp -= 0.5 * math.log(Value * math.pi)
@@ -1592,13 +1602,13 @@ class Student(ContinuousDistributionABC):
                 (1, 2]
             None: number of degrees of freedom is in the interval (0, 1]
         
-        Version 1.0.0.0
+        Version 1.0.0.1
         """
         Degree = self.Degree
         if Degree > 2:
             Result = Degree / (Degree - 2)
         elif Degree > 1:
-            Result = math.inf
+            Result = POS_INF
         else:
             Result = None
         return Result
@@ -1617,13 +1627,13 @@ class Student(ContinuousDistributionABC):
                 (1, 2]
             None: number of degrees of freedom is in the interval (0, 1]
         
-        Version 1.0.0.0
+        Version 1.0.0.1
         """
         Degree = self.Degree
         if Degree > 2:
             Result = math.sqrt(Degree / (Degree - 2))
         elif Degree > 1:
-            Result = math.inf
+            Result = POS_INF
         else:
             Result = None
         return Result
@@ -1662,13 +1672,13 @@ class Student(ContinuousDistributionABC):
                 (2, 4]
             None: number of degrees of freedom is in the interval (0, 2]
         
-        Version 1.0.0.0
+        Version 1.0.0.1
         """
         Degree = self.Degree
         if Degree > 4:
             Result = 6 / (Degree - 4)
         elif Degree > 2:
-            Result = math.inf
+            Result = POS_INF
         else:
             Result = None
         return Result
@@ -1707,7 +1717,7 @@ class ChiSquared(ContinuousDistributionABC):
         random()
             None -> float
     
-    Version 1.0.0.0
+    Version 1.0.1.0
     """
     
     #class 'private' fields
@@ -1733,7 +1743,7 @@ class ChiSquared(ContinuousDistributionABC):
             UT_TypeError: the argument is neither int nor float
             UT_ValueError: the argument is zero or negative
         
-        Version 1.0.0.0
+        Version 1.0.0.1
         """
         if not isinstance(Degree, (int, float)):
             raise UT_TypeError(Degree, (int, float), SkipFrames = 1)
@@ -1748,7 +1758,7 @@ class ChiSquared(ContinuousDistributionABC):
         self._Cached['Q3'] = None #cached third quartile
         self._Cached['Median'] = None
         if Degree < 2: #override the class attribute, make open > 0 interval
-            self._Min = 2 * sys.float_info.min
+            self._Min = 2 * ALMOST_ZERO
     
     #private methods
     
@@ -1813,19 +1823,19 @@ class ChiSquared(ContinuousDistributionABC):
             UT_TypeError: passed value is not a real number
             UT_ValueError: passed value is not positive
         
-        Version 1.0.0.0
+        Version 1.0.1.0
         """
         if not isinstance(Value, (int, float)):
             raise UT_TypeError(Value, (int, float), SkipFrames = 1)
         if Value <= 0:
             raise UT_ValueError(Value, '> 0 - degree parameter', SkipFrames = 1)
         self._Parameters['Degree'] = Value
-        for Key in self._Cached.keys():
+        for Key in self._Cached:
             self._Cached[Key] = None
         Temp =  - (0.5 * Value * math.log(2) + math.lgamma(0.5 * Value))
         self._Cached['Factor'] = Temp
         if Value < 2: #override the class attribute, make open > 0 interval
-            self._Min = 2 * sys.float_info.min
+            self._Min = 2 * ALMOST_ZERO
         else: # makes the interval closed
             self._Min = 0.0
     
@@ -1912,7 +1922,7 @@ class F_Distribution(ContinuousDistributionABC):
         random()
             None -> float
     
-    Version 1.0.0.0
+    Version 1.0.1.0
     """
     
     #class 'private' fields
@@ -1940,7 +1950,7 @@ class F_Distribution(ContinuousDistributionABC):
             UT_TypeError: either of the arguments is neither int nor float
             UT_ValueError: either of the arguments is zero or negative
         
-        Version 1.0.0.0
+        Version 1.0.0.1
         """
         if not isinstance(Degree1, (int, float)):
             raise UT_TypeError(Degree1, (int, float), SkipFrames = 1)
@@ -1963,7 +1973,7 @@ class F_Distribution(ContinuousDistributionABC):
         self._Cached['Q3'] = None #cached third quartile
         self._Cached['Median'] = None
         if Degree1 < 2: #override the class attribute, make open > 0 interval
-            self._Min = 2 * sys.float_info.min
+            self._Min = 2 * ALMOST_ZERO
     
     #private methods
     
@@ -2033,7 +2043,7 @@ class F_Distribution(ContinuousDistributionABC):
             UT_TypeError: passed value is not a real number
             UT_ValueError: passed value is not positive
         
-        Version 1.0.0.0
+        Version 1.0.1.0
         """
         if not isinstance(Value, (int, float)):
             raise UT_TypeError(Value, (int, float), SkipFrames = 1)
@@ -2041,7 +2051,7 @@ class F_Distribution(ContinuousDistributionABC):
             raise UT_ValueError(Value, '> 0 - 1st degree parameter',
                                                                 SkipFrames = 1)
         self._Parameters['Degree1'] = Value
-        for Key in self._Cached.keys():
+        for Key in self._Cached:
             self._Cached[Key] = None
         Degree1 = Value
         Degree2 = self._Parameters['Degree2']
@@ -2049,7 +2059,7 @@ class F_Distribution(ContinuousDistributionABC):
         Temp -= sf.log_beta(0.5 * Degree1, 0.5 * Degree2)
         self._Cached['Factor'] = Temp
         if Value < 2: #override the class attribute, make open > 0 interval
-            self._Min = 2 * sys.float_info.min
+            self._Min = 2 * ALMOST_ZERO
         else: # makes the interval closed
             self._Min = 0.0
     
@@ -2079,7 +2089,7 @@ class F_Distribution(ContinuousDistributionABC):
             UT_TypeError: passed value is not a real number
             UT_ValueError: passed value is not positive
         
-        Version 1.0.0.0
+        Version 1.0.1.0
         """
         if not isinstance(Value, (int, float)):
             raise UT_TypeError(Value, (int, float), SkipFrames = 1)
@@ -2087,7 +2097,7 @@ class F_Distribution(ContinuousDistributionABC):
             raise UT_ValueError(Value, '> 0 - 2nd degree parameter',
                                                                 SkipFrames = 1)
         self._Parameters['Degree2'] = Value
-        for Key in self._Cached.keys():
+        for Key in self._Cached:
             self._Cached[Key] = None
         Degree2 = Value
         Degree1 = self._Parameters['Degree1']
@@ -2107,9 +2117,8 @@ class F_Distribution(ContinuousDistributionABC):
             float > 0: 2nd number of degrees of freedom > 2
             None: 2nd number of degrees of freedom is in the interval <= 2
         
-        Version 1.0.0.0
+        Version 1.0.0.1
         """
-        d1 = self.Degree1
         d2 = self.Degree2
         if d2 > 2:
             Result = d2 / (d2 - 2)
@@ -2247,12 +2256,12 @@ class Gamma(ContinuousDistributionABC):
         random()
             None -> float
     
-    Version 1.0.0.0
+    Version 1.0.1.0
     """
     
     #class 'private' fields
     
-    _Min: ClassVar[sf.TReal] = 2 * sys.float_info.min
+    _Min: ClassVar[sf.TReal] = 2 * ALMOST_ZERO
     
     #special methods
     
@@ -2349,7 +2358,7 @@ class Gamma(ContinuousDistributionABC):
             UT_TypeError: passed value is not a real number
             UT_ValueError: passed value is not positive
         
-        Version 1.0.0.0
+        Version 1.0.1.0
         """
         if not isinstance(Value, (int, float)):
             raise UT_TypeError(Value, (int, float), SkipFrames = 1)
@@ -2359,7 +2368,7 @@ class Gamma(ContinuousDistributionABC):
         Shape = Value
         Rate = self._Parameters['Rate']
         Temp = Shape * math.log(Rate) - math.lgamma(Shape)
-        for Key in self._Cached.keys():
+        for Key in self._Cached:
             self._Cached[Key] = None
         self._Cached['Factor'] = Temp
     
@@ -2387,7 +2396,7 @@ class Gamma(ContinuousDistributionABC):
             UT_TypeError: passed value is not a real number
             UT_ValueError: passed value is not positive
         
-        Version 1.0.0.0
+        Version 1.0.1.0
         """
         if not isinstance(Value, (int, float)):
             raise UT_TypeError(Value, (int, float), SkipFrames = 1)
@@ -2397,7 +2406,7 @@ class Gamma(ContinuousDistributionABC):
         Rate = Value
         Shape = self._Parameters['Shape']
         Temp = Shape * math.log(Rate) - math.lgamma(Shape)
-        for Key in self._Cached.keys():
+        for Key in self._Cached:
             self._Cached[Key] = None
         self._Cached['Factor'] = Temp
     
@@ -2493,7 +2502,7 @@ class Erlang(Gamma):
         random()
             None -> float
     
-    Version 1.0.0.0
+    Version 1.0.1.0
     """
     
     #class 'private' fields
@@ -2587,7 +2596,7 @@ class Erlang(Gamma):
             UT_TypeError: passed value is not an integer number
             UT_ValueError: passed value is not positive
         
-        Version 1.0.0.0
+        Version 1.0.1.0
         """
         if not isinstance(Value, int):
             raise UT_TypeError(Value, int, SkipFrames = 1)
@@ -2597,7 +2606,7 @@ class Erlang(Gamma):
         Shape = Value
         Rate = self._Parameters['Rate']
         Temp = math.pow(Rate, Shape) / math.factorial(Shape - 1)
-        for Key in self._Cached.keys():
+        for Key in self._Cached:
             self._Cached[Key] = None
         self._Cached['Factor'] = Temp
     
@@ -2625,7 +2634,7 @@ class Erlang(Gamma):
             UT_TypeError: passed value is not a real number
             UT_ValueError: passed value is not positive
         
-        Version 1.0.0.0
+        Version 1.0.1.0
         """
         if not isinstance(Value, (int, float)):
             raise UT_TypeError(Value, (int, float), SkipFrames = 1)
@@ -2635,7 +2644,7 @@ class Erlang(Gamma):
         Rate = Value
         Shape = self._Parameters['Shape']
         Temp = math.pow(Rate, Shape) / math.factorial(Shape - 1)
-        for Key in self._Cached.keys():
+        for Key in self._Cached:
             self._Cached[Key] = None
         self._Cached['Factor'] = Temp
 
@@ -2673,7 +2682,7 @@ class Poisson(DiscreteDistributionABC):
         random()
             None -> int
     
-    Version 1.0.0.0
+    Version 1.0.1.0
     """
 
     #special methods
@@ -2761,14 +2770,14 @@ class Poisson(DiscreteDistributionABC):
             UT_TypeError: passed value is not an integer number nor float
             UT_ValueError: passed value is not positive
         
-        Version 1.0.0.0
+        Version 1.0.1.0
         """
         if not isinstance(Value, (int, float)):
             raise UT_TypeError(Value, (int, float), SkipFrames = 1)
         if Value <= 0:
             raise UT_ValueError(Value, '> 0 - rate parameter', SkipFrames = 1)
         self._Parameters['Rate'] = Value
-        for Key in self._Cached.keys():
+        for Key in self._Cached:
             self._Cached[Key] = None
         self._Cached['Factor'] = math.exp(- Value)
     
@@ -2856,7 +2865,7 @@ class Binomial(DiscreteDistributionABC):
         random()
             None -> int
     
-    Version 1.0.0.0
+    Version 1.0.1.0
     """
 
     #special methods
@@ -2954,7 +2963,7 @@ class Binomial(DiscreteDistributionABC):
             UT_TypeError: passed value is not float
             UT_ValueError: passed value is not in the range (0, 1)
         
-        Version 1.0.0.0
+        Version 1.0.1.0
         """
         if not isinstance(Value, float):
             raise UT_TypeError(Value, float, SkipFrames = 1)
@@ -2962,7 +2971,7 @@ class Binomial(DiscreteDistributionABC):
             raise UT_ValueError(Value, '0 < p < 1 - probability parameter',
                                                                 SkipFrames = 1)
         self._Parameters['Probability'] = Value
-        for Key in self._Cached.keys():
+        for Key in self._Cached:
             self._Cached[Key] = None
     
     @property
@@ -2989,14 +2998,14 @@ class Binomial(DiscreteDistributionABC):
             UT_TypeError: passed value is not int
             UT_ValueError: passed value is not positive
         
-        Version 1.0.0.0
+        Version 1.0.1.0
         """
         if not isinstance(Value, int):
             raise UT_TypeError(Value, int, SkipFrames = 1)
         if Value <= 0:
             raise UT_ValueError(Value, '> 0 - draws parameter', SkipFrames = 1)
         self._Parameters['Draws'] = Value
-        for Key in self._Cached.keys():
+        for Key in self._Cached:
             self._Cached[Key] = None
     
     @property
@@ -3097,7 +3106,7 @@ class Geometric(DiscreteDistributionABC):
         random()
             None -> int
     
-    Version 1.0.0.0
+    Version 1.0.1.0
     """
     
      #class 'private' fields
@@ -3201,7 +3210,7 @@ class Geometric(DiscreteDistributionABC):
             UT_TypeError: passed value is not float
             UT_ValueError: passed value is not in the range (0, 1)
         
-        Version 1.0.0.0
+        Version 1.0.1.0
         """
         if not isinstance(Value, float):
             raise UT_TypeError(Value, float, SkipFrames = 1)
@@ -3209,7 +3218,7 @@ class Geometric(DiscreteDistributionABC):
             raise UT_ValueError(Value, '0 < p < 1 - probability parameter',
                                                                 SkipFrames = 1)
         self._Parameters['Probability'] = Value
-        for Key in self._Cached.keys():
+        for Key in self._Cached:
             self._Cached[Key] = None
     
     @property
@@ -3294,10 +3303,9 @@ class Geometric(DiscreteDistributionABC):
         Signature:
             None -> float > 0
         
-        Version 1.0.0.0
+        Version 1.0.0.1
         """
         Prob = self.Probability
-        pq = Prob * (1 - Prob)
         return 6 + Prob * Prob / (1 - Prob)
 
 class Hypergeometric(DiscreteDistributionABC):
@@ -3338,7 +3346,7 @@ class Hypergeometric(DiscreteDistributionABC):
         random()
             None -> int
     
-    Version 1.0.0.0
+    Version 1.0.1.0
     """
 
     #special methods
@@ -3363,7 +3371,7 @@ class Hypergeometric(DiscreteDistributionABC):
                 the third argument is less than 1, OR the second or the third
                 argument is greater than or equal to the first
         
-        Version 1.0.0.0
+        Version 1.0.0.1
         """
         if not isinstance(Size, int):
             raise UT_TypeError(Size, int, SkipFrames = 1)
@@ -3380,10 +3388,10 @@ class Hypergeometric(DiscreteDistributionABC):
         if Draws < 1:
             raise UT_ValueError(Draws, '>= 1, number of draws', SkipFrames = 1)
         if Successes >= Size:
-            raise UT_ValueError(Successes,
-                    '< {}, number of successes'.format(Size), SkipFrames = 1)
+            raise UT_ValueError(Successes, f'< {Size}, number of successes',
+                                                                SkipFrames = 1)
         if Draws >= Size:
-            raise UT_ValueError(Draws, '< {}, number of draws'.format(Size),
+            raise UT_ValueError(Draws, f'< {Size}, number of draws',
                                                                 SkipFrames = 1)
         self._Parameters = dict()
         self._Parameters['Size'] = Size
@@ -3454,7 +3462,7 @@ class Hypergeometric(DiscreteDistributionABC):
             UT_TypeError: passed value is not int
             UT_ValueError: passed value is less than 2
         
-        Version 1.0.0.0
+        Version 1.0.1.0
         """
         if not isinstance(Value, int):
             raise UT_TypeError(Value, int, SkipFrames = 1)
@@ -3463,15 +3471,13 @@ class Hypergeometric(DiscreteDistributionABC):
         Draws = self.Draws
         Successes = self.Successes
         if Value <= Draws:
-            strError= '> {} - size must be greater than draws'.format(
-                                                                        Draws)
-            raise UT_ValueError(Value, strError, SkipFrames = 1)
+            Message = f'> {Draws} - size must be greater than draws'
+            raise UT_ValueError(Value, Message, SkipFrames = 1)
         if Value <= Successes:
-            strError= '> {} - size must be greater than successes'.format(
-                                                                    Successes)
-            raise UT_ValueError(Value, strError, SkipFrames = 1)
+            Message = f'> {Successes} - size must be greater than successes'
+            raise UT_ValueError(Value, Message, SkipFrames = 1)
         self._Parameters['Size'] = Value
-        for Key in self._Cached.keys():
+        for Key in self._Cached:
             self._Cached[Key] = None
         self._Cached['Factor'] = sf.combination(Value, self.Draws)
 
@@ -3499,7 +3505,7 @@ class Hypergeometric(DiscreteDistributionABC):
             UT_TypeError: passed value is not int
             UT_ValueError: passed value is not positive
         
-        Version 1.0.0.0
+        Version 1.0.1.0
         """
         if not isinstance(Value, int):
             raise UT_TypeError(Value, int, SkipFrames = 1)
@@ -3508,10 +3514,10 @@ class Hypergeometric(DiscreteDistributionABC):
                                                                 SkipFrames = 1)
         Size = self.Size
         if Value >= Size:
-            raise UT_ValueError(Value, '< {} - successes number'.format(Size),
+            raise UT_ValueError(Value, f'< {Size} - successes number',
                                                                 SkipFrames = 1)
         self._Parameters['Successes'] = Value
-        for Key in self._Cached.keys():
+        for Key in self._Cached:
             self._Cached[Key] = None
         self._Cached['Factor'] = sf.combination(Size, self.Draws)
 
@@ -3539,7 +3545,7 @@ class Hypergeometric(DiscreteDistributionABC):
             UT_TypeError: passed value is not int
             UT_ValueError: passed value is not positive
         
-        Version 1.0.0.0
+        Version 1.0.1.0
         """
         if not isinstance(Value, int):
             raise UT_TypeError(Value, int, SkipFrames = 1)
@@ -3547,10 +3553,10 @@ class Hypergeometric(DiscreteDistributionABC):
             raise UT_ValueError(Value, '> 0 - draws parameter', SkipFrames = 1)
         Size = self.Size
         if Value >= Size:
-            raise UT_ValueError(Value, '< {} - draws parameter'.format(Size),
+            raise UT_ValueError(Value, f'< {Size} - draws parameter',
                                                                 SkipFrames = 1)
         self._Parameters['Draws'] = Value
-        for Key in self._Cached.keys():
+        for Key in self._Cached:
             self._Cached[Key] = None
         self._Cached['Factor'] = sf.combination(Size, Value)
     

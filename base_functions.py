@@ -72,8 +72,8 @@ Functions:
                 *, int > 0, bool/ -> int OR float
 """
 
-__version__= '1.0.0.0'
-__date__ = '10-02-2022'
+__version__= '1.0.1.0'
+__date__ = '01-05-2023'
 __status__ = 'Production'
 
 #imports
@@ -153,13 +153,13 @@ def _CheckInput(Data: Any, *, SkipFrames: int = 1) -> None:
         UT_ValueError: passed mandatory sequence is empty, OR any keyword
             argument is of the proper type but unacceptable value
 
-    Version 1.0.0.0
+    Version 1.0.1.0
     """
     _CheckPositiveInteger(SkipFrames)
     if ((not isinstance(Data, c_abc.Sequence))
                                 or (isinstance(Data, (str, bytes, bytearray)))):
         raise UT_TypeError(Data, (list, tuple), SkipFrames = SkipFrames)
-    if not len(Data):
+    if not Data:
         raise UT_ValueError(len(Data), '> 0 - length of the sequence',
                                                         SkipFrames = SkipFrames)
     for Index, Element in enumerate(Data):
@@ -167,8 +167,7 @@ def _CheckInput(Data: Any, *, SkipFrames: int = 1) -> None:
             if not (hasattr(Element, 'Value') and hasattr(Element, 'SE')):
                 err = UT_TypeError(Element, (int, float, MeasuredValue),
                                                         SkipFrames = SkipFrames)
-                err.args = ('{} at position {} in sequence'.format(err.args[0],
-                                                                    Index), )
+                err.appendMessage(f'at position {Index} in sequence')
                 raise err
     
 
@@ -621,7 +620,7 @@ def GetMoment(Data: TGenericSequence, Power: int, *, IsCentral: bool = False,
             is zero or negative integer, OR any keyword argument is of the
             proper type but unacceptable value
 
-    Version 1.0.0.0
+    Version 1.0.0.1
     """
     _CheckPositiveInteger(Power)
     _CheckPositiveInteger(SkipFrames)
@@ -640,8 +639,8 @@ def GetMoment(Data: TGenericSequence, Power: int, *, IsCentral: bool = False,
     Length = len(_Data)
     Eps = sys.float_info.epsilon
     First = _Data[0]
-    bCond = any(map(lambda x: abs(x - First) > Eps, _Data))
-    if bCond:
+    CheckIfSameValues = any(map(lambda x: abs(x - First) > Eps, _Data))
+    if CheckIfSameValues:
         Sum = sum(pow((Item - Mean) / Sigma, Power) for Item in _Data)
         Result = Sum / Length
     else: #all elements are the same!!!!
@@ -915,7 +914,7 @@ def GetMoment2(DataX: TGenericSequence, DataY: TGenericSequence, PowerX: int,
             of the proper type but unacceptable value, OR the X and Y sequences
             are of different length
 
-    Version 1.0.0.0
+    Version 1.0.0.1
     """
     _CheckPositiveInteger(PowerX)
     _CheckPositiveInteger(PowerY)
@@ -944,10 +943,10 @@ def GetMoment2(DataX: TGenericSequence, DataY: TGenericSequence, PowerX: int,
         SigmaY = 1
     Eps = sys.float_info.epsilon
     First = _DataX[0]
-    bCond1 = any(map(lambda x: abs(x - First) > Eps, _DataX))
+    AreSameXs = any(map(lambda x: abs(x - First) > Eps, _DataX))
     First = _DataY[0]
-    bCond2 = any(map(lambda x: abs(x - First) > Eps, _DataY))
-    if bCond1 and bCond2:
+    AreSameYs = any(map(lambda x: abs(x - First) > Eps, _DataY))
+    if AreSameXs and AreSameYs:
         Sum = sum((pow((Item - MeanX) / SigmaX, PowerX) *
                 pow((_DataY[Index] - MeanY) / SigmaY, PowerY))
                                         for Index, Item in enumerate(_DataX))
