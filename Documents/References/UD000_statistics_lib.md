@@ -2,7 +2,7 @@
 
 ## Scope
 
-This document provides the reference infomation on the library *statistics_lib*, which includes the following modules:
+This document provides the reference information on the library *statistics_lib*, which includes the following modules:
 
 * *base_functions*
 * *ordered_functions*
@@ -14,12 +14,13 @@ This document provides the reference infomation on the library *statistics_lib*,
 
 ## Installation
 
-This library can be check-out from the GitHub [repository https://github.com/FooBarShebang/statistics_lib](https://github.com/FooBarShebang/statistics_lib). The recommended manner of use is within a *virtual environment*. The recommended location is *Lib/site_packages* within the virtual enviroments.
+This library can be check-out from the GitHub [repository https://github.com/FooBarShebang/statistics_lib](https://github.com/FooBarShebang/statistics_lib). The recommended manner of use is within a *virtual environment*. The recommended location is *Lib/site_packages* within the virtual environments.
 
 **Important**! Do not forget to check-out the dependencies into the same location side by side with *statistics_lib*:
 
 * [introspection_lib](https://github.com/FooBarShebang/introspection_lib)
 * [phyqus_lib](https://github.com/FooBarShebang/phyqus_lib)
+* [math_extra_lib](https://github.com/FooBarShebang/math_extra_lib)
 
 ## Intended Use and Functionality
 

@@ -22,11 +22,6 @@ Modules:
         floating point numbers) and / or measurements with uncertainty, which
         are treated as the entire population. The statistical properties of the
         population distribution are calculated and returned on demand.
-    special_functions: Implements special mathematical functions such as inverse
-        error function, beta function, incomplete beta function and incomplete
-        gamma functions; as well as wrappers for (Python v >= 3.8) / actual
-        implementation (Python v < 3.8) of the combinatorics functions for
-        permutation and combinations.
     distribution_classes: Provides classes implementing a number of commonly
         used discrete and continuous distributions. All classes have properties
         returning the basic statistical properties of the distribution: mean,
@@ -67,5 +62,4 @@ __license__ = 'Public Domain'
 __copyright__ = 'Diagnoptics Technologies B.V.'
 
 __all__ = ['base_functions', 'ordered_functions', 'data_classes',
-            'special_functions', 'distribution_classes',
-            'inverse_distributions', 'stat_tests']
+            'distribution_classes', 'inverse_distributions', 'stat_tests']
