@@ -1,4 +1,4 @@
-# Module statistics_lib.base_functions Reference
+# Module statistics_lib.ordered_functions Reference
 
 ## Scope
 
