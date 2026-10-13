@@ -18,6 +18,16 @@ The classes provided in this module implement the following functionality:
 * Immutability of the stored data - the values of each individual data points can be read-accessed, but not modified or removed, as well as new data points cannot be added
 * Improved calculation speed - previously accessed statistical properties are cached and not re-calculated upon the consequent request
 * Easy and convenient API - the statistical properties of the data sequence are accessible via read-only properties, instead of function or method call
+* Statistic1D and Statistics2D classes support
+  * built-in len() function
+  * built-in iter() function, therefore 'for loop' and enumeration()
+  * integer indexing for accesing a specific single data point / data points pair
+* Statistics1D class supports
+  * array-scalar and scalar-array basic arithmetics: addition, subtraction, multiplication, division
+  * array-array (per element) basic arithmetics: addition, subtraction, multiplication, division
+  * raising to an integer power
+
+Note, that 'scalar' can be a native Python **int** or **float**, as well as **phyqus_lib.base_classes.MeasuredValue** instance (measurement value with uncertainty). An 'array' may be a native Python sequence (**list** or **tuple**) of such 'scalars' or another instance of **Statistics1D** class. Naturally, the 'array' must be of the same length as the current instance of **Statistics1D** class.
 
 The base design idea is that the entire data set is treated and passed around as a single object, which can calculate the own statistical properties. Thus, the API of such objects can made compatible / mostly similar to the classes implementing model continuous distributions. Therefore the functions performing statistical comparison can operate in the same manner on the measured (finite size samples) data and model distributions. Also, this approach simplifies implementation of the statistical tests functions.
 

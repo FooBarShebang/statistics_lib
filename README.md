@@ -38,7 +38,7 @@ $git submodule update --recursive --remote
 
 ## System requirements
 
-This library is written in Python 3 programming language (>= v3.6) and is intended to be OS platform independent. At least, it is tested under MS Windows and GNU Linux OSes, see [Documents/Tests/tested_OS.md](./Documents/Tests/tested_OS.md).
+This library is written in Python 3 programming language (>= v3.11) and is intended to be OS platform independent. At least, it is tested under MS Windows and GNU Linux OSes, see [Documents/Tests/tested_OS.md](./Documents/Tests/tested_OS.md).
 
 This library depends on additional Python packages, which should be installed as well (see [Dependencies.md](./Dependencies.md)).
 

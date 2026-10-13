@@ -1,6 +1,6 @@
 # List of the required libraries (dependencies) of the library statistics_lib
 
-This library  requires the Python 3, specifically version >= 3.6.
+This library  requires the Python 3, specifically version >= 3.11.
 
 ## Direct dependencies
 

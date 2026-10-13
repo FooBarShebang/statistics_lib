@@ -6,9 +6,8 @@ Set of unit tests on the module stastics_lib.data_classes. See the test plan /
 report TE003_data_classes.md
 """
 
-
-__version__= '1.0.0.0'
-__date__ = '08-03-2022'
+__version__= '2.0.0.0'
+__date__ = '13-10-2026'
 __status__ = 'Testing'
 
 #imports
@@ -55,10 +54,15 @@ class Test_Statistics1D(unittest.TestCase):
     Unit-test class implementing testing of the class Statistics1D() from the
     module statistics_lib.data_classes.
 
-    Implements tests: 
-    Covers the requirements:
+    Implements tests: TEST-T-310, TEST-T-311, TEST-T-312, TEST-T-313,
+    TEST-T-314, TEST-T-315, TEST-T-316, TEST-T-317, TEST-T-318, TEST-T-319,
+    TEST-T-31A, TEST-T-31B
+    
+    Covers the requirements: REQ-FUN-310, REQ-FUN-311, REQ-FUN-312, REQ-FUN-313,
+    REQ-FUN-314, REQ-FUN-316, REQ-FUN-317, REQ-AWM-300, REQ-AWM-301,
+    REQ-AWM-302, REQ-AWM-310, REQ-AWM-311, REQ-AWM-312, REQ-AWM-313
 
-    Version 1.0.0.0
+    Version 1.1.0.0
     """
     
     @classmethod
@@ -98,8 +102,23 @@ class Test_Statistics1D(unittest.TestCase):
             else:
                 cls.TotalMixed.append(Item.Value)
                 cls.TotalErr.append(0)
+        cls.TotalMixed_Arith = list()
+        for Item in cls.MixedErr:
+            Temp = random.random()
+            if Temp >= 0.6:
+                cls.TotalMixed_Arith.append(Item)
+            else:
+                cls.TotalMixed_Arith.append(Item.Value)
         cls.BadCases = [1, 2.0, 'asd', [1, '1'], ('b', 2.0), int, float, list,
                         tuple, {1:1, 2:2}, dict]
+        BadCopy = list(cls.TotalMixed)
+        BadCopy[-1] = '1'
+        cls.BadArithmetics = [int, float, '1', '1.1', {1 : 1}, list, tuple,
+                                [1 for _ in range(len(cls.TotalMixed) - 1)],
+                                [1 for _ in range(len(cls.TotalMixed) + 1)],
+                                BadCopy, None, MeasuredValue
+                                ]
+        
         cls.Properties = (('N', int), ('Mean', (int, float)),
                                 ('Min', (int, float)), ('Max', (int, float)),
                                 ('Median', (int, float)), ('Q1', (int, float)),
@@ -830,13 +849,666 @@ class Test_Statistics1D(unittest.TestCase):
             objTest.getHistogram(BinSize = 0.0)
         del objTest
 
+    def test_len(self):
+        """
+        Checks that the length of the stored data set is returned properly using
+        len() function.
+        
+        Tests ID: TEST-T-319
+        Requirements ID: REQ-FUN-316
+
+        Version 1.0.0.0
+        """
+        for Input in [self.AllInt, self.AllFloat, self.Mixed, self.IntErr,
+                                self.FloatErr, self.MixedErr, self.TotalMixed]:
+            objTest = self.TestClass(Input)
+            self.assertIsInstance(len(objTest), int)
+            self.assertEqual(len(objTest), len(Input))
+            #check the repetitive call!
+            self.assertIsInstance(len(objTest), int)
+            self.assertEqual(len(objTest), len(Input))
+            del objTest
+
+    def test_getitem(self):
+        """
+        Checks that the stored data point can be accessed using integer index
+        notation.
+        
+        Tests ID: TEST-T-319
+        Requirements ID: REQ-FUN-316
+
+        Version 1.0.0.0
+        """
+        for Input in [self.AllInt, self.AllFloat, self.Mixed, self.IntErr,
+                                self.FloatErr, self.MixedErr, self.TotalMixed]:
+            objTest = self.TestClass(Input)
+            for Index, Item in enumerate(Input):
+                Check = objTest[Index]
+                if isinstance(Item, int):
+                    self.assertIsInstance(Check, int)
+                    self.assertEqual(Check, Item)
+                    self.assertEqual(Check, objTest.Values[Index])
+                elif isinstance(Item, float):
+                    self.assertIsInstance(Check, float)
+                    self.assertAlmostEqual(Check, Item)
+                    self.assertAlmostEqual(Check, objTest.Values[Index])
+                else:
+                    self.assertIsInstance(Check, MeasuredValue)
+                    self.assertAlmostEqual(Check.Value, Item.Value)
+                    self.assertAlmostEqual(Check.Value, objTest.Values[Index])
+                    self.assertAlmostEqual(Check.SE, Item.SE)
+                    self.assertAlmostEqual(Check.SE, objTest.Errors[Index])
+            del objTest
+
+    def test_for_loop(self):
+        """
+        Checks that the stored data point can be iterated over in a for loop.
+        
+        Tests ID: TEST-T-319
+        Requirements ID: REQ-FUN-316
+
+        Version 1.0.0.0
+        """
+        for Input in [self.AllInt, self.AllFloat, self.Mixed, self.IntErr,
+                                self.FloatErr, self.MixedErr, self.TotalMixed]:
+            objTest = self.TestClass(Input)
+            Index = 0
+            for Check in objTest:
+                Item = Input[Index]
+                if isinstance(Item, int):
+                    self.assertIsInstance(Check, int)
+                    self.assertEqual(Check, Item)
+                    self.assertEqual(Check, objTest.Values[Index])
+                elif isinstance(Item, float):
+                    self.assertIsInstance(Check, float)
+                    self.assertAlmostEqual(Check, Item)
+                    self.assertAlmostEqual(Check, objTest.Values[Index])
+                else:
+                    self.assertIsInstance(Check, MeasuredValue)
+                    self.assertAlmostEqual(Check.Value, Item.Value)
+                    self.assertAlmostEqual(Check.Value, objTest.Values[Index])
+                    self.assertAlmostEqual(Check.SE, Item.SE)
+                    self.assertAlmostEqual(Check.SE, objTest.Errors[Index])
+                Index += 1
+            del objTest
+
+    def test_enumerate(self):
+        """
+        Checks that the stored data can be enumerated.
+        
+        Tests ID: TEST-T-319
+        Requirements ID: REQ-FUN-316
+
+        Version 1.0.0.0
+        """
+        for Input in [self.AllInt, self.AllFloat, self.Mixed, self.IntErr,
+                                self.FloatErr, self.MixedErr, self.TotalMixed]:
+            objTest = self.TestClass(Input)
+            for Index, Check in enumerate(objTest):
+                Item = Input[Index]
+                self.assertIsInstance(Check, Item.__class__)
+                if isinstance(Item, int):
+                    self.assertIsInstance(Check, int)
+                    self.assertEqual(Check, Item)
+                    self.assertEqual(Check, objTest.Values[Index])
+                elif isinstance(Item, float):
+                    self.assertIsInstance(Check, float)
+                    self.assertAlmostEqual(Check, Item)
+                    self.assertAlmostEqual(Check, objTest.Values[Index])
+                else:
+                    self.assertIsInstance(Check, MeasuredValue)
+                    self.assertAlmostEqual(Check.Value, Item.Value)
+                    self.assertAlmostEqual(Check.Value, objTest.Values[Index])
+                    self.assertAlmostEqual(Check.SE, Item.SE)
+                    self.assertAlmostEqual(Check.SE, objTest.Errors[Index])
+            del objTest
+
+    def test_add(self):
+        """
+        Checks addition of another object to the test class instance.
+        
+        Tests ID: TEST-T-31A
+        Requirements ID: REQ-FUN-317
+
+        Version 1.0.0.0
+        """
+        objTest = self.TestClass(self.TotalMixed)
+        Items = [random.randint(1, 10) for _ in range(3)]
+        Items.extend([random.randint(1, 10) +random.random() for _ in range(3)])
+        Items.extend([MeasuredValue(random.randint(1, 10) + random.random(),
+                                            random.random()) for _ in range(3)])  
+        Items.append(self.TotalMixed_Arith)
+        Items.append(self.TestClass(self.TotalMixed_Arith))
+        for Item in Items:
+            Check = objTest + Item
+            self.assertIsInstance(Check, self.TestClass)
+            self.assertEqual(len(Check), len(objTest))
+            self.assertIsNot(Check, objTest)
+            for Index, Value in enumerate(self.TotalMixed):
+                Old = objTest[Index]
+                self.assertIsInstance(Old, Value.__class__)
+                if isinstance(Value, int):
+                    self.assertEqual(Value, Old)
+                elif isinstance(Value, float):
+                    self.assertAlmostEqual(Value, Old)
+                else:
+                    self.assertAlmostEqual(Value.Value, Old.Value)
+                    self.assertAlmostEqual(Value.SE, Old.SE)
+                if isinstance(Item, (int, float, MeasuredValue)):
+                    Control = Old + Item
+                else:
+                    Control = Old + Item[Index]
+                New = Check[Index]
+                self.assertIsInstance(New, Control.__class__)
+                if isinstance(Control, (int, float)):
+                    self.assertAlmostEqual(New, Control)
+                else:
+                    self.assertAlmostEqual(New.Value, Control.Value)
+                    self.assertAlmostEqual(New.SE, Control.SE)
+        del objTest
+
+    def test_radd(self):
+        """
+        Checks addition of the test class instance to another object.
+        
+        Tests ID: TEST-T-31A
+        Requirements ID: REQ-FUN-317
+
+        Version 1.0.0.0
+        """
+        objTest = self.TestClass(self.TotalMixed)
+        Items = [random.randint(1, 10) for _ in range(3)]
+        Items.extend([random.randint(1, 10) +random.random() for _ in range(3)])
+        Items.extend([MeasuredValue(random.randint(1, 10) + random.random(),
+                                            random.random()) for _ in range(3)])  
+        Items.append(self.TotalMixed_Arith)
+        Items.append(self.TestClass(self.TotalMixed_Arith))
+        for Item in Items:
+            Check = Item + objTest
+            self.assertIsInstance(Check, self.TestClass)
+            self.assertEqual(len(Check), len(objTest))
+            self.assertIsNot(Check, objTest)
+            for Index, Value in enumerate(self.TotalMixed):
+                Old = objTest[Index]
+                self.assertIsInstance(Old, Value.__class__)
+                if isinstance(Value, int):
+                    self.assertEqual(Value, Old)
+                elif isinstance(Value, float):
+                    self.assertAlmostEqual(Value, Old)
+                else:
+                    self.assertAlmostEqual(Value.Value, Old.Value)
+                    self.assertAlmostEqual(Value.SE, Old.SE)
+                if isinstance(Item, (int, float, MeasuredValue)):
+                    Control = Item + Old
+                else:
+                    Control = Item[Index] + Old
+                New = Check[Index]
+                self.assertIsInstance(New, Control.__class__)
+                if isinstance(Control, (int, float)):
+                    self.assertAlmostEqual(New, Control)
+                else:
+                    self.assertAlmostEqual(New.Value, Control.Value)
+                    self.assertAlmostEqual(New.SE, Control.SE)
+        del objTest
+
+    def test_sub(self):
+        """
+        Checks subtraction of another object from the test class instance.
+        
+        Tests ID: TEST-T-31A
+        Requirements ID: REQ-FUN-317
+
+        Version 1.0.0.0
+        """
+        objTest = self.TestClass(self.TotalMixed)
+        Items = [random.randint(1, 10) for _ in range(3)]
+        Items.extend([random.randint(1, 10) +random.random() for _ in range(3)])
+        Items.extend([MeasuredValue(random.randint(1, 10) + random.random(),
+                                            random.random()) for _ in range(3)])  
+        Items.append(self.TotalMixed_Arith)
+        Items.append(self.TestClass(self.TotalMixed_Arith))
+        for Item in Items:
+            Check = objTest - Item
+            self.assertIsInstance(Check, self.TestClass)
+            self.assertEqual(len(Check), len(objTest))
+            self.assertIsNot(Check, objTest)
+            for Index, Value in enumerate(self.TotalMixed):
+                Old = objTest[Index]
+                self.assertIsInstance(Old, Value.__class__)
+                if isinstance(Value, int):
+                    self.assertEqual(Value, Old)
+                elif isinstance(Value, float):
+                    self.assertAlmostEqual(Value, Old)
+                else:
+                    self.assertAlmostEqual(Value.Value, Old.Value)
+                    self.assertAlmostEqual(Value.SE, Old.SE)
+                if isinstance(Item, (int, float, MeasuredValue)):
+                    Control = Old - Item
+                else:
+                    Control = Old - Item[Index]
+                New = Check[Index]
+                self.assertIsInstance(New, Control.__class__)
+                if isinstance(Control, (int, float)):
+                    self.assertAlmostEqual(New, Control)
+                else:
+                    self.assertAlmostEqual(New.Value, Control.Value)
+                    self.assertAlmostEqual(New.SE, Control.SE)
+        del objTest
+
+    def test_rsub(self):
+        """
+        Checks subtraction of the test class instance from another object.
+        
+        Tests ID: TEST-T-31A
+        Requirements ID: REQ-FUN-317
+
+        Version 1.0.0.0
+        """
+        objTest = self.TestClass(self.TotalMixed)
+        Items = [random.randint(1, 10) for _ in range(3)]
+        Items.extend([random.randint(1, 10) +random.random() for _ in range(3)])
+        Items.extend([MeasuredValue(random.randint(1, 10) + random.random(),
+                                            random.random()) for _ in range(3)])  
+        Items.append(self.TotalMixed_Arith)
+        Items.append(self.TestClass(self.TotalMixed_Arith))
+        for Item in Items:
+            Check = Item - objTest
+            self.assertIsInstance(Check, self.TestClass)
+            self.assertEqual(len(Check), len(objTest))
+            self.assertIsNot(Check, objTest)
+            for Index, Value in enumerate(self.TotalMixed):
+                Old = objTest[Index]
+                self.assertIsInstance(Old, Value.__class__)
+                if isinstance(Value, int):
+                    self.assertEqual(Value, Old)
+                elif isinstance(Value, float):
+                    self.assertAlmostEqual(Value, Old)
+                else:
+                    self.assertAlmostEqual(Value.Value, Old.Value)
+                    self.assertAlmostEqual(Value.SE, Old.SE)
+                if isinstance(Item, (int, float, MeasuredValue)):
+                    Control = Item - Old
+                else:
+                    Control = Item[Index] - Old
+                New = Check[Index]
+                self.assertIsInstance(New, Control.__class__)
+                if isinstance(Control, (int, float)):
+                    self.assertAlmostEqual(New, Control)
+                else:
+                    self.assertAlmostEqual(New.Value, Control.Value)
+                    self.assertAlmostEqual(New.SE, Control.SE)
+        del objTest
+
+    def test_mul(self):
+        """
+        Checks multiplication of the test class instance by another object.
+        
+        Tests ID: TEST-T-31A
+        Requirements ID: REQ-FUN-317
+
+        Version 1.0.0.0
+        """
+        objTest = self.TestClass(self.TotalMixed)
+        Items = [random.randint(1, 10) for _ in range(3)]
+        Items.extend([random.randint(1, 10) +random.random() for _ in range(3)])
+        Items.extend([MeasuredValue(random.randint(1, 10) + random.random(),
+                                            random.random()) for _ in range(3)])  
+        Items.append(self.TotalMixed_Arith)
+        Items.append(self.TestClass(self.TotalMixed_Arith))
+        for Item in Items:
+            Check = objTest * Item
+            self.assertIsInstance(Check, self.TestClass)
+            self.assertEqual(len(Check), len(objTest))
+            self.assertIsNot(Check, objTest)
+            for Index, Value in enumerate(self.TotalMixed):
+                Old = objTest[Index]
+                self.assertIsInstance(Old, Value.__class__)
+                if isinstance(Value, int):
+                    self.assertEqual(Value, Old)
+                elif isinstance(Value, float):
+                    self.assertAlmostEqual(Value, Old)
+                else:
+                    self.assertAlmostEqual(Value.Value, Old.Value)
+                    self.assertAlmostEqual(Value.SE, Old.SE)
+                if isinstance(Item, (int, float, MeasuredValue)):
+                    Control = Old * Item
+                else:
+                    Control = Old * Item[Index]
+                New = Check[Index]
+                self.assertIsInstance(New, Control.__class__)
+                if isinstance(Control, (int, float)):
+                    self.assertAlmostEqual(New, Control)
+                else:
+                    self.assertAlmostEqual(New.Value, Control.Value)
+                    self.assertAlmostEqual(New.SE, Control.SE)
+        del objTest
+
+    def test_rmul(self):
+        """
+        Checks multiplication of another object by the test class instance.
+        
+        Tests ID: TEST-T-31A
+        Requirements ID: REQ-FUN-317
+
+        Version 1.0.0.0
+        """
+        objTest = self.TestClass(self.TotalMixed)
+        Items = [random.randint(1, 10) for _ in range(3)]
+        Items.extend([random.randint(1, 10) +random.random() for _ in range(3)])
+        Items.extend([MeasuredValue(random.randint(1, 10) + random.random(),
+                                            random.random()) for _ in range(3)])  
+        Items.append(self.TotalMixed_Arith)
+        Items.append(self.TestClass(self.TotalMixed_Arith))
+        for Item in Items:
+            Check = Item * objTest
+            self.assertIsInstance(Check, self.TestClass)
+            self.assertEqual(len(Check), len(objTest))
+            self.assertIsNot(Check, objTest)
+            for Index, Value in enumerate(self.TotalMixed):
+                Old = objTest[Index]
+                self.assertIsInstance(Old, Value.__class__)
+                if isinstance(Value, int):
+                    self.assertEqual(Value, Old)
+                elif isinstance(Value, float):
+                    self.assertAlmostEqual(Value, Old)
+                else:
+                    self.assertAlmostEqual(Value.Value, Old.Value)
+                    self.assertAlmostEqual(Value.SE, Old.SE)
+                if isinstance(Item, (int, float, MeasuredValue)):
+                    Control = Item * Old
+                else:
+                    Control = Item[Index] * Old
+                New = Check[Index]
+                self.assertIsInstance(New, Control.__class__)
+                if isinstance(Control, (int, float)):
+                    self.assertAlmostEqual(New, Control)
+                else:
+                    self.assertAlmostEqual(New.Value, Control.Value)
+                    self.assertAlmostEqual(New.SE, Control.SE)
+        del objTest
+
+    def test_truediv(self):
+        """
+        Checks division of the test class instance by another object.
+        
+        Tests ID: TEST-T-31A
+        Requirements ID: REQ-FUN-317
+
+        Version 1.0.0.0
+        """
+        objTest = self.TestClass(self.TotalMixed)
+        Items = [random.randint(1, 10) for _ in range(3)]
+        Items.extend([random.randint(1, 10) +random.random() for _ in range(3)])
+        Items.extend([MeasuredValue(random.randint(1, 10) + random.random(),
+                                            random.random()) for _ in range(3)])  
+        Items.append(self.TotalMixed_Arith)
+        Items.append(self.TestClass(self.TotalMixed_Arith))
+        for Item in Items:
+            Check = objTest / Item
+            self.assertIsInstance(Check, self.TestClass)
+            self.assertEqual(len(Check), len(objTest))
+            self.assertIsNot(Check, objTest)
+            for Index, Value in enumerate(self.TotalMixed):
+                Old = objTest[Index]
+                self.assertIsInstance(Old, Value.__class__)
+                if isinstance(Value, int):
+                    self.assertEqual(Value, Old)
+                elif isinstance(Value, float):
+                    self.assertAlmostEqual(Value, Old)
+                else:
+                    self.assertAlmostEqual(Value.Value, Old.Value)
+                    self.assertAlmostEqual(Value.SE, Old.SE)
+                if isinstance(Item, (int, float, MeasuredValue)):
+                    Control = Old / Item
+                else:
+                    Control = Old / Item[Index]
+                New = Check[Index]
+                self.assertIsInstance(New, Control.__class__)
+                if isinstance(Control, (int, float)):
+                    self.assertAlmostEqual(New, Control)
+                else:
+                    self.assertAlmostEqual(New.Value, Control.Value)
+                    self.assertAlmostEqual(New.SE, Control.SE)
+        del objTest
+
+    def test_rtruediv(self):
+        """
+        Checks division of another object by the test class instance.
+        
+        Tests ID: TEST-T-31A
+        Requirements ID: REQ-FUN-317
+
+        Version 1.0.0.0
+        """
+        objTest = self.TestClass(self.TotalMixed)
+        Items = [random.randint(1, 10) for _ in range(3)]
+        Items.extend([random.randint(1, 10) +random.random() for _ in range(3)])
+        Items.extend([MeasuredValue(random.randint(1, 10) + random.random(),
+                                            random.random()) for _ in range(3)])  
+        Items.append(self.TotalMixed_Arith)
+        Items.append(self.TestClass(self.TotalMixed_Arith))
+        for Item in Items:
+            Check = Item / objTest
+            self.assertIsInstance(Check, self.TestClass)
+            self.assertEqual(len(Check), len(objTest))
+            self.assertIsNot(Check, objTest)
+            for Index, Value in enumerate(self.TotalMixed):
+                Old = objTest[Index]
+                self.assertIsInstance(Old, Value.__class__)
+                if isinstance(Value, int):
+                    self.assertEqual(Value, Old)
+                elif isinstance(Value, float):
+                    self.assertAlmostEqual(Value, Old)
+                else:
+                    self.assertAlmostEqual(Value.Value, Old.Value)
+                    self.assertAlmostEqual(Value.SE, Old.SE)
+                if isinstance(Item, (int, float, MeasuredValue)):
+                    Control = Item / Old
+                else:
+                    Control = Item[Index] / Old
+                New = Check[Index]
+                self.assertIsInstance(New, Control.__class__)
+                if isinstance(Control, (int, float)):
+                    self.assertAlmostEqual(New, Control)
+                else:
+                    self.assertAlmostEqual(New.Value, Control.Value)
+                    self.assertAlmostEqual(New.SE, Control.SE)
+        del objTest
+
+    def test_pow(self):
+        """
+        Checks raising the test class instance to a random integere power.
+        
+        Tests ID: TEST-T-31A
+        Requirements ID: REQ-FUN-317
+
+        Version 1.0.0.0
+        """
+        objTest = self.TestClass(self.TotalMixed)
+        Items = [random.randint(1, 10) for _ in range(3)]
+        Items.extend([-random.randint(1, 10) for _ in range(3)])
+        for Item in Items:
+            Check = objTest ** Item
+            self.assertIsInstance(Check, self.TestClass)
+            self.assertEqual(len(Check), len(objTest))
+            self.assertIsNot(Check, objTest)
+            for Index, Value in enumerate(self.TotalMixed):
+                Old = objTest[Index]
+                self.assertIsInstance(Old, Value.__class__)
+                if isinstance(Value, int):
+                    self.assertEqual(Value, Old)
+                elif isinstance(Value, float):
+                    self.assertAlmostEqual(Value, Old)
+                else:
+                    self.assertAlmostEqual(Value.Value, Old.Value)
+                    self.assertAlmostEqual(Value.SE, Old.SE)
+                Control = Old ** Item
+                New = Check[Index]
+                self.assertIsInstance(New, Control.__class__)
+                if isinstance(Control, (int, float)):
+                    self.assertAlmostEqual(New, Control)
+                else:
+                    self.assertAlmostEqual(New.Value, Control.Value)
+                    self.assertAlmostEqual(New.SE, Control.SE)
+        del objTest
+
+    def test_add_TypeError(self):
+        """
+        Checks __add__() method raises TypeError is the second operand is of
+        improper type.
+        
+        Tests ID: TEST-T-31B
+        Requirements ID: REQ-AWM-313
+
+        Version 1.0.0.0
+        """
+        objTest = self.TestClass(self.TotalMixed)
+        for Item in self.BadArithmetics:
+            with self.assertRaises(TypeError):
+                Check = objTest + Item
+        del objTest
+
+    def test_radd_TypeError(self):
+        """
+        Checks __radd__() method raises TypeError is the second operand is of
+        improper type.
+        
+        Tests ID: TEST-T-31B
+        Requirements ID: REQ-AWM-313
+
+        Version 1.0.0.0
+        """
+        objTest = self.TestClass(self.TotalMixed)
+        for Item in self.BadArithmetics:
+            with self.assertRaises(TypeError):
+                Check = Item + objTest
+        del objTest
+
+    def test_sub_TypeError(self):
+        """
+        Checks __sub__() method raises TypeError is the second operand is of
+        improper type.
+        
+        Tests ID: TEST-T-31B
+        Requirements ID: REQ-AWM-313
+
+        Version 1.0.0.0
+        """
+        objTest = self.TestClass(self.TotalMixed)
+        for Item in self.BadArithmetics:
+            with self.assertRaises(TypeError):
+                Check = objTest - Item
+        del objTest
+
+    def test_rsub_TypeError(self):
+        """
+        Checks __rsub__() method raises TypeError is the second operand is of
+        improper type.
+        
+        Tests ID: TEST-T-31B
+        Requirements ID: REQ-AWM-313
+
+        Version 1.0.0.0
+        """
+        objTest = self.TestClass(self.TotalMixed)
+        for Item in self.BadArithmetics:
+            with self.assertRaises(TypeError):
+                Check = Item - objTest
+        del objTest
+
+    def test_mul_TypeError(self):
+        """
+        Checks __mul__() method raises TypeError is the second operand is of
+        improper type.
+        
+        Tests ID: TEST-T-31B
+        Requirements ID: REQ-AWM-313
+
+        Version 1.0.0.0
+        """
+        objTest = self.TestClass(self.TotalMixed)
+        for Item in self.BadArithmetics:
+            with self.assertRaises(TypeError):
+                Check = objTest * Item
+        del objTest
+
+    def test_rmul_TypeError(self):
+        """
+        Checks __rmul__() method raises TypeError is the second operand is of
+        improper type.
+        
+        Tests ID: TEST-T-31B
+        Requirements ID: REQ-AWM-313
+
+        Version 1.0.0.0
+        """
+        objTest = self.TestClass(self.TotalMixed)
+        for Item in self.BadArithmetics:
+            with self.assertRaises(TypeError):
+                Check = Item * objTest
+        del objTest
+
+    def test_truediv_TypeError(self):
+        """
+        Checks __truediv__() method raises TypeError is the second operand is of
+        improper type.
+        
+        Tests ID: TEST-T-31B
+        Requirements ID: REQ-AWM-313
+
+        Version 1.0.0.0
+        """
+        objTest = self.TestClass(self.TotalMixed)
+        for Item in self.BadArithmetics:
+            with self.assertRaises(TypeError):
+                Check = objTest / Item
+        del objTest
+
+    def test_rtruediv_TypeError(self):
+        """
+        Checks __rtruediv__() method raises TypeError is the second operand is
+        of improper type.
+        
+        Tests ID: TEST-T-31B
+        Requirements ID: REQ-AWM-313
+
+        Version 1.0.0.0
+        """
+        objTest = self.TestClass(self.TotalMixed)
+        for Item in self.BadArithmetics:
+            with self.assertRaises(TypeError):
+                Check = Item / objTest
+        del objTest
+
+    def test_pow_TypeError(self):
+        """
+        Checks __pow__() method raises TypeError is the second operand is of
+        improper type.
+        
+        Tests ID: TEST-T-31B
+        Requirements ID: REQ-AWM-313
+
+        Version 1.0.0.0
+        """
+        objTest = self.TestClass(self.TotalMixed)
+        for Item in self.BadArithmetics:
+            with self.assertRaises(TypeError):
+                Check = objTest ** Item
+        for Item in [1.0, MeasuredValue(1, 1), self.TotalMixed, objTest]:
+            with self.assertRaises(TypeError):
+                Check = objTest ** Item
+        del objTest
+
 class Test_Statistics2D(unittest.TestCase):
     """
     Unit-test class implementing testing of the class Statistics2D() from the
     module statistics_lib.data_classes.
 
-    Implements tests: 
-    Covers the requirements:
+    Implements tests: TEST-T-320, TEST-T-321, TEST-T-322, TEST-T-323,
+    TEST-T-324, TEST-T-325, TEST-T-326
+
+    Covers the requirements: REQ-FUN-320, REQ-FUN-321, REQ-FUN-322, REQ-FUN-323,
+    REQ-FUN-324, REQ-FUN-325, REQ-AWM-300, REQ-AWM-301, REQ-AWM-302
 
     Version 1.0.0.0
     """
@@ -1209,6 +1881,160 @@ class Test_Statistics2D(unittest.TestCase):
             TestResult = objTest.Kendall
             self.assertIsInstance(TestResult, (int, float))
             self.assertEqual(TestResult, Check)
+            del objTest
+
+    def test_len(self):
+        """
+        Checks that the 2D statitics class supports the len() function.
+        
+        Tests ID: TEST-T-326
+        Requirements ID: REQ-FUN-325
+
+        Version 1.0.0.0
+        """
+        for DataX, DataY in [(self.AllIntX, self.AllIntY),
+                                (self.AllFloatX, self.AllFloatY),
+                                (self.MixedX, self.MixedY),
+                                (self.IntErrX, self.IntErrY),
+                                (self.FloatErrX, self.FloatErrY),
+                                (self.MixedErrX, self.MixedErrY),
+                                (self.TotalMixedX, self.TotalMixedY)]:
+            objTest = self.TestClass(DataX, DataY)
+            Check = len(objTest)
+            self.assertIsInstance(Check, int)
+            self.assertEqual(Check, len(DataX))
+            del objTest
+
+    def test_for(self):
+        """
+        Checks that the 2D statitics class supports 'for loop' functionality.
+        
+        Tests ID: TEST-T-326
+        Requirements ID: REQ-FUN-325
+
+        Version 1.0.0.0
+        """
+        for DataX, DataY in [(self.AllIntX, self.AllIntY),
+                                (self.AllFloatX, self.AllFloatY),
+                                (self.MixedX, self.MixedY),
+                                (self.IntErrX, self.IntErrY),
+                                (self.FloatErrX, self.FloatErrY),
+                                (self.MixedErrX, self.MixedErrY),
+                                (self.TotalMixedX, self.TotalMixedY)]:
+            objTest = self.TestClass(DataX, DataY)
+            Index = 0
+            for Check in objTest:
+                self.assertIsInstance(Check, tuple)
+                self.assertEqual(len(Check), 2)
+                CheckX, CheckY = Check
+                ControlX = DataX[Index]
+                ControlY = DataY[Index]
+                self.assertIsInstance(CheckX, ControlX.__class__)
+                self.assertIsInstance(CheckY, ControlY.__class__)
+                if isinstance(ControlX, (int, float)):
+                    self.assertAlmostEqual(CheckX, ControlX)
+                    self.assertAlmostEqual(CheckX, objTest.X[Index])
+                else:
+                    self.assertAlmostEqual(CheckX.Value, ControlX.Value)
+                    self.assertAlmostEqual(CheckX.SE, ControlX.SE)
+                    self.assertAlmostEqual(CheckX.Value, objTest.X[Index].Value)
+                    self.assertAlmostEqual(CheckX.SE, objTest.X[Index].SE)
+                if isinstance(ControlY, (int, float)):
+                    self.assertAlmostEqual(CheckY, ControlY)
+                    self.assertAlmostEqual(CheckY, objTest.Y[Index])
+                else:
+                    self.assertAlmostEqual(CheckY.Value, ControlY.Value)
+                    self.assertAlmostEqual(CheckY.SE, ControlY.SE)
+                    self.assertAlmostEqual(CheckY.Value, objTest.Y[Index].Value)
+                    self.assertAlmostEqual(CheckY.SE, objTest.Y[Index].SE)
+                Index += 1
+            del objTest
+
+    def test_enumerate(self):
+        """
+        Checks that the 2D statitics class supports enumerate() functionality.
+        
+        Tests ID: TEST-T-326
+        Requirements ID: REQ-FUN-325
+
+        Version 1.0.0.0
+        """
+        for DataX, DataY in [(self.AllIntX, self.AllIntY),
+                                (self.AllFloatX, self.AllFloatY),
+                                (self.MixedX, self.MixedY),
+                                (self.IntErrX, self.IntErrY),
+                                (self.FloatErrX, self.FloatErrY),
+                                (self.MixedErrX, self.MixedErrY),
+                                (self.TotalMixedX, self.TotalMixedY)]:
+            objTest = self.TestClass(DataX, DataY)
+            for Index, Check in enumerate(objTest):
+                self.assertIsInstance(Check, tuple)
+                self.assertEqual(len(Check), 2)
+                CheckX, CheckY = Check
+                ControlX = DataX[Index]
+                ControlY = DataY[Index]
+                self.assertIsInstance(CheckX, ControlX.__class__)
+                self.assertIsInstance(CheckY, ControlY.__class__)
+                if isinstance(ControlX, (int, float)):
+                    self.assertAlmostEqual(CheckX, ControlX)
+                    self.assertAlmostEqual(CheckX, objTest.X[Index])
+                else:
+                    self.assertAlmostEqual(CheckX.Value, ControlX.Value)
+                    self.assertAlmostEqual(CheckX.SE, ControlX.SE)
+                    self.assertAlmostEqual(CheckX.Value, objTest.X[Index].Value)
+                    self.assertAlmostEqual(CheckX.SE, objTest.X[Index].SE)
+                if isinstance(ControlY, (int, float)):
+                    self.assertAlmostEqual(CheckY, ControlY)
+                    self.assertAlmostEqual(CheckY, objTest.Y[Index])
+                else:
+                    self.assertAlmostEqual(CheckY.Value, ControlY.Value)
+                    self.assertAlmostEqual(CheckY.SE, ControlY.SE)
+                    self.assertAlmostEqual(CheckY.Value, objTest.Y[Index].Value)
+                    self.assertAlmostEqual(CheckY.SE, objTest.Y[Index].SE)
+            del objTest
+
+    def test_getitem(self):
+        """
+        Checks that the 2D statitics class supports indexiing functionality.
+        
+        Tests ID: TEST-T-326
+        Requirements ID: REQ-FUN-325
+
+        Version 1.0.0.0
+        """
+        for DataX, DataY in [(self.AllIntX, self.AllIntY),
+                                (self.AllFloatX, self.AllFloatY),
+                                (self.MixedX, self.MixedY),
+                                (self.IntErrX, self.IntErrY),
+                                (self.FloatErrX, self.FloatErrY),
+                                (self.MixedErrX, self.MixedErrY),
+                                (self.TotalMixedX, self.TotalMixedY)]:
+            objTest = self.TestClass(DataX, DataY)
+            for Index in range(len(DataX)):
+                Check = objTest[Index]
+                self.assertIsInstance(Check, tuple)
+                self.assertEqual(len(Check), 2)
+                CheckX, CheckY = Check
+                ControlX = DataX[Index]
+                ControlY = DataY[Index]
+                self.assertIsInstance(CheckX, ControlX.__class__)
+                self.assertIsInstance(CheckY, ControlY.__class__)
+                if isinstance(ControlX, (int, float)):
+                    self.assertAlmostEqual(CheckX, ControlX)
+                    self.assertAlmostEqual(CheckX, objTest.X[Index])
+                else:
+                    self.assertAlmostEqual(CheckX.Value, ControlX.Value)
+                    self.assertAlmostEqual(CheckX.SE, ControlX.SE)
+                    self.assertAlmostEqual(CheckX.Value, objTest.X[Index].Value)
+                    self.assertAlmostEqual(CheckX.SE, objTest.X[Index].SE)
+                if isinstance(ControlY, (int, float)):
+                    self.assertAlmostEqual(CheckY, ControlY)
+                    self.assertAlmostEqual(CheckY, objTest.Y[Index])
+                else:
+                    self.assertAlmostEqual(CheckY.Value, ControlY.Value)
+                    self.assertAlmostEqual(CheckY.SE, ControlY.SE)
+                    self.assertAlmostEqual(CheckY.Value, objTest.Y[Index].Value)
+                    self.assertAlmostEqual(CheckY.SE, objTest.Y[Index].SE)
             del objTest
 
 #+ test suites

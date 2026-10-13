@@ -13,8 +13,8 @@ Classes:
     Statistics2D
 """
 
-__version__= '1.0.1.0'
-__date__ = '01-05-2023'
+__version__= '1.1.0.0'
+__date__ = '13-10-2026'
 __status__ = 'Production'
 
 #imports
@@ -24,8 +24,11 @@ __status__ = 'Production'
 import sys
 import os
 import math
+import operator
 
-from typing import Optional, Union, Any, Tuple
+from collections.abc import Sequence
+
+from typing import Optional, Union, Any, Tuple, Generator, Self, Callable
 
 #+ custom modules
 
@@ -47,7 +50,45 @@ import statistics_lib.ordered_functions as of
 
 #+ data types
 
-TRealTuple = Tuple[Union[int, float], ...]
+TReal = Union[int, float]
+
+TRealTuple = Tuple[TReal, ...]
+
+TNumber = Union[TReal, bf.MeasuredValue]
+
+TNumberSequence = Sequence[TNumber]
+
+TAllowedOperand = Union[TNumber, TNumberSequence]
+
+#helper functions
+
+def _CheckIfNumber(Other: Any) -> bool:
+    """
+    Helper function to check if a value is an integer, floating point or value
+    with uncertainty.
+
+    Signature:
+        type A -> bool
+
+    Version 1.0.0.0
+    """
+    return True if isinstance(Other, (int, float, bf.MeasuredValue)) else False
+
+def _CheckIfNumberSequence(Other: Any) -> bool:
+    """
+    Helper function to check if a value is a sequence of integers, floating
+    point numbers or values with uncertainty.
+    
+    Signature:
+        type A -> bool
+    
+    Version 1.0.0.0
+    """
+    if isinstance(Other, Sequence):
+        Result = True if all(map(_CheckIfNumber, Other)) else False
+    else:
+        Result = False
+    return Result
 
 #classes
 
@@ -56,6 +97,10 @@ class Statistics1D:
     Data storage class encapsulating 1D data set and ensuring its immutability.
     The statistical properties are calculated 'on demand', cached and interfaced
     via read-only properties (attributes).
+
+    Supports len(), iter() and getitem(Index: int) protocols, thus can be used
+    in 'for loop' and enumerate(). Also supports basic scalar-array and per
+    element array-array arithmetics.
 
     Must be instantiated with one sequence of (a mix of) real numbers or
     instances of classes implementing 'measurements with uncertainty' of the
@@ -105,9 +150,60 @@ class Statistics1D:
             /*, int > 0 OR None, int > 0 OR float > 0 OR None/
                 -> tuple(tuple(int OR float, int >= 0))
     
-    Version 1.0.1.0
+    Version 1.1.0.0
     """
-    
+
+    #'private' helper methods
+
+    def _checkOther(self, Other: Any) -> None:
+        """
+        Helper method to check if the passed value is a generic number or a
+        sequence of generic numbers of the same length as the stored data.
+
+        Signature:
+            type A -> None
+        
+        Raises:
+            introspection_lib.base_exceptions.UT_TypeError: the argument does
+                not meet the expected data type restriction
+        
+        Version 1.0.0.0
+        """
+        if _CheckIfNumberSequence(Other) or isinstance(Other, self.__class__):
+            if len(Other) != self.N:
+                Error = bf.UT_TypeError(Other, (Sequence, self.__class__),
+                                                                SkipFrames = 2)
+                Message = f'of length {self.N} - operand {Other}'
+                Error.appendMessage(Message)
+                raise Error
+        elif not _CheckIfNumber(Other):
+            Error = bf.UT_TypeError(Other, (Sequence, self.__class__, int,
+                                    float, bf.MeasuredValue), SkipFrames = 2)
+            Message = f'- operand {Other}'
+            Error.appendMessage(Message)
+            raise Error
+
+    def _applyOperator(self, Other: TAllowedOperand,
+                            Operator: Callable[[TNumber, TNumber], TNumber], *,
+                                                Reversed: bool = False) -> Self:
+        """
+        Helper method to implement array-scalar and array-array arithmethics.
+
+        Signature:
+            Statistics1D OR int OR float OR seq(int OR float OR MeasuredValue),
+                func(type A, type B -> type C)/, *, bool/ -> Statistics1D
+        """
+        IsScalar = _CheckIfNumber(Other)
+        Temp = list()
+        for Index, Item in enumerate(self):
+            Value = Other[Index] if not IsScalar else Other
+            if not Reversed:
+                Result = Operator(Item, Value)
+            else:
+                Result = Operator(Value, Item)
+            Temp.append(Result)
+        return self.__class__(Temp)
+
     #special methods
 
     def __init__(self, Data: bf.TGenericSequence) -> None:
@@ -128,7 +224,7 @@ class Statistics1D:
                 measurements with uncertainty
             UT_ValueError: passed sequence is empty
         
-        Version 1.0.0.0
+        Version 1.0.0.1
         """
         Temp = bf._ExtractMeans(Data, SkipFrames = 2)
         self._Data = dict()
@@ -139,6 +235,8 @@ class Statistics1D:
                                     'Q3', 'Min', 'Max', 'Var', 'Sigma', 'SE',
                                         'Skew', 'Kurt', 'FullVar', 'FullSigma',
                                                             'FullSE', 'Name']}
+        self._SupportsMeasuredValue = True #walkaround to fix conflict with
+        # MeasuredValue arithmetics implementation
     
     def __str__(self) -> str:
         """
@@ -164,7 +262,209 @@ class Statistics1D:
         """
         IdHex = hex(id(self))
         return f'<{self.__class__.__name__}({self.Name}) at {IdHex}>'
-    
+
+    def __len__(self) -> int:
+        """
+        'Magic' method returning the stored data sample size, basically the
+        same as the getter property self.N.
+
+        Signature:
+            None -> int >= 0
+        
+        Version 1.0.0.0
+        """
+        return self.N
+
+    def __iter__(self) -> Generator[TNumber, None, None]:
+        """
+        'Magic' method implementing looping through the stored data points as
+        in 'for Item in Sequence'.
+
+        Signature:
+            None -> gen(None -> int OR float OR MeasuredValue)
+        
+        Returns:
+            gen(None -> int OR float OR MeasuredValue); a generator function
+                returning a real value OR an instance of MeasuredValue class
+                for each consequence call
+        
+        Version 1.0.0.0
+        """
+        for Index, Value in enumerate(self._Data['Values']):
+            Error = self._Data["Errors"][Index]
+            Item = bf.MeasuredValue(Value, Error) if Error else Value
+            yield Item
+
+    def __getitem__(self, Index: int) -> TNumber:
+        """
+        'Magic' method to retrieve a stored data point by its positional index.
+
+        Signature:
+            int -> int OR float OR MeasuredValue
+        
+        Version 1.0.0.0
+        """
+        Value = self._Data['Values'][Index]
+        Error = self._Data['Errors'][Index]
+        return bf.MeasuredValue(Value, Error) if Error else Value
+
+    def __add__(self, Other: Union[TNumberSequence, Self]) -> Self:
+        """
+        'Magic' method implementing right addition of a scalar or an array to
+        the stored data.
+
+        Signature:
+            Statistics1D OR int OR float OR seq(int OR float OR MeasuredValue)
+                -> Statistics1D
+        Raises:
+            introspection_lib.base_exceptions.UT_TypeError: the argument does
+                not meet the expected data type restriction
+        
+        Version 1.0.0.0
+        """
+        self._checkOther(Other)
+        return self._applyOperator(Other, operator.add)
+
+    def __radd__(self, Other: Union[TNumberSequence, Self]) -> Self:
+        """
+        'Magic' method implementing left addition of a scalar or an array to
+        the stored data.
+
+        Signature:
+            Statistics1D OR int OR float OR seq(int OR float OR MeasuredValue)
+                -> Statistics1D
+        Raises:
+            introspection_lib.base_exceptions.UT_TypeError: the argument does
+                not meet the expected data type restriction
+        
+        Version 1.0.0.0
+        """
+        self._checkOther(Other)
+        return self._applyOperator(Other, operator.add, Reversed = True)
+
+    def __sub__(self, Other: Union[TNumberSequence, Self]) -> Self:
+        """
+        'Magic' method implementing right subtraction of a scalar or an array to
+        the stored data.
+
+        Signature:
+            Statistics1D OR int OR float OR seq(int OR float OR MeasuredValue)
+                -> Statistics1D
+        Raises:
+            introspection_lib.base_exceptions.UT_TypeError: the argument does
+                not meet the expected data type restriction
+        
+        Version 1.0.0.0
+        """
+        self._checkOther(Other)
+        return self._applyOperator(Other, operator.sub)
+
+    def __rsub__(self, Other: Union[TNumberSequence, Self]) -> Self:
+        """
+        'Magic' method implementing left addition of a scalar or an array to
+        the stored data.
+
+        Signature:
+            Statistics1D OR int OR float OR seq(int OR float OR MeasuredValue)
+                -> Statistics1D
+        Raises:
+            introspection_lib.base_exceptions.UT_TypeError: the argument does
+                not meet the expected data type restriction
+        
+        Version 1.0.0.0
+        """
+        self._checkOther(Other)
+        return self._applyOperator(Other, operator.sub, Reversed = True)
+
+    def __mul__(self, Other: Union[TNumberSequence, Self]) -> Self:
+        """
+        'Magic' method implementing right multiplication by a scalar or an array
+        of the stored data.
+
+        Signature:
+            Statistics1D OR int OR float OR seq(int OR float OR MeasuredValue)
+                -> Statistics1D
+        Raises:
+            introspection_lib.base_exceptions.UT_TypeError: the argument does
+                not meet the expected data type restriction
+        
+        Version 1.0.0.0
+        """
+        self._checkOther(Other)
+        return self._applyOperator(Other, operator.mul)
+
+    def __rmul__(self, Other: Union[TNumberSequence, Self]) -> Self:
+        """
+        'Magic' method implementing left multiplication by a scalar or an array
+        of the stored data.
+
+        Signature:
+            Statistics1D OR int OR float OR seq(int OR float OR MeasuredValue)
+                -> Statistics1D
+        Raises:
+            introspection_lib.base_exceptions.UT_TypeError: the argument does
+                not meet the expected data type restriction
+        
+        Version 1.0.0.0
+        """
+        self._checkOther(Other)
+        return self._applyOperator(Other, operator.mul, Reversed = True)
+
+    def __truediv__(self, Other: Union[TNumberSequence, Self]) -> Self:
+        """
+        'Magic' method implementing division of the stored data by a scalar or
+        an array.
+
+        Signature:
+            Statistics1D OR int OR float OR seq(int OR float OR MeasuredValue)
+                -> Statistics1D
+        Raises:
+            introspection_lib.base_exceptions.UT_TypeError: the argument does
+                not meet the expected data type restriction
+        
+        Version 1.0.0.0
+        """
+        self._checkOther(Other)
+        return self._applyOperator(Other, operator.truediv)
+
+    def __rtruediv__(self, Other: Union[TNumberSequence, Self]) -> Self:
+        """
+        'Magic' method implementing division of a scalar or an array by the
+        stored data.
+
+        Signature:
+            Statistics1D OR int OR float OR seq(int OR float OR MeasuredValue)
+                -> Statistics1D
+        Raises:
+            introspection_lib.base_exceptions.UT_TypeError: the argument does
+                not meet the expected data type restriction
+        
+        Version 1.0.0.0
+        """
+        self._checkOther(Other)
+        return self._applyOperator(Other, operator.truediv, Reversed = True)
+
+    def __pow__(self, Other: int) -> Self:
+        """
+        'Magic' method implementing raising of the stored data to an integer
+        power.
+
+        Signature:
+            Statistics1D OR int OR float OR seq(int OR float OR MeasuredValue)
+                -> Statistics1D
+        Raises:
+            introspection_lib.base_exceptions.UT_TypeError: the argument is not
+                an integer number
+        
+        Version 1.0.0.0
+        """
+        if not isinstance(Other, int):
+            Error = bf.UT_TypeError(Other, int, SkipFrames = 1)
+            Message = f'- operand {Other}'
+            Error.appendMessage(Message)
+            raise Error
+        return self._applyOperator(Other, operator.pow)
+
     #public API
 
     #+ properties
@@ -557,6 +857,9 @@ class Statistics2D:
     The statistical properties are calculated 'on demand', cached and interfaced
     via read-only properties (attributes).
 
+    Supports len(), iter() and getitem(Index: int) protocols, thus can be used
+    in 'for loop' and enumerate().
+
     Must be instantiated with two sequences of (a mix of) real numbers or
     instances of classes implementing 'measurements with uncertainty' of the
     same length.
@@ -576,7 +879,7 @@ class Statistics2D:
         Summary: (read-only) str; the summary of the statistical properties of
             the data set
     
-    Version 1.0.1.0
+    Version 1.1.1.0
     """
     
     #special methods
@@ -662,6 +965,50 @@ class Statistics2D:
         """
         IdHex = hex(id(self))
         return f'<{self.__class__.__name__}({self.Name}) at {IdHex}>'
+
+    def __len__(self) -> int:
+        """
+        'Magic' method returning the stored data sample size, basically the
+        same as the getter property self.N.
+
+        Signature:
+            None -> int >= 0
+        
+        Version 1.0.0.0
+        """
+        return self.N
+
+    def __iter__(self) -> Generator[tuple[TNumber, TNumber], None, None]:
+        """
+        'Magic' method implementing looping through the stored data points as
+        in 'for Item in Sequence'.
+
+        Signature:
+            None -> gen(None -> tuple(int OR float OR MeasuredValue,
+                                                int OR float OR MeasuredValue))
+        
+        Returns:
+            gen(None -> tuple(int OR float OR MeasuredValue,
+                int OR float OR MeasuredValue)); a generator function
+                returning a rtuple of values, corresponding to the stored X-
+                and Y- data points with the same indexes.
+        
+        Version 1.0.0.0
+        """
+        for Index, Value in enumerate(self._Data['X']):
+            yield (Value, self._Data['Y'][Index])
+
+    def __getitem__(self, Index: int) -> tuple[TNumber, TNumber]:
+        """
+        'Magic' method to retrieve a stored data point by its positional index.
+
+        Signature:
+            int -> tuple(int OR float OR MeasuredValue, 
+                int OR float OR MeasuredValue)
+        
+        Version 1.0.0.0
+        """
+        return (self._Data['X'][Index], self._Data['Y'][Index])
     
     #public API
 

@@ -7,7 +7,7 @@ This document describes the intended usage, design and implementation of the fun
 This module provides functions for calculation of:
 
 * 1D statstics
-  * The minimal value within the sample - *GetMix*()
+  * The minimal value within the sample - *GetMin*()
   * The maximal value within the sample - *GetMax*()
   * Median value of the sample - *GetMedian*()
   * The first quartile of the sample - *GetFirstQuartile*()

@@ -297,6 +297,104 @@ ___
 
 ___
 
+**Test Identifier:** TEST-T-319
+
+**Requirement ID(s)**: REQ-FUN-316
+
+**Verification method:** T
+
+**Test goal:** Check that the 1D statistics class behaves as an iterable sequence
+
+**Expected result:** The 1D statistics class should support the following protocols:
+
+* len() - returns the length of the stored data (same as self.N property)
+* iter(), i.e. can be used in for loop
+* self[Index: int], i.e. a stored data point can be (read) accessed by its positional index
+
+
+The last two protocols return an integer or a floating point value if the error of the respective data point is 0, otherwise - an instance of MeasuredValue containing the stored 'mean' and 'se' values of the respective data point.
+
+**Test steps:** Prepare the test sequences as in TEST-T-316. Instantiate the class being tested with each of the sequences in turn and check that:
+
+* The built-in function *len*() applied to the created object returns the same value as *len*() applied to the argument of the instantiation method
+* Iterate though enumeration of each argument of instantion method and check that index access to the created object returns the same data type and value as the respective index position in the instantiation argument, compare with the self.Values[index] and self.Errors[index] values as well.
+* Iterate through the created object, increment index manually and check that the object yielded at each itteration matches the type and value(s) of the respective element of the instantiation argument,  compare with the self.Values[index] and self.Errors[index] values as well.
+* Enumerate though the created object and check that the yielded object at each iteration is the same as retrieved using the indexing notation.
+
+**Test result:** PASS
+
+___
+
+**Test Identifier:** TEST-T-31A
+
+**Requirement ID(s)**: REQ-FUN-317
+
+**Verification method:** T
+
+**Test goal:** Check that the 1D statistics class supports basic arithmetics, such that
+
+* A[1D statistics] * B[number] -> C[1D statistics] : len(C) = len(A), C is not A, C.[i] = A.[i] * B for all i
+* B[number] * A[1D statistics] -> C[1D statistics] : len(C) = len(A), C is not A, C.[i] = A.[i] * B for all i
+* A[1D statistics] * B[1D statisics OR seq(number)] -> C[1D statistics] : len(C) = len(A), C is not A, C.[i] = A.[i] * B.[i] for all i
+* B[1D statisics OR seq(number)] * A[1D statistics] -> C[1D statistics] : len(C) = len(A), C is not A, C.[i] = A.[i] * B.[i] for all i
+* A[1D statistics] + B[number] -> C[1D statistics] : len(C) = len(A), C is not A, C.[i] = A.[i] + B for all i
+* B[number] + A[1D statistics] -> C[1D statistics] : len(C) = len(A), C is not A, C.[i] = A.[i] + B for all i
+* A[1D statistics] + B[1D statisics OR seq(number)] -> C[1D statistics] : len(C) = len(A), C is not A, C.[i] = A.[i] + B.[i] for all i
+* B[1D statisics OR seq(number)] + A[1D statistics] -> C[1D statistics] : len(C) = len(A), C is not A, C.[i] = A.[i] + B.[i] for all i
+* A[1D statistics] - B[number] -> C[1D statistics] : len(C) = len(A), C is not A, C.[i] = A.[i] - B for all i
+* B[number] - A[1D statistics] -> C[1D statistics] : len(C) = len(A), C is not A, C.[i] = B - A.[i] for all i
+* A[1D statistics] - B[1D statisics OR seq(number)] -> C[1D statistics] : len(C) = len(A), C is not A, C.[i] = A.[i] - B.[i] for all i
+* B[1D statisics OR seq(number)] - A[1D statistics] -> C[1D statistics] : len(C) = len(A), C is not A, C.[i] = B.[i] - A.[i] for all i
+* A[1D statistics] / B[number] -> C[1D statistics] : len(C) = len(A), C is not A, C.[i] = A.[i] / B for all i
+* B[number] / A[1D statistics] -> C[1D statistics] : len(C) = len(A), C is not A, C.[i] = B / A.[i] for all i
+* A[1D statistics] / B[1D statisics OR seq(number)] -> C[1D statistics] : len(C) = len(A), C is not A, C.[i] = A.[i] / B.[i] for all i
+* B[1D statisics OR seq(number)] / A[1D statistics] -> C[1D statistics] : len(C) = len(A), C is not A, C.[i] = B.[i] / A.[i] for all i
+* A[1D statistics] ** B[int] -> C[1D statistics] : len(C) = len(A), C is not A, C.[i] = A.[i] ** B for all i
+
+**Expected result:** 1D statistics class supports all operations listed above, returns a new instance of own class of the same number of data points, and for each data points the data type and value(s) match the expectation based on the types and values of the respective per-element operation's left and right operands. 
+
+**Test steps:** Instantiate the class being tested with a random mixture of integers, floating point numbers and values with uncertainty. Generate 3 random but non-zero integers, floating point numbers and values with uncertainty, as well as another random mixture of integers, floating point numbers and values with uncertainty of the same length as the test object.
+
+* Attempt the add each of the generated numbers, and the second random sequence to the test object
+  * Check that in instance of 1D statistics class is returned
+  * Check that it is a different object
+  * Check that it has the same length as the test object
+  * Check that the values stored in the test object are not changed
+  * Check per element of the second object that the expected type and value(s) match expectation - as control, use getitem() and manual per-element calculations
+* Repeat with test object being added to the same numbers and sequence
+* Repeat with left and right subtraction, multiplication and division
+* Repeat the test with raising the test object to random positive and negative integer powers
+
+**Test result:** PASS
+
+___
+
+**Test Identifier:** TEST-T-31B
+
+**Requirement ID(s)**: REQ-AWM-313
+
+**Verification method:** T
+
+**Test goal:** Check that the 1D statistics class raises **TypeError** compatible exception if the second operand of an arithmetic operation is of unacceptable data type
+
+**Expected result:** A sub-class of **TypeError** is raised in the following situations:
+
+* The second operand is neither a 'generic' number (int, float or instance of MeasureValue class), nor a sequence of 'generic' numbers of the same length, nor another instance of 1D statistics in the following operations
+  * Self + Other
+  * Other + Self
+  * Seft - Other
+  * Other - Self
+  * Self * Other
+  * Other * Self
+  * Self / Other
+  * Other / Self
+* The second operand in Self ** Other is not an integer
+
+**Test steps:** Instantiate the class being tested with a random mixture of integers, floating point numbers and values with uncertainty. Generate a sequence of inappropriate data types / values based on the expectations above. Check every implemented operation in question that a sub-class of **TypeError** is raised every time. With pow() operation - also check that floating point or MeasuredValue argument also causes raise of the same exception, as well as same length numeric sequence or instance of the same class.
+
+**Test result:** PASS
+___
+
 **Test Identifier:** TEST-T-320
 
 **Requirement ID(s)**: REQ-AWM-300
@@ -441,6 +539,29 @@ ___
 
 **Test result:** PASS
 
+___
+
+**Test Identifier:** TEST-T-326
+
+**Requirement ID(s)**: REQ-FUN-325
+
+**Verification method:** T
+
+**Test goal:** Check that the 2D statistics class behaves as an iterable sequence
+
+**Expected result:** The 2D statistics class should support the following protocols:
+
+* len() - returns the length of the stored data (same as self.N property)
+* iter(), i.e. can be used in for loop
+* self[Index: int], i.e. a stored data point can be (read) accessed by its positional index
+
+
+The last two protocols return a 2-elements tuple of an integer or a floating point value or an instance of MeasuredValue, which are the X- and Y values stored at the same positional index.
+
+**Test steps:** Instantiate 2D statistics class with arbitrary but proper data. Check that len() function applied to it returns the same integer number as self.N property. Check that the created instance can be used in 'for loop' and enumerate(), and that at each iteration with index I the obtained value is a tuple (self.X[I], self.Y[I]) by type and value. Check the same for the direct indexing access.
+
+**Test result:** PASS
+
 ## Tests definition (Demonstration)
 
 **Test Identifier:** TEST-D-300
@@ -472,17 +593,21 @@ For traceability the relation between tests and requirements is summarized in th
 | REQ-FUN-313        | TEST-T-317             | YES                      |
 | REQ-FUN-314        | TEST-T-318             | YES                      |
 | REQ-FUN-315        | TEST-D-300             | YES                      |
+| REQ-FUN-316        | TEST-T-319             | YES                      |
+| REQ-FUN-317        | TEST-T-31A             | YES                      |
 | REQ-FUN-320        | TEST-T-323             | YES                      |
 | REQ-FUN-321        | TEST-T-323             | YES                      |
 | REQ-FUN-322        | TEST-T-324             | YES                      |
 | REQ-FUN-323        | TEST-T-325             | YES                      |
 | REQ-FUN-324        | TEST-D-300             | YES                      |
+| REQ-FUN-325        | TEST-T-326             | YES                      |
 | REQ-AWM-300        | TEST-T-310, TEST-T-320 | YES                      |
 | REQ-AWM-301        | TEST-T-311, TEST-T-321 | YES                      |
 | REQ-AWM-302        | TEST-T-312, TEST-T-322 | YES                      |
 | REQ-AWM-310        | TEST-T-313             | YES                      |
 | REQ-AWM-311        | TEST-T-314             | YES                      |
 | REQ-AWM-312        | TEST-T-315             | YES                      |
+| REQ-AWM-313        | TEST-T-31B             | YES                      |
 
 | **Software ready for production \[YES/NO\]** | **Rationale**        |
 | :------------------------------------------: | :------------------- |

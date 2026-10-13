@@ -1,7 +1,7 @@
 {
     "python" : {
         "major" : 3,
-        "minor" : 6
+        "minor" : 11
     },
     "DO" : {
         "introspection_lib" : {
@@ -11,7 +11,7 @@
         },
         "phyqus_lib" : {
                 "major" : 0,
-                "minor" : 1,
+                "minor" : 2,
                 "path": "https://github.com/FooBarShebang/phyqus_lib"
         },
         "math_extra_lib" : {

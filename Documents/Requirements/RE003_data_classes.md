@@ -136,6 +136,33 @@ The report may be encapsulated into visual separator lines (the first and the la
 
 ___
 
+**Requirement ID:** REQ-FUN-316
+
+**Title:** 1D statistics class as iterable sequence
+
+**Description:** The 1D statistics class should support len() standard function, 'for Item in Sequence' (i.e. iter() protocol) and index access as Sequence[Index: int] protocol.
+
+**Verification Method:** T
+
+___
+
+**Requirement ID:** REQ-FUN-317
+
+**Title:** 1D statistics class supports basic per-element arithmetics
+
+**Description:** The 1D statistics class should support basic arrtihmetics with scalars (numbers) and same-length sequence of scalars.
+
+* Left and right addition
+* Left and right subtraction
+* Left and right multiplication
+* Division by a scalar or sequence of scalars
+* Division of a scalar or sequence of scalars by itself
+* Raising of itself to an integer power
+
+**Verification Method:** T
+
+___
+
 **Requirement ID:** REQ-FUN-320
 
 **Title:** Instantiation of 2D statistics class
@@ -201,6 +228,17 @@ These lines should be followed by the respective reports on 1D sub-sets with a c
 The report may be encapsulated into visual separator lines (the first and the last).
 
 **Verification Method:** D
+
+___
+
+**Requirement ID:** REQ-FUN-325
+
+**Title:** 2D statistics class as iterable sequence
+
+**Description:** The 1D statistics class should support len() standard function, 'for Item in Sequence' (i.e. iter() protocol) and index access as Sequence[Index: int] protocol. The iter() and getitem() protocols should return a tuple of 2 elements, each being eiter a real number, or an instance of the measured with uncertainty value class. Basically 2D[Index: int] = tuple(2D.X[Index], 2D.Y[Index]).
+
+**Verification Method:** T
+
 
 ## Alarms, warnings and operator messages
 
@@ -289,5 +327,26 @@ ___
 * *getHistogram*() method:
   * Number of bins requested is an integer number, but not positive
   * Number of bins is not requested (OR None) and the requested bin size is integer or floating point number, but not positive
+
+**Verification Method:** T
+
+___
+
+**Requirement ID:** REQ-AWM-313
+
+**Title:** 1D statistics class methods - improper adata type of the second operand of an arithmetic operation
+
+**Description:** The **TypeError** or its sub-class should be raised in response to
+
+* Second operand is not an integer, floating point number or MeasuredValue instance, or sequence of integers, floating point numbers or MeasuredValue instances, or an instance of same 1D statistics class; OR the lenght of the sequence or another 1D statistics class is different:
+  * Self + Other
+  * Other + Self
+  * Seft - Other
+  * Other - Self
+  * Self * Other
+  * Other * Self
+  * Self / Other
+  * Other / Self
+* The second operand in Self ** Other is not an integer
 
 **Verification Method:** T

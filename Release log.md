@@ -1,5 +1,16 @@
 # Release log of library statistics_lib
 
+## 2026-10-13 v1,2,0-rc1
+
+* Added to Statistic1D and Statistics2D classes support for
+  * built-in len() function
+  * built-in iter() function, therefore 'for loop' and enumeration()
+  * integer indexing
+* Added to Statistics1D class support for
+  * array-scalar and scalar-array basic arithmetics: addition, subtraction, multiplication, division
+  * array-array (per element) basic arithmetics: addition, subtraction, multiplication, division
+  * raising to an integer power
+
 ## 2023-05-01 v1.1.0-rc1
 
 * Moved implementation of the special functions into a different library *math\_extra\_lib*. Module *special\_functions* now simply aliases them.
