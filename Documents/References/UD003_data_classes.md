@@ -208,6 +208,40 @@ Calculates the k-th of m-quantile value of the stored data set. The computation 
 
 Calculates the histogram of number of apperance of 'mean' values belonging to the respective bins for the data sample. Either total number of bins OR the desired bin width can be specified, where number of bins takes the precedence. When neither value is defined, the default number of bins is 20. Computation speed is always O(N).
 
+**generateZ_Score**()
+
+*Signature*:
+
+None -> Statistics1D
+
+*Returns*:
+
+**Statisitics1D**: a new instance of the class, storing the z-score distribution calculated for the data stored in the current instance
+
+*Description*:
+
+Generates a z-score distribution based on the currently stored data preserving the data points order; i.e. `x[i] -> z[i]= (x[i] - <x>) / sigma`.
+
+Note that even for all real number data (all errors are zeros) the mean is calculated already with uncertainty, i.e. as **MeasuredValue** class instance, thus all `z[i]` generated as MeasuredValue (with uncertainty) class instances. Furthermore, SE of `<x>` and Sigma are calculated as FullSE and FullSigma to account for the uncertainties (if present) of the original distribution's values.
+
+*Tipes and Hints* This was a design choice due to concerns about Standard Error Proparation Model, i.e. the usage of z-score based regression models. The drawback is that if the original values were stored with uncertainty already present, FullSigma > Sigma by definition, thus variance of the generated z-score Var(z) < 1, because of the reduced spread of the generated z-values. If this is not the desired effect, use the 'pure' version *generateZ_ScorePure*().
+
+**generateZ_ScorePure**()
+
+*Signature*:
+
+None -> Statistics1D
+
+*Returns*:
+
+**Statisitics1D**: a new instance of the class, storing the z-score distribution calculated for the data stored in the current instance
+
+*Description*:
+
+Generates a z-score distribution based on the currently stored data preserving the data points order; i.e. `x[i] -> z[i]= (x[i] - <x>) / sigma`.
+
+This is a 'pure' version of z-score generator, which ignores the uncertainties of the stored values. Thus, Var(z) = 1 is guaranteed, and all generated z-values have no uncertainties.
+
 ## Class Statistics2D
 
 Data storage class encapsulating 2D data set and ensuring its immutability. The statistical properties are calculated 'on demand', cached and interfaced via read-only properties (attributes).

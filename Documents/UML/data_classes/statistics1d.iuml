@@ -36,4 +36,6 @@ class Statistics1D {
     + getHistogram(*, NBins = None, BinSize = None):
     /*, int > 0 OR None, int > 0 OR float > 0 OR None/ ->
     tuple(tuple(int OR float, int >= 0))
+    + generateZ_Score(): None -> Statistics1D
+    + generateZ_ScorePure(): None -> Statistics1D
 }

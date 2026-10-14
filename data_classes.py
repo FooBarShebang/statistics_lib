@@ -14,7 +14,7 @@ Classes:
 """
 
 __version__= '1.1.0.0'
-__date__ = '13-10-2026'
+__date__ = '14-10-2026'
 __status__ = 'Production'
 
 #imports
@@ -149,6 +149,8 @@ class Statistics1D:
         getHistogram(*, NBins = None, BinSize = None)
             /*, int > 0 OR None, int > 0 OR float > 0 OR None/
                 -> tuple(tuple(int OR float, int >= 0))
+        generateZ_Score()
+            None -> Statistics1D
     
     Version 1.1.0.0
     """
@@ -850,6 +852,57 @@ class Statistics1D:
                                                 SkipFrames = 2, DoCheck = False)
         Result = tuple((Key, Item) for Key, Item in Temp.items())
         return Result
+
+    def generateZ_Score(self) -> Self:
+        """
+        Generates a z-score distribution based on the currently stored data
+        preserving the data points order; i.e. x[i] -> z[i]= (x[i] - <x>) / sig.
+
+        Note that even for all real number data (all errors are zeros) the mean
+        is calculated already with uncertainty, i.e. as MeasuredValue class
+        instance, thus all z[i] generated as MeasuredValue (with uncertainty)
+        class instances. Furthermore, SE of <x> and Sigma are calculated as
+        FullSE and FullSigma to account for the uncertainties (if present) of
+        the original distribution's values.
+
+        Signature:
+            None -> Statistics1D
+
+        Returns:
+            Statisitics1D: a new instance of the class, storing the z-score
+                distribution
+
+        Version 1.0.0.0
+        """
+        Mean = self.Mean
+        SE = self.FullSE
+        Mean = bf.MeasuredValue(Mean, SE)
+        Sigma = self.FullSigma
+        NewData = list((Value - Mean) / Sigma for Value in self)
+        return self.__class__(NewData)
+
+    def generateZ_ScorePure(self) -> Self:
+        """
+        Generates a z-score distribution based on the currently stored data
+        preserving the data points order; i.e. x[i] -> z[i]= (x[i] - <x>) / sig.
+
+        This is a 'pure' version of z-score generator, which ignores the
+        uncertainties of the stored values. Thus, Var(z) = 1 is guaranteed, and
+        all generated z-values have no uncertainties.
+
+        Signature:
+            None -> Statistics1D
+
+        Returns:
+            Statisitics1D: a new instance of the class, storing the z-score
+                distribution
+
+        Version 1.0.0.0
+        """
+        Mean = self.Mean
+        Sigma = self.Sigma
+        NewData = list((Value - Mean) / Sigma for Value in self.Values)
+        return self.__class__(NewData)
 
 class Statistics2D:
     """

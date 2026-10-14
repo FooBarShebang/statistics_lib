@@ -1,6 +1,6 @@
 # Release log of library statistics_lib
 
-## 2026-10-13 v1,2,0-rc1
+## 2026-10-14 v1,2,0-rc1
 
 * Added to Statistic1D and Statistics2D classes support for
   * built-in len() function
@@ -10,6 +10,7 @@
   * array-scalar and scalar-array basic arithmetics: addition, subtraction, multiplication, division
   * array-array (per element) basic arithmetics: addition, subtraction, multiplication, division
   * raising to an integer power
+  * generation of z-score distribution from the stored data
 
 ## 2023-05-01 v1.1.0-rc1
 
