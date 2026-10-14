@@ -303,7 +303,8 @@ class ContinuousDistributionABC(abc.ABC):
         """
         return self._Max
     
-    @abc.abstractproperty
+    @property
+    @abc.abstractmethod
     def Mean(self) -> sf.TReal:
         """
         Prototype for the getter property for the arithmetic mean of the
@@ -374,7 +375,8 @@ class ContinuousDistributionABC(abc.ABC):
             Result = self._qf(0.75)
         return Result
     
-    @abc.abstractproperty
+    @property
+    @abc.abstractmethod
     def Var(self) -> sf.TReal:
         """
         Prototype for the getter property for the variance of the distribution.
@@ -396,7 +398,8 @@ class ContinuousDistributionABC(abc.ABC):
         """
         return math.sqrt(self.Var)
     
-    @abc.abstractproperty
+    @property
+    @abc.abstractmethod
     def Skew(self) -> sf.TReal:
         """
         Prototype for the getter property for the skewness of the distribution.
@@ -406,7 +409,8 @@ class ContinuousDistributionABC(abc.ABC):
         """
         pass
     
-    @abc.abstractproperty
+    @property
+    @abc.abstractmethod
     def Kurt(self) -> sf.TReal:
         """
         Prototype for the getter property for the excess kurtosis of the
