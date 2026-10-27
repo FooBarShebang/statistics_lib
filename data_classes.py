@@ -13,8 +13,8 @@ Classes:
     Statistics2D
 """
 
-__version__= '1.1.0.0'
-__date__ = '14-10-2026'
+__version__= '1.2.0.0'
+__date__ = '27-10-2026'
 __status__ = 'Production'
 
 #imports
@@ -151,8 +151,14 @@ class Statistics1D:
                 -> tuple(tuple(int OR float, int >= 0))
         generateZ_Score()
             None -> Statistics1D
+        generateZ_ScorePure()
+            None -> Statistics1D
+        getPMF()
+            None -> tuple(tuple(int OR float, float), ...)
+        getCDF()
+            None -> tuple(tuple(int OR float, float), ...)
     
-    Version 1.1.0.0
+    Version 1.2.0.0
     """
 
     #'private' helper methods
@@ -208,31 +214,40 @@ class Statistics1D:
 
     #special methods
 
-    def __init__(self, Data: bf.TGenericSequence) -> None:
+    def __init__(self, Data: bf.TGenericSequence | Self) -> None:
         """
         Initialization method. Perfroms the input data sanity check, extaction
         of the 'means' and uncertainties of the measurements, and encapsulation
         of the data.
 
         Signature:
-            seq(int OR float OR phyqus_lib.base_classes.MeasuredValue) -> None
+            seq(int OR float OR phyqus_lib.base_classes.MeasuredValue)
+                OR Statistics1D -> None
 
         Args:
-            Data: seq(int OR float OR phyqus_lib.base_classes.MeasuredValue);
-                generic sequence of the measurements data to be stored
+            Data: seq(int OR float OR phyqus_lib.base_classes.MeasuredValue)
+                OR Statistics1D; generic sequence of the measurements data to be
+                stored OR another instance of Statistics1D class
 
         Raises:
             UT_TypeError: argument is not a sequence of real numbers or
-                measurements with uncertainty
+                measurements with uncertainty OR another instance of the
+                Statistics1D class
             UT_ValueError: passed sequence is empty
         
-        Version 1.0.0.1
+        Version 2.0.0.
         """
-        Temp = bf._ExtractMeans(Data, SkipFrames = 2)
         self._Data = dict()
-        self._Data['Values'] = tuple(Temp)
-        self._Data['Errors'] = tuple(bf._ExtractErrors(Data, DoCheck = False))
         self._Data['Sorted'] =  None
+        if isinstance(Data, self.__class__):
+            self._Data['Values'] = tuple(Value for Value in Data.Values)
+            self._Data['Errors'] = tuple(Value for Value in Data.Errors)
+            if not Data._Data['Sorted'] is None:
+                self._Data['Sorted'] = tuple(Value for Value in Data.Sorted)
+        else:
+            Temp = bf._ExtractMeans(Data, SkipFrames = 2)
+            self._Data['Values'] = tuple(Temp)
+            self._Data['Errors']=tuple(bf._ExtractErrors(Data, DoCheck = False))
         self._Properties = {Key : None for Key in ['N', 'Mean', 'Median', 'Q1',
                                     'Q3', 'Min', 'Max', 'Var', 'Sigma', 'SE',
                                         'Skew', 'Kurt', 'FullVar', 'FullSigma',
@@ -904,6 +919,61 @@ class Statistics1D:
         NewData = list((Value - Mean) / Sigma for Value in self.Values)
         return self.__class__(NewData)
 
+    def getPMF(self) -> tuple[tuple[TReal, float], ...]:
+        """
+        Calculates the node points of the probability mass function of the
+        discrete distribution of the stored data points, i.e. the probability of
+        each unique value in the data set, sorted in the ascending order of the
+        values.
+
+        Signature:
+            None -> tuple(tuple(int OR float, float), ...)
+        
+        Returns:
+            tuple(tuple(int OR float, float), ...); in the nested tuples, the
+                first element is the exact value of each unique in the data set,
+                sorted in the ascending order, the second element is the
+                probability of this value (number of occurence /data set length)
+        
+        Version 1.0.0.0
+        """
+        Data = self.Sorted
+        PMF = dict()
+        for Value in Data:
+            Count = PMF.get(Value, 0)
+            PMF[Value] = Count + 1
+        Total = len(Data)
+        Result = tuple((Key, Value / Total) for Key, Value in PMF.items())
+        return Result
+
+    def getCDF(self) -> tuple[tuple[TReal, float], ...]:
+        """
+        Calculates the node points of the cummulative density (step) function of
+        the discrete distribution of the stored data points, i.e. the
+        probability of observing value less or equal to each unique value in the
+        data set, sorted in the ascending order of the values.
+
+        Signature:
+            None -> tuple(tuple(int OR float, float), ...)
+        
+        Returns:
+            tuple(tuple(int OR float, float), ...); in the nested tuples, the
+                first element is the exact value of each unique in the data set,
+                sorted in the ascending order, the second element is the
+                probability of this value or less
+        
+        Version 1.0.0.0
+        """
+        CDF = list
+        Accumulator = 0
+        PMF = self.getPMF()
+        for Key, Value in PMF.items():
+            Accumulator += Value
+            CDF.append((Key, Accumulator))
+        del CDF[-1]
+        CDF.append((Key, 1))
+        return tuple(CDF)
+
 class Statistics2D:
     """
     Data storage class encapsulating 2D data set and ensuring its immutability.
@@ -937,8 +1007,8 @@ class Statistics2D:
     
     #special methods
 
-    def __init__(self, DataX: bf.TGenericSequence,
-                                            DataY: bf.TGenericSequence) -> None:
+    def __init__(self, DataX: bf.TGenericSequence | Statistics1D,
+                            DataY: bf.TGenericSequence | Statistics1D) -> None:
         """
         Initialization method. Perfroms the input data sanity check, extaction
         of the 'means' and uncertainties of the measurements, and encapsulation
@@ -950,12 +1020,12 @@ class Statistics2D:
                     -> None
 
         Args:
-            DataX: seq(int OR float OR phyqus_lib.base_classes.MeasuredValue);
-                generic sequence of the measurements data to be stored as X
-                sub-set
-            DataY: seq(int OR float OR phyqus_lib.base_classes.MeasuredValue);
-                generic sequence of the measurements data to be stored as X
-                sub-set
+            DataX: seq(int OR float OR phyqus_lib.base_classes.MeasuredValue)
+                OR Statistics1D; generic sequence of the measurements data OR
+                an instance of Statistics1D class to be stored as X sub-set
+            DataY: seq(int OR float OR phyqus_lib.base_classes.MeasuredValue)
+                OR Statistics1D; generic sequence of the measurements data OR
+                an instance of Statistics1D class to be stored as Y sub-set
             
         Raises:
             UT_TypeError: any of the arguments is not a sequence of real numbers
@@ -963,29 +1033,19 @@ class Statistics2D:
             UT_ValueError: any of the passed sequences is empty, or they have
                 unequal length
         
-        Version 1.0.1.0
+        Version 2.0.0.0
         """
         self._Data = dict()
         try:
             self._Data['X'] = Statistics1D(DataX)
         except (UT_TypeError, UT_ValueError) as err1:
-            Message = f'{err1.getMessage()} - X data'
-            if isinstance(err1, UT_TypeError):
-                err = UT_TypeError(1, int, SkipFrames = 1)
-            else:
-                err = UT_ValueError(1, 'whatever', SkipFrames = 1)
-            err.setMessage(Message)
-            raise err from None
+            err1.appendMessage('- X data')
+            raise err1 from None
         try:
             self._Data['Y'] = Statistics1D(DataY)
         except (UT_TypeError, UT_ValueError) as err1:
-            Message = f'{err1.getMessage()} - Y data'
-            if isinstance(err1, UT_TypeError):
-                err = UT_TypeError(1, int, SkipFrames = 1)
-            else:
-                err = UT_ValueError(1, 'whatever', SkipFrames = 1)
-            err.setMessage(Message)
-            raise err from None
+            err1.appendMessage('- Y data')
+            raise err1 from None
         LengthX = self.X.N
         LengthY = self.Y.N
         if LengthX != LengthY:
@@ -1130,7 +1190,7 @@ class Statistics2D:
         return self.X.N
     
     @property
-    def Cov(self) -> int:
+    def Cov(self) -> TReal:
         """
         Read-only property returning the covariance of the stored data set.
 
@@ -1145,7 +1205,7 @@ class Statistics2D:
         return self._Properties['Cov']
     
     @property
-    def Pearson(self) -> int:
+    def Pearson(self) -> TReal:
         """
         Read-only property returning the Pearson's coefficient of correlation r
         of the stored data set.
@@ -1161,7 +1221,7 @@ class Statistics2D:
         return self._Properties['Pearson']
     
     @property
-    def Spearman(self) -> int:
+    def Spearman(self) -> TReal:
         """
         Read-only property returning the Spearman coefficient of rank
         correlation rho of the stored data set.
@@ -1177,7 +1237,7 @@ class Statistics2D:
         return self._Properties['Spearman']
     
     @property
-    def Kendall(self) -> int:
+    def Kendall(self) -> TReal:
         """
         Read-only property returning the Kendall coefficient of rank correlation
         tau-b of the stored data set.

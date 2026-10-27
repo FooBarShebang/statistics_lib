@@ -3,6 +3,13 @@
         "major" : 3,
         "minor" : 11
     },
+    "3rd_party" : {
+        "matplotlib" : {
+            "major" : 3,
+            "minor" : 6,
+            "path": "PyPI using 'pip install matplotlib'"
+        }
+    },
     "DO" : {
         "introspection_lib" : {
             "major" : 0,

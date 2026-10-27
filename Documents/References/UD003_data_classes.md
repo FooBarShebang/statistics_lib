@@ -242,6 +242,34 @@ Generates a z-score distribution based on the currently stored data preserving t
 
 This is a 'pure' version of z-score generator, which ignores the uncertainties of the stored values. Thus, Var(z) = 1 is guaranteed, and all generated z-values have no uncertainties.
 
+**getPMF**()
+
+*Signature*:
+
+None -> tuple(tuple(int OR float, float), ...)
+
+*Returns*:
+
+**tuple**(**tuple**(**int** OR **float**, **float**), ...): in the nested tuples, the first element is the exact value of each unique in the data set $x_i$, sorted in the ascending order, the second element is the probability of this value $P[X = x_i]$ (number of occurence /data set length)
+
+*Description*:
+
+Calculates the node points of the probability mass function $\{x_i, P[X = x_i]\}$  of the discrete distribution of the stored data points, i.e. the probability of each unique value in the data set, sorted in the ascending order of the values.
+
+**getCDF**()
+
+*Signature*:
+
+None -> tuple(tuple(int OR float, float), ...)
+
+*Returns*:
+
+**tuple**(**tuple**(**int** OR **float**, **float**), ...): in the nested tuples, the first element is the exact value of each unique in the data set $x_i$, sorted in the ascending order, the second element is the probability of this value or less to be observed $P[X \le x_i]$
+
+*Description*:
+
+Calculates the node points of the cummulative density (step) function $\{x_i, P[X \le x_i]\}$ of the discrete distribution of the stored data points, i.e. the probability of observing value less or equal to each unique value in the data set, sorted in the ascending order of the values.
+
 ## Class Statistics2D
 
 Data storage class encapsulating 2D data set and ensuring its immutability. The statistical properties are calculated 'on demand', cached and interfaced via read-only properties (attributes).

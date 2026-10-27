@@ -4,6 +4,10 @@ This library  requires the Python 3, specifically version >= 3.11.
 
 ## Direct dependencies
 
+### 3rd party libararies
+
+* [matplotlib](https://pypi.org/project/matplotlib/) >= v3.6
+
 ### Other own libraries
 
 * [introspection_lib](https://github.com/FooBarShebang/introspection_lib)

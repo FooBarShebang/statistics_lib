@@ -6,8 +6,8 @@ Set of unit tests on the module stastics_lib.data_classes. See the test plan /
 report TE003_data_classes.md
 """
 
-__version__= '2.0.0.0'
-__date__ = '13-10-2026'
+__version__= '2.1.0.0'
+__date__ = '27-10-2026'
 __status__ = 'Testing'
 
 #imports
@@ -62,7 +62,7 @@ class Test_Statistics1D(unittest.TestCase):
     REQ-FUN-314, REQ-FUN-316, REQ-FUN-317, REQ-AWM-300, REQ-AWM-301,
     REQ-AWM-302, REQ-AWM-310, REQ-AWM-311, REQ-AWM-312, REQ-AWM-313
 
-    Version 1.1.0.0
+    Version 1.2.0.0
     """
     
     @classmethod
@@ -70,22 +70,32 @@ class Test_Statistics1D(unittest.TestCase):
         """
         Preparation for the test cases, done only once.
 
-        Version 1.0.0.0
+        Update 2027-10-27 - excluded zeroes from the generated sets.
+
+        Version 2.0.0.0
         """
         cls.TestClass = test_module.Statistics1D
-        cls.AllInt = [random.randint(-100, 100)
-                                    for _ in range(random.randrange(5, 100))]
-        cls.AllFloat = [random.uniform(-10.0, 10.0)
-                                    for _ in range(random.randrange(5, 100))]
+        cls.AllInt = [random.randint(1, 100)
+                                    for _ in range(random.randrange(3, 50))]
+        cls.AllInt.extend([random.randint(-100, -1)
+                                    for _ in range(random.randrange(2, 50))])
+        cls.AllFloat = [random.uniform(0.000001, 10.0)
+                                    for _ in range(random.randrange(3, 50))]
+        cls.AllFloat.extend([random.uniform(-10.0, -0.000001)
+                                    for _ in range(random.randrange(3, 50))])
         cls.Mixed = list()
         for _ in range(random.randrange(10, 100)):
             Temp = random.random()
-            if Temp >= 0.5:
-                cls.Mixed.append(random.uniform(-10.0, 10.0))
+            if Temp >= 0.75:
+                cls.Mixed.append(random.uniform(0.0001, 10.0))
+            elif Temp < 0.25:
+                cls.Mixed.append(random.uniform(-10.0, -0.0001))
+            elif Temp >= 0.5:
+                cls.Mixed.append(random.randint(1, 100))
             else:
-                cls.Mixed.append(random.randint(-100, 100))
+                cls.Mixed.append(random.randint(-100, -1))
         MaxLength = max(len(cls.AllInt), len(cls.AllFloat), len(cls.Mixed))
-        cls.Errors = [random.uniform(0.0, 3.0) for _ in range(MaxLength)]
+        cls.Errors = [random.uniform(0.001, 3.0) for _ in range(MaxLength)]
         cls.IntErr = [MeasuredValue(Value, cls.Errors[i])
                                         for i, Value in enumerate(cls.AllInt)]
         cls.FloatErr = [MeasuredValue(Value, cls.Errors[i])
@@ -160,6 +170,23 @@ class Test_Statistics1D(unittest.TestCase):
                 self.TestClass([])
         with self.assertRaises(ValueError):
                 self.TestClass(tuple())
+
+    def test_initFromS1D(self):
+        """
+        Checks instantiation from another instance of Statistics1D class. Not
+        part of the test plan / requirements.
+
+        Version 1.0.0.0
+        """
+        Check = self.TestClass(self.TotalMixed)
+        objTest = self.TestClass(Check)
+        self.assertIsNot(objTest, Check)
+        self.assertIsNot(objTest.Values, Check.Values)
+        self.assertIsNot(objTest.Errors, Check.Errors)
+        self.assertTupleEqual(objTest.Values, Check.Values)
+        self.assertTupleEqual(objTest.Errors, Check.Errors)
+        del objTest
+        del Check
     
     def test_HasAttributes(self):
         """
@@ -1510,7 +1537,7 @@ class Test_Statistics2D(unittest.TestCase):
     Covers the requirements: REQ-FUN-320, REQ-FUN-321, REQ-FUN-322, REQ-FUN-323,
     REQ-FUN-324, REQ-FUN-325, REQ-AWM-300, REQ-AWM-301, REQ-AWM-302
 
-    Version 1.0.0.0
+    Version 1.1.0.0
     """
     
     @classmethod
@@ -1621,6 +1648,36 @@ class Test_Statistics2D(unittest.TestCase):
                 self.TestClass([1, 2, 3], (1, 2))
         with self.assertRaises(ValueError):
                 self.TestClass((1, 2, 3), [1, 2, 3, 4, 5])
+
+    def test_initFromS1D(self):
+        """
+        Checks instantiation from one or two instances of Statistics1D class.
+        Not part of the test plan / requirements.
+
+        Version 1.0.0.0
+        """
+        DataX = test_module.Statistics1D(self.TotalMixedX)
+        DataY = test_module.Statistics1D(self.TotalMixedY)
+        objTest = self.TestClass(DataX, self.TotalMixedY)
+        self.assertIsNot(objTest.X, DataX)
+        self.assertTupleEqual(objTest.X.Values, DataX.Values)
+        self.assertTupleEqual(objTest.X.Errors, DataX.Errors)
+        del objTest
+        objTest = self.TestClass(self.TotalMixedX, DataY)
+        self.assertIsNot(objTest.Y, DataY)
+        self.assertTupleEqual(objTest.Y.Values, DataY.Values)
+        self.assertTupleEqual(objTest.Y.Errors, DataY.Errors)
+        del objTest
+        objTest = self.TestClass(DataX, DataY)
+        self.assertIsNot(objTest.X, DataX)
+        self.assertTupleEqual(objTest.X.Values, DataX.Values)
+        self.assertTupleEqual(objTest.X.Errors, DataX.Errors)
+        self.assertIsNot(objTest.Y, DataY)
+        self.assertTupleEqual(objTest.Y.Values, DataY.Values)
+        self.assertTupleEqual(objTest.Y.Errors, DataY.Errors)
+        del objTest
+        del DataX
+        del DataY
     
     def test_HasAttributes(self):
         """

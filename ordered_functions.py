@@ -45,8 +45,8 @@ Functions:
                 *, int > 0, bool/ -> int OR float
 """
 
-__version__= '1.0.1.0'
-__date__ = '01-05-2023'
+__version__= '1.0.1.1'
+__date__ = '27-10-2026'
 __status__ = 'Production'
 
 #imports
@@ -513,7 +513,7 @@ def GetHistogram(Data: TGenericSequence, *, NBins: Optional[int] = None,
         for Item in _Data:
             Index = int((round(Item, 16) - Start) / Step + 0.5)
             if Index >= NSteps: #rounding-up errors
-                Index = NSteps + 1
+                Index = NSteps - 1 #2026-10-27 fixed bug '+1' -> '-1'
             elif Index < 0:
                 Index = 0
             Temp[Index] += 1

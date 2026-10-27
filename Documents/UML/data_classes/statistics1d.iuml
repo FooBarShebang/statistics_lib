@@ -38,4 +38,6 @@ class Statistics1D {
     tuple(tuple(int OR float, int >= 0))
     + generateZ_Score(): None -> Statistics1D
     + generateZ_ScorePure(): None -> Statistics1D
+    + getPMF(): None -> tuple(tuple(int OR float, float), ...)
+    + getCDF(): None -> tuple(tuple(int OR float, float), ...)
 }
