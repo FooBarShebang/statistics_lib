@@ -9,6 +9,7 @@
   * Q-Q plot of a data set vs another data set or model distribution
   * P-P plot of a data set vs another data set or model distribution
   * Direct comparison plot of two data sets of the equal length
+  * Bland-Altman comparison plot of two data sets of the equal length
   * Histogram comparison of a data set vs another data set or model distibution
   * Plot of multiple data sets vs same (X-axis) data set
   * Histogram graph of one or more data sets using the same X-coordinates / characterization
