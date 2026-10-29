@@ -21,6 +21,9 @@ Functions:
     PlotMany(*Data, **kwargs)
         *tuple(Statistics2D OR seq(Statistics1D OR seq(int OR float OR
             MeasuredValue)))/, **dict(str -> type A)/ -> None
+    PlotManySeparate(*Data, **kwargs)
+        *tuple(Statistics2D OR seq(Statistics1D OR seq(int OR float OR
+            MeasuredValue)))/, **dict(str -> type A)/ -> None
 """
 
 __version__= '1.0.0.0'
@@ -67,6 +70,17 @@ TDataSet = Union[Sequence[dc.TNumber], dc.Statistics1D]
 TDataSet2D = Union[Sequence[TDataSet], dc.Statistics2D]
 
 #+ plot styles
+
+DEF_LAYOUT = {
+    2 : (2, 1),
+    3 : (3, 1),
+    4 : (2, 2),
+    5 : (3, 2),
+    6 : (3, 2),
+    7 : (3, 3),
+    8 : (3, 3),
+    9 : (3, 3)
+}
 
 REF_LINE_STYLE = {
     'marker' : 'none',
@@ -670,10 +684,8 @@ def PlotMany(*Data: *tuple[TDataSet2D], Slope: Optional[dc.TReal] = None,
         ErrorsX.append(XErrors)
         ErrorsY.append(YErrors)
         _XTitle, _YTitle, _Title=_ExtractTitles(DataSet)
-        print(_XTitle, _YTitle, _Title)
         if (TitleX is None) and (not _XTitle is None):
             TitleX = _XTitle
-            print('!', TitleX)
         if (TitleY is None) and (not _YTitle is None):
             TitleY = _YTitle
         if not _Title is None:
@@ -736,6 +748,142 @@ def PlotMany(*Data: *tuple[TDataSet2D], Slope: Optional[dc.TReal] = None,
     ax.set_ylabel(TitleY)
     ax.set_title(TitleP)
     ppl.legend()
+    if not Filename is None:
+        try:
+            fig.savefig(Filename)
+            print(f'Figure is saved as {Filename}')
+        except Exception as err:
+            print(f'Couldn`t save the figure as {Filename}')
+            print(f'Exception raised {err.__class__.__name__}: {str(err)}')
+    ppl.show()
+
+def PlotManySeparate(*Data: *tuple[TDataSet2D], Slope: Optional[dc.TReal] =None,
+                YIntercept: Optional[dc.TReal] = None,
+                    VSplit: Optional[dc.TReal] = None,
+                        ShowXErrors: bool = False, ShowYErrors: bool = False,
+                            Title: Optional[str] = None,
+                                Filename: Optional[str] = None,
+                                    Labels: Sequence[str] = []) -> None:
+    """
+    Plots multiple Y-variables against X-variables with markers without lines,
+    as separate sub-plot for each data set on a single figure (max 9 sub-plots).
+    In each set the both variables can be passed as an instance of Statistics2D
+    class, or as a 2-element sequence of generic numeric sequences or instances
+    of Statistics1D class. When possible, X- and Y-axis titles are extracted
+    from the labels (Name attribute) of the passed data sets, as well as the
+    plot title, otherwise generic titles are created automatically. X- and / or
+    Y-erorbars can be requested as well as sloped (or horizontal) and / or
+    vertical reference line.
+
+    If filename is provided, the plot is also saved using the respective path,
+    relative to the current working directory.
+
+    Signature:
+        *tuple(Statistics2D OR seq(Statistics1D OR seq(int OR float OR
+            MeasuredValue))) /, **dict(str -> type A)/ -> None
+    
+    Args:
+        Data: *tuple(Statistics2D OR seq(Statistics1D OR seq(int OR float
+            OR MeasuredValue))); two or more data sets, expected an instance of
+            Statistics2D or 2-element sequence of instances of Statistics1D or
+            generic numeric sequences for each element
+        kwargs: **dict(str -> type A); only allowed settings are
+            Slope: int OR float OR None; in not None - adds a sloped reference
+                line, can be used with or without YIntercept as y(x) = a * x + b
+            YIntercept: int OR float OR None; if not None - adds a vertical
+                offset to the sloped reference line, if used without Slope -
+                creates a horizontal reference line y(x) = b
+            VSplit: int OR float OR None; if not None - adds a vertical
+                reference line at x = VSplit
+            ShowXErrors: bool; if True - adds X-errorbars to the markers
+            ShowYErrors: bool; if True - adds Y-errorbars to the markers
+            Title: str OR None; if not None - overwrites the plot title
+                extracted from data or automatically created
+            Filename: str OR None; if not None - saves the figure into a file
+            Labels: seq(str OR None); optional labels / names of the deatasets,
+                applied in not gready manner, None values are ignored, missing
+                or superficial entires are ignored, overwrites the data set
+                names extracted from the arguments or auto-generated ones
+    
+    Raises:
+        UT_TypeError: unexpected type of the arguments OR their elements
+        UT_ValueError: unequal length of 1D datasets, OR not exactly 2 data sets
+            are passed in any dataset, OR less than 2 x-y data sets are passed 
+    
+    Version 1.0.0.0
+    """
+    DataX = []
+    DataY = []
+    ErrorsX = []
+    ErrorsY = []
+    _Labels = []
+    TitlesX = []
+    TitlesY = []
+    NSets = len(Data)
+    if NSets < 2 or NSets > 9:
+        raise dc.UT_ValueError(NSets,'in range [2, 9] - number of x-y datasets')
+    rows, cols = DEF_LAYOUT[NSets]
+    for Index, DataSet in enumerate(Data):
+        try:
+            XValues, XErrors, YValues, YErrors = _Check2Dset(DataSet)
+        except (dc.UT_ValueError, dc.UT_TypeError) as err:
+            err.appendMessage(f'- datased {DataSet} at position {Index}')
+        DataX.append(XValues)
+        DataY.append(YValues)
+        ErrorsX.append(XErrors)
+        ErrorsY.append(YErrors)
+        _XTitle, _YTitle, _Title =_MakeTitles(DataSet, None, None, None)
+        TitlesX.append(_XTitle)
+        TitlesY.append(_YTitle)
+        if _Title is None:
+            _Title = f'{_YTitle} vs {_XTitle}'
+        _Labels.append(_Title)
+    for Index, Label in enumerate(Labels):
+        if (not Label is None) and Index < len(_Labels):
+            _Labels[Index] = str(Label)
+    fig, axs = ppl.subplots(rows, cols)
+    for Index, XValues in enumerate(DataX):
+        row, col = divmod(Index, cols)
+        ax = axs[row][col]
+        YValues = DataY[Index]
+        XErrors = ErrorsX[Index]
+        YErrors = ErrorsY[Index]
+        if ShowYErrors and ShowXErrors:
+            ax.errorbar(XValues, YValues, yerr = YErrors, xerr = XErrors,
+                                                            **NO_LINE_ERRORS)
+        elif ShowYErrors:
+            ax.errorbar(XValues, YValues, yerr = YErrors, **NO_LINE_ERRORS)
+        elif ShowXErrors:
+            ax.errorbar(XValues, YValues, xerr = XErrors, **NO_LINE_ERRORS)
+        else:
+            ax.plot(XValues, YValues, **NO_LINE_STYLE)
+        if isinstance(VSplit, (int, float)):
+            XData = [VSplit, VSplit]
+            YData = [min(YValues), max(YValues)]
+            ax.plot(XData, YData, **REF_LINE_STYLE)
+        bCond1 = isinstance(Slope, (int, float))
+        bCond2 = isinstance(YIntercept, (int, float))
+        if bCond1 or bCond2:
+            XData = [min(XValues), max(XValues)]
+            if bCond1:
+                YData = [Slope * XData[0], Slope * XData[1]]
+            else:
+                YData = [0, 0]
+            if bCond2:
+                YData = [YData[0] + YIntercept, YData[1] + YIntercept]
+            ax.plot(XData, YData, **REF_LINE_STYLE)
+        ax.set_xlabel(TitlesX[Index])
+        ax.set_ylabel(TitlesY[Index])
+        ax.set_title(_Labels[Index])
+    NGrid = rows * cols
+    if NGrid > NSets:
+        NEmpty = NGrid - NSets
+        StartIndex = cols - NEmpty
+        for col in range(StartIndex, cols):
+            axs[rows - 1][col].set_visible(False)
+    if not Title is None:
+        fig.suptitle(str(Title))
+    fig.tight_layout()
     if not Filename is None:
         try:
             fig.savefig(Filename)
