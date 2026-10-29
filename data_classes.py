@@ -13,8 +13,8 @@ Classes:
     Statistics2D
 """
 
-__version__= '1.2.0.0'
-__date__ = '27-10-2026'
+__version__= '1.2.0.1'
+__date__ = '29-10-2026'
 __status__ = 'Production'
 
 #imports
@@ -158,7 +158,7 @@ class Statistics1D:
         getCDF()
             None -> tuple(tuple(int OR float, float), ...)
     
-    Version 1.2.0.0
+    Version 1.2.0.1
     """
 
     #'private' helper methods
@@ -235,23 +235,24 @@ class Statistics1D:
                 Statistics1D class
             UT_ValueError: passed sequence is empty
         
-        Version 2.0.0.
+        Version 2.1.0.0
         """
         self._Data = dict()
         self._Data['Sorted'] =  None
+        self._Properties = {Key : None for Key in ['N', 'Mean', 'Median', 'Q1',
+                                    'Q3', 'Min', 'Max', 'Var', 'Sigma', 'SE',
+                                        'Skew', 'Kurt', 'FullVar', 'FullSigma',
+                                                            'FullSE', 'Name']}
         if isinstance(Data, self.__class__):
             self._Data['Values'] = tuple(Value for Value in Data.Values)
             self._Data['Errors'] = tuple(Value for Value in Data.Errors)
             if not Data._Data['Sorted'] is None:
                 self._Data['Sorted'] = tuple(Value for Value in Data.Sorted)
+            self._Properties.update(Data._Properties)
         else:
             Temp = bf._ExtractMeans(Data, SkipFrames = 2)
             self._Data['Values'] = tuple(Temp)
             self._Data['Errors']=tuple(bf._ExtractErrors(Data, DoCheck = False))
-        self._Properties = {Key : None for Key in ['N', 'Mean', 'Median', 'Q1',
-                                    'Q3', 'Min', 'Max', 'Var', 'Sigma', 'SE',
-                                        'Skew', 'Kurt', 'FullVar', 'FullSigma',
-                                                            'FullSE', 'Name']}
         self._SupportsMeasuredValue = True #walkaround to fix conflict with
         # MeasuredValue arithmetics implementation
     
@@ -1002,7 +1003,7 @@ class Statistics2D:
         Summary: (read-only) str; the summary of the statistical properties of
             the data set
     
-    Version 1.1.1.0
+    Version 1.1.1.1
     """
     
     #special methods
@@ -1033,7 +1034,7 @@ class Statistics2D:
             UT_ValueError: any of the passed sequences is empty, or they have
                 unequal length
         
-        Version 2.0.0.0
+        Version 2.1.0.0
         """
         self._Data = dict()
         try:
@@ -1053,6 +1054,8 @@ class Statistics2D:
                                                                 SkipFrames = 1)
         self._Properties = {Key : None for Key in ['Cov', 'Pearson', 'Spearman',
                                                             'Kendall', 'Name']}
+        if (not self.X.Name is None) and (not self.Y.Name is None):
+            self._Properties['Name'] = f'{self.Y.Name} vs {self.X.Name}'
     
     def __str__(self) -> str:
         """

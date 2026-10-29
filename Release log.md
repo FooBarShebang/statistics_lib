@@ -14,6 +14,7 @@
   * Plot of multiple data sets at the same X-Y coordinates (single subplot), each data set has own X- and Y- points
   * Plot of 2 to 9 (inclusively) different data sets arranged in a grid of individual sub-plots
   * Histogram graph of one or more data sets using the same X-coordinates / characterization
+  * Multiple histograms placed on a grid
 
 ## 2026-10-14 v1.2.0-rc1
 

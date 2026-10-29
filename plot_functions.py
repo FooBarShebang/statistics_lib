@@ -892,3 +892,16 @@ def PlotManySeparate(*Data: *tuple[TDataSet2D], Slope: Optional[dc.TReal] =None,
             print(f'Couldn`t save the figure as {Filename}')
             print(f'Exception raised {err.__class__.__name__}: {str(err)}')
     ppl.show()
+
+def PlotHistograms(*Data: *tuple[TDataSet], NBins: Optional[int] = 10,
+                    SharedBins: bool = True):
+    """
+    """
+    fig, ax = ppl.subplots()
+    if not SharedBins:
+        for _Data in Data:
+            ax.hist(_Data.Values, bins = NBins)
+    else:
+        _Data = [Entry.Values for Entry in Data]
+        ax.hist(_Data, bins = NBins)
+    ppl.show()
