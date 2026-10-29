@@ -11,7 +11,7 @@
   * Direct comparison plot of two data sets of the equal length
   * Bland-Altman comparison plot of two data sets of the equal length
   * Histogram comparison of a data set vs another data set or model distibution
-  * Plot of multiple data sets vs same (X-axis) data set
+  * Plot of multiple data sets at the same X-Y coordinates, each data set has own X- and Y- points
   * Histogram graph of one or more data sets using the same X-coordinates / characterization
 
 ## 2026-10-14 v1.2.0-rc1
