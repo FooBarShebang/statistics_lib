@@ -24,6 +24,9 @@ Functions:
     PlotManySeparate(*Data, **kwargs)
         *tuple(Statistics2D OR seq(Statistics1D OR seq(int OR float OR
             MeasuredValue)))/, **dict(str -> type A)/ -> None
+    PlotHistograms(*Data, **kwargs)
+        *tuple(seq(int OR float OR MeasuredValue) OR Statistics1D)
+            **dict(str -> type A)-> None
 """
 
 __version__= '1.0.0.0'
@@ -36,6 +39,7 @@ __status__ = 'Development'
 
 import sys
 import os
+import math
 
 from typing import Union, Optional
 
@@ -222,7 +226,6 @@ def GetCovarianceMatrix(*Data: *tuple[TDataSet, ...]
     Summary = '\n'.join([
         'Covariance matrix report.',
         f'N points = {len(Data[0])}, N sets = {NSets}.',
-        'Above diagonal - Pearson`s r, below - Spearman \u03C1.',
         '=====================================================',
         '\t'.join(['#', '\t'.join(Names)]),
         '\n'.join(['\t'.join([Name, '\t'.join(f'{Value: .5E}'
@@ -335,7 +338,8 @@ def _ExtractTitles(Data: TDataSet2D
             sequences
 
     Returns:
-        tuple(str OR None, str OR None, str OR None); X-axis title, Y-axis title, plot title
+        tuple(str OR None, str OR None, str OR None); X-axis title,
+            Y-axis title, plot title
     
     Version 1.0.0.0
     """
@@ -491,6 +495,13 @@ def Plot2Sets(Data: TDataSet2D, /, Slope: Optional[dc.TReal] = None,
     if _Title is None:
         _Title = f'Direct comparison of {_YTitle} to {_XTitle}'
     ax.set_title(_Title)
+    r = bf.GetPearsonR(XValues, YValues, DoCheck = False)
+    Text = f'Pearson`s r={r:0.5f}'
+    if r >= 0:
+        coords = (0.05, 0.95)
+    else:
+        coords = (0.05, 0.05)
+    ppl.text(*coords, Text, transform = ax.transAxes)
     if not Filename is None:
         try:
             fig.savefig(Filename)
@@ -563,7 +574,7 @@ def PlotBlandAltman(Data: TDataSet2D, /, Slope: Optional[dc.TReal] = None,
     _XTitle, _YTitle, _Title = _MakeTitles(Data, XTitle, YTitle, Title)
     fig, ax = ppl.subplots()
     if ShowYErrors and ShowXErrors:
-        ax.errorbar(XData, YData, yerr = Errors, xerr = XErrors,
+        ax.errorbar(XData, YData, yerr = Errors, xerr = Errors,
                                                     **SINGLE_MARKER_ERRORS)
     elif ShowYErrors:
         ax.errorbar(XData, YData, yerr = Errors, **SINGLE_MARKER_ERRORS)
@@ -602,6 +613,80 @@ def PlotBlandAltman(Data: TDataSet2D, /, Slope: Optional[dc.TReal] = None,
 
 #++ multiple variables
 
+#+++ helper functions
+
+def _CheckNDset(Data: Sequence[TDataSet]) -> list[Sequence[dc.TReal]]:
+    """
+    Helper function. Performs data sanity check and extracts the 'mean' values
+    for each element of each dataset in the passed sequence of datasets.
+
+    Signature:
+        seq(seq(int OR float OR MeasuredValue) OR Statistics1D)
+            -> list(seq(int OR float))
+    
+    Args:
+        Data: seq(seq(int OR float OR MeasuredValue) OR Statistics1D); input
+            data as a sequence of generic numeric sequences
+    
+    Returns:
+        list(seq(int OR float)); only 'mean' values, number of the nested
+            sequences equals to the number of datasets passed, for each nested
+            sequence its length equals the size of the respective dataset.
+    
+    Raises:
+        UT_TypeError: not a sequence of numeric sequences is passed
+        UT_ValueError: sequence is empty or any of the nested sequences is empty
+
+    Version 1.0.0.0
+    """
+    if not isinstance(Data, Sequence):
+        raise dc.UT_TypeError(Data, Sequence, SkipFrames = 1)
+    Result = list()
+    if not len(Data):
+        raise dc.UT_ValueError(0, f'> 0 - number of data sets in {Data}',
+                               SkipFrames = 1)
+    for Index, DataSet in enumerate(Data):
+        if isinstance(DataSet, dc.Statistics1D):
+            if not len(DataSet):
+                raise dc.UT_ValueError(0,
+                            f'> 0 - length of sub-sequence {Index} in {Data}',
+                                SkipFrames = 1)
+            Result.append(DataSet.Values)
+        elif dc._CheckIfNumberSequence(DataSet):
+            Result.append(bf._ExtractMeans(DataSet, DoCheck = False))
+        else:
+            Error = dc.UT_TypeError(DataSet, (Sequence, dc.Statistics1D),
+                                    SkipFrames = 1)
+            Message = f'- sub-set {DataSet} at position {Index} in {Data}'
+            Error.appendMessage(Message)
+            raise Error
+    return Result
+
+def _ExtractLabelsNDset(Data: Sequence[TDataSet]) -> list[str]:
+    """
+    Helper function. Attempts to extract the label (name) of each dataset from
+    the passed sequence of datasets. If not possible - generates the respective
+    label in the form 'Dataset {k}'.
+
+    Signature:
+        seq(seq(int OR float OR MeasuredValue) OR Statistics1D) -> list(str)
+    
+    Args:
+        Data: seq(seq(int OR float OR MeasuredValue) OR Statistics1D); input
+            data as a sequence of generic numeric sequences
+    Returns:
+        list(str): extracted or generated labels for each dataset
+    
+    Version 1.0.0.0
+    """
+    Labels = list()
+    for Index, DataSet in enumerate(Data):
+        if isinstance(DataSet, dc.Statistics1D) and (not DataSet.Name is None):
+            Labels.append(DataSet.Name)
+        else:
+            Labels.append(f'Dataset {Index + 1}')
+    return Labels
+
 #+++ actual plot functions
 
 def PlotMany(*Data: *tuple[TDataSet2D], Slope: Optional[dc.TReal] = None,
@@ -612,7 +697,8 @@ def PlotMany(*Data: *tuple[TDataSet2D], Slope: Optional[dc.TReal] = None,
                                 YTitle: Optional[str] = None,
                                     Title: Optional[str] = None,
                                         Filename: Optional[str] = None,
-                                            Labels: Sequence[str] = []) -> None:
+                                            Labels: Sequence[str | None] = []
+                                                ) -> None:
     """
     Plots multiple Y-variables against X-variables with markers without lines.
     In each set the both variables can be passed as an instance of Statistics2D
@@ -763,7 +849,7 @@ def PlotManySeparate(*Data: *tuple[TDataSet2D], Slope: Optional[dc.TReal] =None,
                         ShowXErrors: bool = False, ShowYErrors: bool = False,
                             Title: Optional[str] = None,
                                 Filename: Optional[str] = None,
-                                    Labels: Sequence[str] = []) -> None:
+                                    Labels: Sequence[str | None] = []) -> None:
     """
     Plots multiple Y-variables against X-variables with markers without lines,
     as separate sub-plot for each data set on a single figure (max 9 sub-plots).
@@ -844,7 +930,10 @@ def PlotManySeparate(*Data: *tuple[TDataSet2D], Slope: Optional[dc.TReal] =None,
     fig, axs = ppl.subplots(rows, cols)
     for Index, XValues in enumerate(DataX):
         row, col = divmod(Index, cols)
-        ax = axs[row][col]
+        if cols > 1:
+            ax = axs[row][col]
+        else:
+            ax = axs[row]
         YValues = DataY[Index]
         XErrors = ErrorsX[Index]
         YErrors = ErrorsY[Index]
@@ -893,15 +982,168 @@ def PlotManySeparate(*Data: *tuple[TDataSet2D], Slope: Optional[dc.TReal] =None,
             print(f'Exception raised {err.__class__.__name__}: {str(err)}')
     ppl.show()
 
-def PlotHistograms(*Data: *tuple[TDataSet], NBins: Optional[int] = 10,
-                    SharedBins: bool = True):
+def PlotHistograms(*Data: *tuple[TDataSet], NBins: int = 10,
+                    Step: Optional[int | float] = None,
+                    BinsBoundaries: Optional[Sequence[int | float]] = None,
+                    SharedBins: bool = True, Title: Optional[str] = None,
+                    Labels: Sequence[str | None] = [],
+                    Filename: Optional[str] = None) -> None:
     """
+    Creates a side-by-side histograms of one or more datasets. Designed for
+    comparison of the distribution of the comparable variables, e.g. same
+    quantity sampled from different populations OR comparable / closely related
+    quantities sampled from the same population. When possible, extracts the
+    dataset label / name from the respective dataset, otherwise generates a
+    generic label for it. If passed explicitely, the extracted / generated
+    labels are replaced by the user-defined values.
+
+    Signature:
+        *tuple(seq(int OR float OR MeasuredValue) OR Statistics1D)
+            **dict(str -> type A)-> None
+    
+    Args:
+        Data: *tuple(seq(int OR float OR MeasuredValue) OR Statistics1D); input
+            data as a sequence of generic numeric sequences
+        kwargs: **dict(str -> type A)
+            NBins: int > 0; number of bins to use, defaults to 10
+            Step: (int OR float) > 0 OR None; defaults to None, if not None -
+                overrides the NBins parameter, used as the desired width of
+                each bin to determine their number automatically
+            BinBoundaries: seq(int OR float) OR None; the explicit boundaries
+                of the bins to use, defaults to None, if not None - overrides
+                NBins and Step parameters
+            SharedBins:bool; defaults to True, when all sets are binned and
+                plotted simultaneously, resulting in the horizontally stacked
+                bars using the same bins for all datasets, overwise the separate
+                datasets are binned and plotted separately on top of each other,
+                if nether Step nor BinBoundaries are specified each dataset will
+                have the same number of bins of different width
+            Title: str OR None; optional title of the plot, defaults to None,
+                i.e. no title is set
+            Labels: seq(str OR None); optional labels / names of the deatasets,
+                applied in not gready manner, None values are ignored, missing
+                or superficial entires are ignored, overwrites the data set
+                names extracted from the arguments or auto-generated ones
+            Filename: str OR None; if not None - saves the figure into a file
+    
+    Raises:
+        UT_TypeError: not a sequence of numeric sequences is passed as Data, OR
+            any keyword argument is of improper data type
+        UT_ValueError: sequence is empty or any of the nested sequences is empty
+            OR any of the keyword arguments is of improper value
+
+    Version 1.0.0.0
     """
+    DataSets = _CheckNDset(Data)
+    _Labels = _ExtractLabelsNDset(Data)
+    for Index, Label in enumerate(Labels):
+        if (not Label is None) and Index < len(_Labels):
+            _Labels[Index] = str(Label)
+    if not isinstance(NBins, int):
+        Error = dc.UT_TypeError(NBins, int)
+        Error.appendMessage('- NBins argument')
+        raise Error
+    if NBins < 1:
+        raise dc.UT_ValueError(NBins, '> 0 - number of bins')
+    _NBins = NBins
+    if not Step is None:
+        if not isinstance(Step, (int, float)):
+            Error = dc.UT_TypeError(Step, (int, float, None))
+            Error.appendMessage('- Step argument')
+            raise Error
+        if Step <= 0:
+            raise dc.UT_ValueError(Step, '> 0 - length of the Step')
+    if not BinsBoundaries is None:
+        if not dc._CheckIfNumberSequence(BinsBoundaries):
+            Error = dc.UT_TypeError(BinsBoundaries, Sequence)
+            Error.appendMessage('- of real numbers - BinsBoundary argument')
+            raise Error
+        _Ranges = bf._ExtractMeans(BinsBoundaries, DoCheck = False)
     fig, ax = ppl.subplots()
     if not SharedBins:
-        for _Data in Data:
-            ax.hist(_Data.Values, bins = NBins)
+        for Index, _Data in enumerate(DataSets):
+            if not Step is None:
+                Xmin = min(_Data)
+                Xmax = max(_Data)
+                _NBins = int(math.ceil((Xmax - Xmin) / Step))
+            if not BinsBoundaries is None:
+                _NBins = _Ranges
+            ax.hist(_Data, bins = _NBins, label = _Labels[Index])
     else:
-        _Data = [Entry.Values for Entry in Data]
-        ax.hist(_Data, bins = NBins)
+        if not Step is None:
+            Xmin = min(min(_Data) for _Data in DataSets)
+            Xmax = max(max(_Data) for _Data in DataSets)
+            _NBins = int(math.ceil((Xmax - Xmin) / Step))
+        if not BinsBoundaries is None:
+            _NBins = _Ranges
+        ax.hist(DataSets, bins = _NBins, label = _Labels)
+    ax.set_xlabel('Observed values')
+    ax.set_ylabel('N [counts]')
+    if not Title is None:
+        ax.set_title(str(Title))
+    ppl.legend()
+    if not Filename is None:
+        try:
+            fig.savefig(Filename)
+            print(f'Figure is saved as {Filename}')
+        except Exception as err:
+            print(f'Couldn`t save the figure as {Filename}')
+            print(f'Exception raised {err.__class__.__name__}: {str(err)}')
     ppl.show()
+
+def PlotManyHistograms(*Data: *tuple[Sequence[TDataSet]], NBins: int = 10,
+                    Step: Optional[int | float] = None,
+                    BinsBoundaries: Optional[Sequence[int | float]] = None,
+                    SharedBins: bool = True,
+                    Titles: Sequence[str | None] = [],
+                    Labels: Sequence[Sequence[str | None]] = [],
+                    Filename: Optional[str] = None) -> None:
+    """
+    """
+    if not isinstance(NBins, int):
+        Error = dc.UT_TypeError(NBins, int)
+        Error.appendMessage('- NBins argument')
+        raise Error
+    if NBins < 1:
+        raise dc.UT_ValueError(NBins, '> 0 - number of bins')
+    _NBins = NBins
+    if not Step is None:
+        if not isinstance(Step, (int, float)):
+            Error = dc.UT_TypeError(Step, (int, float, None))
+            Error.appendMessage('- Step argument')
+            raise Error
+        if Step <= 0:
+            raise dc.UT_ValueError(Step, '> 0 - length of the Step')
+    if not BinsBoundaries is None:
+        if not dc._CheckIfNumberSequence(BinsBoundaries):
+            Error = dc.UT_TypeError(BinsBoundaries, Sequence)
+            Error.appendMessage('- of real numbers - BinsBoundary argument')
+            raise Error
+        _Ranges = bf._ExtractMeans(BinsBoundaries, DoCheck = False)
+    if not isinstance(Data, Sequence):
+        Error = dc.UT_TypeError(Data, Sequence)
+        Error.appendMessage('- Data argument')
+        raise Error
+    if not len(Data):
+        raise dc.UT_ValueError(0, '> 0 - number of categories / length of Data')
+    Categories = []
+    CatLegends = []
+    CatTitles = []
+    for Index, Category in enumerate(Data):
+        try:
+            DataSet = _CheckNDset(Category)
+        except (dc.UT_TypeError, dc.UT_ValueError) as err:
+            err.appendMessage(f' in category index {Index + 1}')
+            raise err from None
+        Categories.append(DataSet)
+        _Labels = _ExtractLabelsNDset(Category)
+        if Index < len(Labels):
+            for Pos, Label in enumerate(Labels[Index]):
+                if Pos < len(_Labels) and (not Label is None):
+                    _Labels[Pos] = str(Label)
+        CatLegends.append(_Labels)
+        if Index < len(Titles) and (not Titles[Index] is None):
+            CatTitles.append(str(Titles[Index]))
+        else:
+            CatTitles.append(f'Category {Index + 1}')
+    
