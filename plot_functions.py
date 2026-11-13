@@ -30,7 +30,7 @@ Functions:
 """
 
 __version__= '1.0.0.0'
-__date__ = '28-10-2026'
+__date__ = '13-11-2026'
 __status__ = 'Development'
 
 #imports
@@ -893,8 +893,9 @@ def PlotManySeparate(*Data: *tuple[TDataSet2D], Slope: Optional[dc.TReal] =None,
     
     Raises:
         UT_TypeError: unexpected type of the arguments OR their elements
-        UT_ValueError: unequal length of 1D datasets, OR not exactly 2 data sets
-            are passed in any dataset, OR less than 2 x-y data sets are passed 
+        UT_ValueError: unequal length of 1D datasets, OR not exactly 2 variables
+            are passed in any dataset, OR less than 2 or more than 9 x-y data
+            sets are passed 
     
     Version 1.0.0.0
     """
@@ -1091,15 +1092,59 @@ def PlotHistograms(*Data: *tuple[TDataSet], NBins: int = 10,
             print(f'Exception raised {err.__class__.__name__}: {str(err)}')
     ppl.show()
 
-def PlotManyHistograms(*Data: *tuple[Sequence[TDataSet]], NBins: int = 10,
+def PlotManyHistograms(*Data: *tuple[TDataSet], NBins: int = 10,
                     Step: Optional[int | float] = None,
                     BinsBoundaries: Optional[Sequence[int | float]] = None,
-                    SharedBins: bool = True,
-                    Titles: Sequence[str | None] = [],
-                    Labels: Sequence[Sequence[str | None]] = [],
+                    Labels: Sequence[str | None] = [],
+                    Title: str | None = None,
                     Filename: Optional[str] = None) -> None:
     """
+    Places several histograms on a rectangular grid. When possible, extracts the
+    dataset label / name from the respective dataset, otherwise generates a
+    generic label for it. If passed explicitely, the extracted / generated
+    labels are replaced by the user-defined values.
+
+    Signature:
+        *tuple(seq(int OR float OR MeasuredValue) OR Statistics1D)
+            **dict(str -> type A)-> None
+    
+    Args:
+        Data: *tuple(seq(int OR float OR MeasuredValue) OR Statistics1D); input
+            data as a sequence of generic numeric sequences
+        kwargs: **dict(str -> type A)
+            NBins: int > 0; number of bins to use, defaults to 10
+            Step: (int OR float) > 0 OR None; defaults to None, if not None -
+                overrides the NBins parameter, used as the desired width of
+                each bin to determine their number automatically
+            BinBoundaries: seq(int OR float) OR None; the explicit boundaries
+                of the bins to use, defaults to None, if not None - overrides
+                NBins and Step parameters
+            Title: str OR None; optional title of the plot, defaults to None,
+                i.e. no title is set
+            Labels: seq(str OR None); optional labels / names of the deatasets,
+                applied in not gready manner, None values are ignored, missing
+                or superficial entires are ignored, overwrites the data set
+                names extracted from the arguments or auto-generated ones
+            Filename: str OR None; if not None - saves the figure into a file
+    
+    Raises:
+        UT_TypeError: not a sequence of numeric sequences is passed as Data, OR
+            any keyword argument is of improper data type
+        UT_ValueError: sequence is empty or any of the nested sequences is empty
+            OR any of the keyword arguments is of improper value, OR more than
+            9 or less than 2 datasets are passed.
+
+    Version 1.0.0.0
     """
+    DataSets = _CheckNDset(Data)
+    NSets = len(Data)
+    if NSets < 2 or NSets > 9:
+        raise dc.UT_ValueError(NSets,'in range [2, 9] - number of datasets')
+    rows, cols = DEF_LAYOUT[NSets]
+    _Labels = _ExtractLabelsNDset(Data)
+    for Index, Label in enumerate(Labels):
+        if (not Label is None) and Index < len(_Labels):
+            _Labels[Index] = str(Label)
     if not isinstance(NBins, int):
         Error = dc.UT_TypeError(NBins, int)
         Error.appendMessage('- NBins argument')
@@ -1120,30 +1165,40 @@ def PlotManyHistograms(*Data: *tuple[Sequence[TDataSet]], NBins: int = 10,
             Error.appendMessage('- of real numbers - BinsBoundary argument')
             raise Error
         _Ranges = bf._ExtractMeans(BinsBoundaries, DoCheck = False)
-    if not isinstance(Data, Sequence):
-        Error = dc.UT_TypeError(Data, Sequence)
-        Error.appendMessage('- Data argument')
-        raise Error
-    if not len(Data):
-        raise dc.UT_ValueError(0, '> 0 - number of categories / length of Data')
-    Categories = []
-    CatLegends = []
-    CatTitles = []
-    for Index, Category in enumerate(Data):
-        try:
-            DataSet = _CheckNDset(Category)
-        except (dc.UT_TypeError, dc.UT_ValueError) as err:
-            err.appendMessage(f' in category index {Index + 1}')
-            raise err from None
-        Categories.append(DataSet)
-        _Labels = _ExtractLabelsNDset(Category)
-        if Index < len(Labels):
-            for Pos, Label in enumerate(Labels[Index]):
-                if Pos < len(_Labels) and (not Label is None):
-                    _Labels[Pos] = str(Label)
-        CatLegends.append(_Labels)
-        if Index < len(Titles) and (not Titles[Index] is None):
-            CatTitles.append(str(Titles[Index]))
+    fig, axs = ppl.subplots(rows, cols)
+    for Index, _Data in enumerate(DataSets):
+        row, col = divmod(Index, cols)
+        if cols > 1:
+            ax = axs[row][col]
         else:
-            CatTitles.append(f'Category {Index + 1}')
-    
+            ax = axs[row]
+        if not Step is None:
+            Xmin = min(_Data)
+            Xmax = max(_Data)
+            _NBins = int(math.ceil((Xmax - Xmin) / Step))
+        if not BinsBoundaries is None:
+            _NBins = _Ranges
+        ax.hist(_Data, bins = _NBins)
+        ax.set_xlabel('Observed values')
+        ax.set_ylabel('N [counts]')
+        _Label = _Labels[Index]
+        if _Label is None:
+            _Label = f'Category {Index + 1}'
+        ax.set_title(str(_Label))
+    NGrid = rows * cols
+    if NGrid > NSets:
+        NEmpty = NGrid - NSets
+        StartIndex = cols - NEmpty
+        for col in range(StartIndex, cols):
+            axs[rows - 1][col].set_visible(False)
+    if not Title is None:
+        fig.suptitle(str(Title))
+    fig.tight_layout()
+    if not Filename is None:
+        try:
+            fig.savefig(Filename)
+            print(f'Figure is saved as {Filename}')
+        except Exception as err:
+            print(f'Couldn`t save the figure as {Filename}')
+            print(f'Exception raised {err.__class__.__name__}: {str(err)}')
+    ppl.show()
