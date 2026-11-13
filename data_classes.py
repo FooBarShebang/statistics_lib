@@ -965,10 +965,10 @@ class Statistics1D:
         
         Version 1.0.0.0
         """
-        CDF = list
+        CDF = list()
         Accumulator = 0
         PMF = self.getPMF()
-        for Key, Value in PMF.items():
+        for Key, Value in PMF:
             Accumulator += Value
             CDF.append((Key, Accumulator))
         del CDF[-1]
